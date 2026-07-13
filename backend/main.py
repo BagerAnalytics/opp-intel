@@ -1,13 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from database import SessionLocal, get_db
+from database import SessionLocal, get_db, engine
 import models
 from services.llm_service import generate_match_score, generate_strategy
 from services.nas_service import nas_service
 from scrapers.opportunity_desk import scrape_opportunity_desk
 from scrapers.linkedin_opportunities import scrape_linkedin
 from apscheduler.schedulers.background import BackgroundScheduler
+
+# Create tables in the database if they don't exist
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="OppIntel API")
 
