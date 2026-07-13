@@ -5,15 +5,15 @@ from database import SessionLocal, get_db
 import models
 from services.llm_service import generate_match_score, generate_strategy
 from services.nas_service import nas_service
-import subprocess
-import sys
+from scrapers.opportunity_desk import scrape_opportunity_desk
+from scrapers.linkedin_opportunities import scrape_linkedin
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = FastAPI(title="OppIntel API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, change to specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,8 +22,8 @@ app.add_middleware(
 def run_all_scrapers():
     print("Running scheduled scrapers...")
     try:
-        subprocess.run([sys.executable, "scrapers/opportunity_desk.py"], check=True)
-        subprocess.run([sys.executable, "scrapers/linkedin_opportunities.py"], check=True)
+        scrape_opportunity_desk()
+        scrape_linkedin()
         print("Scrapers completed successfully.")
     except Exception as e:
         print(f"Error running scrapers: {e}")
