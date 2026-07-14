@@ -49,6 +49,7 @@ const MatchScoreRing = ({ score }: { score: number | null }) => {
         <circle 
           cx="22" cy="22" r={radius} 
           className={colorClass} 
+          stroke="currentColor"
           strokeWidth="3" 
           fill="none" 
           strokeDasharray={circumference}
