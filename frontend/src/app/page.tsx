@@ -53,72 +53,71 @@ export default function Home() {
     }
   };
 
-  const scoredOpps = opportunities.filter(o => o.match_score !== null);
-  const highMatches = scoredOpps.filter(o => o.match_score! >= 80).length;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
+  const avgScore = opportunities.length > 0 
+    ? Math.round(opportunities.reduce((acc, curr) => acc + (curr.match_score || 0), 0) / opportunities.length)
+    : 0;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-8">
-      
-      {/* Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Opportunity Intelligence</h2>
-        <p className="text-gray-500 mt-2 text-sm">Analyze and score global funding opportunities against your business profile.</p>
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Welcome back, Admin.</h1>
+        <p className="text-gray-400 text-lg">You have {opportunities.length} open opportunities waiting to be reviewed.</p>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-            <Database size={24} />
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="glass-panel rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-300">Open Pipeline</h3>
+            <Database className="text-indigo-400" size={20} />
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Open Records</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">
-              {isLoading ? <Loader2 className="animate-spin inline" size={24}/> : opportunities.length}
-            </p>
-          </div>
+          <p className="text-4xl font-bold text-white">{opportunities.length}</p>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
-            <CheckCircle size={24} />
+        
+        <div className="glass-panel rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-300">Avg Fit Score</h3>
+            <TrendingUp className="text-emerald-400" size={20} />
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">AI Scored</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">
-              {isLoading ? <Loader2 className="animate-spin inline" size={24}/> : scoredOpps.length}
-            </p>
-          </div>
+          <p className="text-4xl font-bold text-white">
+            {avgScore}%
+          </p>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-            <TrendingUp size={24} />
+
+        <div className="glass-panel rounded-xl p-6 border-indigo-500/30 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <h3 className="font-semibold text-indigo-200">Action Required</h3>
+            <CheckCircle className="text-indigo-400" size={20} />
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">High Match (&gt;80%)</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">
-              {isLoading ? <Loader2 className="animate-spin inline" size={24}/> : highMatches}
-            </p>
-          </div>
+          <p className="text-4xl font-bold text-white relative z-10">
+            {opportunities.filter(o => o.match_score === null).length}
+          </p>
+          <p className="text-sm text-indigo-300 mt-2 relative z-10">Unscored grants</p>
         </div>
       </div>
 
-      {/* Main Content Area */}
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-xl font-bold text-white">Latest Opportunities</h2>
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div> High Match</span>
+          <span className="flex items-center gap-1 ml-4"><div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]"></div> Med Match</span>
+        </div>
+      </div>
+
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-gray-900 tracking-tight">Inbox (New Opportunities)</h3>
-          <div className="text-sm font-medium text-gray-500">
-            Showing {opportunities.length} live records
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-4">
-            <Loader2 size={40} className="animate-spin text-gray-400" />
-            <p className="text-sm font-medium">Loading intelligence core...</p>
-          </div>
-        ) : opportunities.length === 0 ? (
-          <div className="text-center py-20 text-gray-500 bg-white rounded-2xl border border-gray-100">
-            No opportunities found in the database.
+        {opportunities.length === 0 ? (
+          <div className="glass-panel rounded-xl p-12 text-center border-dashed">
+            <h3 className="text-xl font-medium text-gray-300 mb-2">Inbox Zero!</h3>
+            <p className="text-gray-500">Run the scrapers to find new grants and tenders.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">

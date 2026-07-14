@@ -17,12 +17,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${hanken.className} bg-[#f8faf9] text-[#061b0e] flex`}>
+    <html lang="en" className="dark">
+      <body className={`${hanken.className} bg-background text-foreground flex antialiased`}>
         <Sidebar />
-        <div className="flex-1 ml-64 flex flex-col min-h-screen">
+        <div className="flex-1 ml-64 flex flex-col min-h-screen bg-[url('/grid-bg.svg')] bg-[length:30px_30px] bg-fixed">
+          <div className="absolute inset-0 bg-black/80 pointer-events-none -z-10" />
           <Header />
-          <main className="flex-1 p-8">
+          <main className="flex-1 p-8 relative z-0">
             {children}
           </main>
         </div>

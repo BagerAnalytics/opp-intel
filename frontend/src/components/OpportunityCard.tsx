@@ -67,9 +67,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                    (opp.application_process || '').toLowerCase().includes(doc.document_name.toLowerCase()));
 
   return (
-    <div className={`bg-white rounded-xl border transition-all duration-300 shadow-sm hover:shadow-md overflow-hidden cursor-pointer
-      ${missingDocs.length > 0 ? 'border-red-300 ring-1 ring-red-50' : 
-        hasScore && scoreData.score! >= 80 ? 'border-green-400 ring-1 ring-green-100' : 'border-gray-200'}
+    <div className={`premium-card glow-border rounded-xl overflow-hidden cursor-pointer relative group
+      ${missingDocs.length > 0 ? '!border-red-500/30' : 
+        hasScore && scoreData.score! >= 80 ? '!border-emerald-500/30' : ''}
     `} onClick={() => setIsExpanded(!isExpanded)}>
       
       {/* Top Bar / Summary */}
@@ -77,32 +77,34 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
         
         <div className="flex-1 space-y-3">
           <div className="flex items-center gap-3">
-            <h3 className="text-xl font-bold text-gray-900 leading-tight">{opp.name}</h3>
+            <h3 className="text-xl font-bold text-white leading-tight tracking-tight">{opp.name}</h3>
             {hasScore && (
-              <span className={`px-3 py-1 text-sm font-bold rounded-full border
-                ${scoreData.score! >= 80 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+              <span className={`px-3 py-1 text-xs font-bold rounded-full border
+                ${scoreData.score! >= 80 
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[inset_0_0_12px_rgba(16,185,129,0.1)]' 
+                  : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-[inset_0_0_12px_rgba(234,179,8,0.1)]'}`}>
                 {scoreData.score}% Match
               </span>
             )}
           </div>
           
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 font-medium">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-400 font-medium">
             <div className="flex items-center gap-2">
-              <Users size={16} className="text-gray-400" /> 
+              <Users size={16} className="text-gray-500" /> 
               {opp.funder}
               {warmConnections.length > 0 && (
-                <span className="ml-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                  <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
+                <span className="ml-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-[inset_0_0_12px_rgba(59,130,246,0.1)]">
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]"></span>
                   Warm Connection: {warmConnections[0].name}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-gray-400" /> {opp.closing_date || "Open"}
+              <Calendar size={16} className="text-gray-500" /> {opp.closing_date || "Open"}
             </div>
           </div>
             
-          <p className={`text-gray-600 text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
+          <p className={`text-gray-400 text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
             {opp.description || "No description provided."}
           </p>
 
@@ -124,15 +126,15 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
           </div>
           
           {missingDocs.length > 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-semibold border border-red-200 shadow-sm">
-              <AlertCircle size={14} />
-              Missing Compliance Docs: {missingDocs.map(d => d.document_name).join(', ')}
+            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-xs font-semibold border border-red-500/20 shadow-[inset_0_0_12px_rgba(239,68,68,0.1)]">
+              <AlertCircle size={14} className="text-red-400" />
+              Missing Docs: {missingDocs.map(d => d.document_name).join(', ')}
             </div>
           )}
         </div>
 
         <div className="shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center gap-3">
-          <div className="flex flex-col gap-2 w-full md:w-auto">
+          <div className="flex flex-col gap-2 w-full md:w-auto relative z-10">
             {opp.status === "open" && (
               <button 
                 onClick={async (e) => {
@@ -145,7 +147,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                     console.error(err);
                   }
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-500"
               >
                 Add to Pipeline
               </button>
@@ -154,22 +156,22 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             <button 
               onClick={handleScoreMatch}
               disabled={isScoring || hasScore}
-              className={`w-full md:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border
+              className={`w-full md:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border backdrop-blur-md
                 ${hasScore 
-                  ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
-                  : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50 shadow-sm'}`}
+                  ? 'bg-white/5 text-gray-500 border-white/5 cursor-not-allowed' 
+                  : 'bg-white/10 text-white border-white/10 hover:bg-white/15 hover:border-white/20 shadow-sm'}`}
             >
               {isScoring ? (
                 <><Loader2 size={16} className="animate-spin" /> Analyzing...</>
               ) : hasScore ? (
                 'Analyzed'
               ) : (
-                <><Zap size={16} /> Analyze Fit</>
+                <><Zap size={16} className="text-indigo-400" /> Analyze Fit</>
               )}
             </button>
           </div>
           
-          <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors self-start md:self-center mt-2 md:mt-0">
+          <button className="p-2 text-gray-500 hover:text-white rounded-lg hover:bg-white/10 transition-colors self-start md:self-center mt-2 md:mt-0 relative z-10">
             {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
         </div>
@@ -177,22 +179,22 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
 
       {/* Expanded Deep Data Section */}
       {isExpanded && (
-        <div className="mt-8 pt-6 border-t border-gray-100 space-y-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mt-4 pt-6 border-t border-white/5 p-6 bg-black/20" onClick={(e) => e.stopPropagation()}>
           
           {hasScore && scoreData.reasoning && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-5 bg-yellow-50 rounded-xl border border-yellow-100 text-sm leading-relaxed">
-                <div className="flex items-center gap-2 mb-3 text-yellow-800 font-semibold text-base tracking-tight">
-                  <Zap size={18} className="fill-yellow-600" /> AI Match Reasoning
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="p-5 bg-yellow-500/5 rounded-xl border border-yellow-500/10 text-sm leading-relaxed shadow-sm">
+                <div className="flex items-center gap-2 mb-3 text-yellow-500 font-semibold text-base tracking-tight">
+                  <Zap size={18} className="fill-yellow-500/50" /> AI Match Reasoning
                 </div>
-                <p className="text-yellow-900/80">{scoreData.reasoning}</p>
+                <p className="text-gray-300">{scoreData.reasoning}</p>
               </div>
               {scoreData.strategy && (
-                <div className="p-5 bg-indigo-50 rounded-xl border border-indigo-100 text-sm leading-relaxed">
-                  <div className="flex items-center gap-2 mb-3 text-indigo-800 font-semibold text-base tracking-tight">
-                    <Target size={18} className="fill-indigo-600" /> How to Win (Strategy)
+                <div className="p-5 bg-indigo-500/5 rounded-xl border border-indigo-500/10 text-sm leading-relaxed shadow-sm">
+                  <div className="flex items-center gap-2 mb-3 text-indigo-400 font-semibold text-base tracking-tight">
+                    <Target size={18} className="fill-indigo-500/50 text-indigo-400" /> How to Win (Strategy)
                   </div>
-                  <p className="text-indigo-900/80 whitespace-pre-wrap">{scoreData.strategy}</p>
+                  <p className="text-gray-300 whitespace-pre-wrap">{scoreData.strategy}</p>
                 </div>
               )}
             </div>
@@ -202,71 +204,69 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {opp.benefits && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-900 font-medium text-sm">
-                    <Gift size={16} className="text-gray-400" /> Benefits
+                  <div className="flex items-center gap-2 text-white font-medium text-sm">
+                    <Gift size={16} className="text-indigo-400" /> Benefits
                   </div>
-                  <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{opp.benefits}</div>
+                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.benefits}</div>
                 </div>
               )}
               
               {opp.eligibility_criteria && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-900 font-medium text-sm">
-                    <CheckCircle2 size={16} className="text-gray-400" /> Eligibility
+                  <div className="flex items-center gap-2 text-white font-medium text-sm">
+                    <CheckCircle2 size={16} className="text-indigo-400" /> Eligibility
                   </div>
-                  <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{opp.eligibility_criteria}</div>
+                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.eligibility_criteria}</div>
                 </div>
               )}
 
               {opp.selection_criteria && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-900 font-medium text-sm">
-                    <ListChecks size={16} className="text-gray-400" /> Selection Criteria
+                  <div className="flex items-center gap-2 text-white font-medium text-sm">
+                    <ListChecks size={16} className="text-indigo-400" /> Selection Criteria
                   </div>
-                  <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{opp.selection_criteria}</div>
+                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.selection_criteria}</div>
                 </div>
               )}
 
               {opp.application_process && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-900 font-medium text-sm">
-                    <FileText size={16} className="text-gray-400" /> How to Apply
+                  <div className="flex items-center gap-2 text-white font-medium text-sm">
+                    <FileText size={16} className="text-indigo-400" /> How to Apply
                   </div>
-                  <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{opp.application_process}</div>
+                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.application_process}</div>
                 </div>
               )}
 
               {opp.past_winners && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-gray-900 font-medium text-sm">
-                    <Trophy size={16} className="text-gray-400" /> Past Winners
+                  <div className="flex items-center gap-2 text-white font-medium text-sm">
+                    <Trophy size={16} className="text-indigo-400" /> Past Winners
                   </div>
-                  <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{opp.past_winners}</div>
+                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.past_winners}</div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-sm text-gray-400 italic text-center py-4">
+            <div className="text-sm text-gray-500 italic text-center py-4">
               Deep data has not been scraped for this historical record.
             </div>
           )}
 
           {opp.link && (
-            <div className="pt-4 flex justify-end">
+            <div className="pt-8 flex justify-end">
               <a 
                 href={opp.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm"
+                className="px-6 py-2.5 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
               >
                 Apply Now <ExternalLink size={16} />
               </a>
             </div>
           )}
-
         </div>
       )}
-
     </div>
   );
 }
