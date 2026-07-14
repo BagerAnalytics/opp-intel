@@ -9,7 +9,7 @@ interface OpportunityCardProps {
     id: number;
     name: string;
     funder: string;
-    deadline: string;
+    closing_date: string | null;
     value: string;
     description: string;
     benefits: string | null;
