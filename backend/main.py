@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import Optional
 from database import SessionLocal, get_db, engine
 import models
 from services.llm_service import generate_match_score, generate_strategy
@@ -192,9 +194,6 @@ def sync_compliance():
     """Trigger a WebDAV sync to list compliance documents."""
     docs = nas_service.list_compliance_documents()
     return {"documents_found": len(docs), "files": docs}
-
-from pydantic import BaseModel
-from typing import Optional
 
 class ContactCreate(BaseModel):
     name: str
