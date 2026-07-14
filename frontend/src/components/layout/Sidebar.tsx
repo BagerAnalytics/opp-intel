@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Trello, Network, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, KanbanSquare, Network, ShieldCheck } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   const links = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/pipeline", label: "Pipeline", icon: Trello },
+    { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
     { href: "/network", label: "Contact Network", icon: Network },
     { href: "/compliance", label: "Compliance Data", icon: ShieldCheck },
   ];
