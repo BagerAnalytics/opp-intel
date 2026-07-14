@@ -38,6 +38,16 @@ def start_scheduler():
     scheduler.add_job(run_all_scrapers, trigger='cron', day_of_week='mon', hour=2, minute=0)
     scheduler.start()
     print("APScheduler started: Bots will run every Monday at 02:00 AM.")
+    
+    # Auto-migrate the database to add the new strategy column
+    from sqlalchemy import text
+    from database import engine
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS strategy TEXT;"))
+            print("Successfully added strategy column to database.")
+    except Exception as e:
+        print(f"Migration notice (safe to ignore): {e}")
 
 @app.post("/api/scrapers/run")
 def trigger_scrapers():
