@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, Plus, Users, Building, Mail, Linkedin, UserPlus, X } from 'lucide-react';
+import { Loader2, Plus, Users, Building, Mail, ExternalLink, UserPlus, X } from 'lucide-react';
 
 interface Contact {
   id: number;
@@ -131,7 +131,7 @@ export default function NetworkPage() {
                   )}
                   {contact.linkedin_url && (
                     <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <Linkedin size={16} className="text-gray-400" />
+                      <ExternalLink size={16} className="text-gray-400" />
                       <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="hover:text-blue-600 hover:underline">LinkedIn Profile</a>
                     </div>
                   )}
