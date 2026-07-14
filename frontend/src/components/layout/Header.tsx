@@ -1,40 +1,37 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
+import { Search, Bell, ChevronDown } from "lucide-react";
 
 export default function Header() {
-  const [isScraping, setIsScraping] = useState(false);
-
-  const runScrapers = async () => {
-    setIsScraping(true);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      await axios.post(`${apiUrl}/api/scrapers/run`);
-      // Give it a second to finish
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } catch (error) {
-      console.error("Failed to run scrapers", error);
-      setIsScraping(false);
-    }
-  };
-
   return (
-    <header className="h-16 glass-panel border-b-0 border-white/5 flex items-center justify-between px-8 sticky top-0 z-10 w-full backdrop-blur-xl bg-black/40">
-      <h2 className="text-lg font-semibold text-white">Overview</h2>
+    <header className="h-20 flex items-center justify-between px-8 z-10 w-full mt-2">
+      {/* Search Bar */}
+      <div className="flex-1 max-w-xl">
+        <div className="relative flex items-center">
+          <Search className="absolute left-4 text-gray-400" size={18} />
+          <input 
+            type="text" 
+            placeholder="Search" 
+            className="w-full bg-[#1e2029]/80 border border-white/5 rounded-xl py-2.5 pl-12 pr-4 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4352ff]/50"
+          />
+        </div>
+      </div>
+
+      {/* Right Side Actions */}
       <div className="flex items-center gap-4">
-        <button className="px-4 py-2 text-sm font-medium text-gray-300 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors">
-          Sync NAS Data
+        <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#1e2029]/80 border border-white/5 text-gray-400 hover:text-white transition-colors">
+          <Bell size={18} />
         </button>
-        <button 
-          onClick={runScrapers}
-          disabled={isScraping}
-          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-        >
-          {isScraping && <Loader2 className="w-4 h-4 animate-spin" />}
-          {isScraping ? "Running..." : "Run Scrapers"}
+        
+        <button className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-[#1e2029]/80 border border-white/5 hover:bg-white/5 transition-colors">
+          <img 
+            src="https://ui-avatars.com/api/?name=Sarah+J&background=random" 
+            alt="Sarah J" 
+            className="w-7 h-7 rounded-full object-cover"
+          />
+          <span className="text-sm font-medium text-white pr-2">Sarah J.</span>
+          <ChevronDown size={14} className="text-gray-400" />
         </button>
       </div>
     </header>

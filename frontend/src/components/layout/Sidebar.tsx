@@ -2,55 +2,76 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, KanbanSquare, Network, ShieldCheck } from "lucide-react";
+import { 
+  Home, 
+  LayoutDashboard, 
+  FolderKanban, 
+  KanbanSquare, 
+  Users, 
+  TrendingUp, 
+  FileText,
+  Settings,
+  HelpCircle
+} from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   const links = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
-    { href: "/network", label: "Contact Network", icon: Network },
-    { href: "/compliance", label: "Compliance Data", icon: ShieldCheck },
+    { href: "/home", label: "Home", icon: Home },
+    { href: "/", label: "Overview", icon: LayoutDashboard },
+    { href: "/projects", label: "Projects", icon: FolderKanban },
+    { href: "/pipeline", label: "Opportunities", icon: KanbanSquare },
+    { href: "/network", label: "Contacts", icon: Users },
+    { href: "/leads", label: "Leads", icon: TrendingUp },
+    { href: "/compliance", label: "Reports", icon: FileText },
   ];
 
   return (
-    <aside className="w-64 glass-panel h-screen flex flex-col fixed left-0 top-0 z-50">
-      <div className="h-16 flex items-center px-6 border-b border-white/5">
-        <h1 className="text-xl font-semibold tracking-tight text-white">
-          Opp<span className="text-gray-500">Intel</span>
-        </h1>
+    <aside className="w-64 h-screen flex flex-col fixed left-0 top-0 z-50 bg-[#1e2029]/40 backdrop-blur-3xl border-r border-white/5 shadow-2xl">
+      <div className="h-20 flex items-center px-6 mt-2">
+        <div className="flex items-center gap-3">
+          {/* Faux Logo mimicking the AETHEL icon */}
+          <div className="relative w-8 h-8 flex items-center justify-center">
+            <div className="absolute w-5 h-5 bg-cyan-400 rounded-sm transform rotate-45 -translate-x-1 mix-blend-screen opacity-90"></div>
+            <div className="absolute w-5 h-5 bg-blue-600 rounded-sm transform rotate-45 translate-x-1 mix-blend-screen opacity-90"></div>
+          </div>
+          <h1 className="text-xl font-bold tracking-widest text-white mt-1 uppercase">
+            OppIntel
+          </h1>
+        </div>
       </div>
-      <nav className="flex-1 px-3 py-6 space-y-1.5">
+      
+      <nav className="flex-1 px-4 py-4 space-y-2 mt-4">
         {links.map((link) => {
-          const isActive = pathname === link.href;
+          const isActive = pathname === link.href || (link.href === '/pipeline' && pathname.includes('/pipeline'));
           const Icon = link.icon;
           return (
             <Link 
               key={link.href}
               href={link.href} 
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
+              className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200
                 ${isActive 
-                  ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-[inset_0_0_12px_rgba(99,102,241,0.1)]' 
-                  : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 border border-transparent'}
+                  ? 'bg-[#4352ff] text-white shadow-lg shadow-blue-500/20' 
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'}
               `}
             >
-              <Icon size={18} className={isActive ? 'text-indigo-400' : 'text-gray-500'} />
+              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-gray-400'} />
               {link.label}
             </Link>
           );
         })}
       </nav>
-      <div className="p-4 border-t border-white/5 bg-black/20">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium text-xs shadow-[0_0_10px_rgba(99,102,241,0.4)]">
-            PA
-          </div>
-          <div className="text-sm">
-            <p className="font-medium text-white">Premier Agric</p>
-            <p className="text-gray-500 text-xs">Admin</p>
-          </div>
-        </div>
+      
+      <div className="p-4 mb-4 space-y-2">
+        <Link href="/settings" className="flex items-center gap-4 px-4 py-3 rounded-xl font-medium text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all">
+          <Settings size={18} strokeWidth={2} />
+          Settings
+        </Link>
+        <Link href="/help" className="flex items-center gap-4 px-4 py-3 rounded-xl font-medium text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all">
+          <HelpCircle size={18} strokeWidth={2} />
+          Help
+        </Link>
       </div>
     </aside>
   );
