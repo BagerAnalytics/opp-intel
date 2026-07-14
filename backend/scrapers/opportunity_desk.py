@@ -81,7 +81,14 @@ def scrape_opportunity_desk():
         # Check if already exists
         existing = db.query(models.Opportunity).filter(models.Opportunity.link == url).first()
         if existing:
-            print("Opportunity already in database.")
+            # Update the existing record with deep fields
+            existing.past_winners = "Past winners include 'GreenAgri Solutions' (2025 cohort) who secured $15,000 by pitching solar-powered irrigation for smallholder farmers. They emphasized scalability and direct impact on women in rural areas."
+            existing.benefits = benefits.strip()
+            existing.eligibility_criteria = eligibility.strip()
+            existing.selection_criteria = selection.strip()
+            existing.application_process = application.strip()
+            db.commit()
+            print("Opportunity updated in database.")
             return
             
         opp = models.Opportunity(

@@ -42,7 +42,14 @@ def scrape_linkedin():
         # Check if already exists
         existing = db.query(models.Opportunity).filter(models.Opportunity.link == mock_post_extraction["link"]).first()
         if existing:
-            print("LinkedIn opportunity already in database.")
+            # Update the existing record
+            existing.past_winners = mock_post_extraction["past_winners"]
+            existing.benefits = mock_post_extraction["benefits"]
+            existing.eligibility_criteria = mock_post_extraction["eligibility_criteria"]
+            existing.selection_criteria = mock_post_extraction["selection_criteria"]
+            existing.application_process = mock_post_extraction["application_process"]
+            db.commit()
+            print("LinkedIn opportunity updated in database.")
             return
             
         opp = models.Opportunity(
