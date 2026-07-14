@@ -90,7 +90,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [] }: Oppo
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-gray-400" /> {opp.deadline || opp.closing_date || "Open"}
+              <Calendar size={16} className="text-gray-400" /> {opp.closing_date || "Open"}
             </div>
           </div>
             
@@ -101,7 +101,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [] }: Oppo
           <div className="flex flex-wrap gap-x-6 gap-y-3 pt-2 text-sm">
             <div className="flex items-center gap-1.5 text-gray-500">
               <Calendar size={14} />
-              <span>{opp.deadline || "Open"}</span>
+              <span>{opp.closing_date || "Open"}</span>
             </div>
             {opp.value && (
               <div className="flex items-center gap-1.5 text-gray-500">
