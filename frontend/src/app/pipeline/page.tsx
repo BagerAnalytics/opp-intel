@@ -118,8 +118,24 @@ export default function PipelinePage() {
                     onDragStart={(e) => handleDragStart(e, opp.id)}
                     className="cursor-move"
                   >
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all">
-                      <h4 className="font-medium text-gray-900 text-sm mb-1">{opp.name}</h4>
+                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all relative group">
+                      <button 
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                            await axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=open`);
+                            setOpportunities(prev => prev.filter(o => o.id !== opp.id));
+                          } catch (err) {
+                            console.error("Failed to remove from pipeline", err);
+                          }
+                        }}
+                        className="absolute top-3 right-3 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove from Pipeline (Move back to Inbox)"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                      <h4 className="font-medium text-gray-900 text-sm mb-1 pr-6">{opp.name}</h4>
                       <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">{opp.funder}</p>
                       
                       <div className="flex justify-between items-center text-xs">
