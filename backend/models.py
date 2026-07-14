@@ -47,3 +47,13 @@ class Contact(Base):
     linkedin_url = Column(String, nullable=True)
     relationship_strength = Column(String, nullable=True) # E.g. "Cold", "Warm", "Strong"
     notes = Column(Text, nullable=True)
+
+class ComplianceDocument(Base):
+    __tablename__ = "compliance_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    document_name = Column(String, index=True)
+    status = Column(String, default="Missing") # "Missing", "Uploaded", "Expired"
+    expiry_date = Column(String, nullable=True)
+    file_url = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)

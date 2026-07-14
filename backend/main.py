@@ -142,6 +142,51 @@ def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         return {"error": "Failed to parse LLM response", "details": str(e)}
 
+class ComplianceDocCreate(BaseModel):
+    document_name: str
+    status: Optional[str] = "Missing"
+    expiry_date: Optional[str] = None
+    file_url: Optional[str] = None
+    notes: Optional[str] = None
+
+@app.get("/api/compliance")
+def get_compliance_docs(db: Session = Depends(get_db)):
+    """Fetch all compliance documents."""
+    return db.query(models.ComplianceDocument).all()
+
+@app.post("/api/compliance")
+def create_compliance_doc(doc: ComplianceDocCreate, db: Session = Depends(get_db)):
+    """Add a new compliance document record."""
+    new_doc = models.ComplianceDocument(**doc.dict())
+    db.add(new_doc)
+    db.commit()
+    db.refresh(new_doc)
+    return new_doc
+
+@app.put("/api/compliance/{doc_id}")
+def update_compliance_doc(doc_id: int, doc: ComplianceDocCreate, db: Session = Depends(get_db)):
+    """Update a compliance document record."""
+    existing_doc = db.query(models.ComplianceDocument).filter(models.ComplianceDocument.id == doc_id).first()
+    if not existing_doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    for key, value in doc.dict(exclude_unset=True).items():
+        setattr(existing_doc, key, value)
+    
+    db.commit()
+    db.refresh(existing_doc)
+    return existing_doc
+
+@app.delete("/api/compliance/{doc_id}")
+def delete_compliance_doc(doc_id: int, db: Session = Depends(get_db)):
+    """Delete a compliance document record."""
+    doc = db.query(models.ComplianceDocument).filter(models.ComplianceDocument.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    db.delete(doc)
+    db.commit()
+    return {"message": "Document deleted"}
+
 @app.get("/api/compliance/sync")
 def sync_compliance():
     """Trigger a WebDAV sync to list compliance documents."""

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Loader2, Zap, Calendar, Users, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target } from 'lucide-react';
+import { Loader2, Zap, Calendar, Users, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target, AlertCircle } from 'lucide-react';
 
 interface OpportunityCardProps {
   opp: {
@@ -24,9 +24,10 @@ interface OpportunityCardProps {
     link: string | null;
   };
   contacts?: any[];
+  complianceDocs?: any[];
 }
 
-export default function OpportunityCard({ opp: initialOpp, contacts = [] }: OpportunityCardProps) {
+export default function OpportunityCard({ opp: initialOpp, contacts = [], complianceDocs = [] }: OpportunityCardProps) {
   const [opp, setOpp] = useState(initialOpp);
   const [isScoring, setIsScoring] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -59,9 +60,16 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [] }: Oppo
   const hasDeepData = opp.benefits || opp.eligibility_criteria || opp.selection_criteria;
   const warmConnections = contacts.filter(c => c.organization?.toLowerCase().includes(opp.funder?.toLowerCase() || 'unmatchable') || opp.funder?.toLowerCase().includes(c.organization?.toLowerCase() || 'unmatchable'));
 
+  // Calculate missing compliance docs
+  const missingDocs = complianceDocs
+    .filter(doc => doc.status !== 'Uploaded')
+    .filter(doc => (opp.eligibility_criteria || '').toLowerCase().includes(doc.document_name.toLowerCase()) || 
+                   (opp.application_process || '').toLowerCase().includes(doc.document_name.toLowerCase()));
+
   return (
     <div className={`bg-white rounded-xl border transition-all duration-300 shadow-sm hover:shadow-md overflow-hidden cursor-pointer
-      ${hasScore && scoreData.score! >= 80 ? 'border-green-400 ring-1 ring-green-100' : 'border-gray-200'}
+      ${missingDocs.length > 0 ? 'border-red-300 ring-1 ring-red-50' : 
+        hasScore && scoreData.score! >= 80 ? 'border-green-400 ring-1 ring-green-100' : 'border-gray-200'}
     `} onClick={() => setIsExpanded(!isExpanded)}>
       
       {/* Top Bar / Summary */}
@@ -114,6 +122,13 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [] }: Oppo
               <span className="capitalize">{opp.status}</span>
             </div>
           </div>
+          
+          {missingDocs.length > 0 && (
+            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-xs font-semibold border border-red-200 shadow-sm">
+              <AlertCircle size={14} />
+              Missing Compliance Docs: {missingDocs.map(d => d.document_name).join(', ')}
+            </div>
+          )}
         </div>
 
         <div className="shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center gap-3">

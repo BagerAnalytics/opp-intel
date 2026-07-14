@@ -27,6 +27,7 @@ interface Opportunity {
 export default function Home() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
+  const [complianceDocs, setComplianceDocs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -36,13 +37,15 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const [oppResponse, contactsResponse] = await Promise.all([
+      const [oppResponse, contactsResponse, complianceResponse] = await Promise.all([
         axios.get(`${apiUrl}/api/opportunities`),
-        axios.get(`${apiUrl}/api/contacts`)
+        axios.get(`${apiUrl}/api/contacts`),
+        axios.get(`${apiUrl}/api/compliance`)
       ]);
       const openOpps = oppResponse.data.filter((opp: Opportunity) => opp.status === 'open');
       setOpportunities(openOpps);
       setContacts(contactsResponse.data);
+      setComplianceDocs(complianceResponse.data);
     } catch (error) {
       console.error("Error fetching data", error);
     } finally {
@@ -120,7 +123,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {opportunities.map(opp => (
-              <OpportunityCard key={opp.id} opp={opp} contacts={contacts} />
+              <OpportunityCard key={opp.id} opp={opp} contacts={contacts} complianceDocs={complianceDocs} />
             ))}
           </div>
         )}
