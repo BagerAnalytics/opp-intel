@@ -34,3 +34,4 @@ class Opportunity(Base):
     source = Column(String, nullable=True)       # e.g. "CSV_Import", "OpportunityDesk"
     winner_analysis = Column(Text, nullable=True) # "who has won and how they did it"
     match_reasoning = Column(Text, nullable=True)
+    strategy = Column(Text, nullable=True)        # The AI-generated winning strategy

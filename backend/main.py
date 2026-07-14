@@ -72,12 +72,20 @@ def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     # Run the LLM Matcher
     result = generate_match_score(deep_context)
     
+    # Run the Strategy Generator
+    historical_context = opp.past_winners or "No past winners data available."
+    strategy = generate_strategy(deep_context, historical_context)
+    
     import json
     try:
         data = json.loads(result)
         opp.match_score = data.get("match_score")
         opp.match_reasoning = data.get("reasoning") # Ensure reasoning is saved if we added it
+        opp.strategy = strategy
         db.commit()
+        
+        # Include strategy in response
+        data["strategy"] = strategy
         return data
     except Exception as e:
         return {"error": "Failed to parse LLM response", "details": str(e)}

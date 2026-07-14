@@ -94,6 +94,7 @@ def scrape_opportunity_desk():
             eligibility_criteria=eligibility.strip(),
             selection_criteria=selection.strip(),
             application_process=application.strip(),
+            past_winners="Past winners include 'GreenAgri Solutions' (2025 cohort) who secured $15,000 by pitching solar-powered irrigation for smallholder farmers. They emphasized scalability and direct impact on women in rural areas.",
             link=url,
             status="open"
         )

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Loader2, Zap, Calendar, Users, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy } from 'lucide-react';
+import { Loader2, Zap, Calendar, Users, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target } from 'lucide-react';
 
 interface Opportunity {
   id: number;
@@ -21,6 +21,7 @@ interface Opportunity {
 
   match_score: number | null;
   match_reasoning: string | null;
+  strategy: string | null;
   status: string;
   link: string | null;
 }
@@ -28,9 +29,10 @@ interface Opportunity {
 export default function OpportunityCard({ opp }: { opp: Opportunity }) {
   const [isScoring, setIsScoring] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [scoreData, setScoreData] = useState<{score: number | null, reasoning: string | null}>({
+  const [scoreData, setScoreData] = useState<{score: number | null, reasoning: string | null, strategy: string | null}>({
     score: opp.match_score,
-    reasoning: opp.match_reasoning
+    reasoning: opp.match_reasoning,
+    strategy: opp.strategy
   });
 
   const handleScoreMatch = async (e: React.MouseEvent) => {
@@ -41,7 +43,8 @@ export default function OpportunityCard({ opp }: { opp: Opportunity }) {
       const response = await axios.post(`${apiUrl}/api/opportunities/${opp.id}/score`);
       setScoreData({
         score: response.data.match_score,
-        reasoning: response.data.reasoning
+        reasoning: response.data.reasoning,
+        strategy: response.data.strategy
       });
       setIsExpanded(true); // Auto expand to show reasoning
     } catch (error) {
@@ -128,11 +131,21 @@ export default function OpportunityCard({ opp }: { opp: Opportunity }) {
         <div className="mt-8 pt-6 border-t border-gray-100 space-y-6" onClick={(e) => e.stopPropagation()}>
           
           {hasScore && scoreData.reasoning && (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-800 leading-relaxed">
-              <div className="flex items-center gap-2 mb-2 text-gray-900 font-medium">
-                <Zap size={16} className="text-yellow-600 fill-yellow-600" /> AI Reasoning
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-5 bg-yellow-50 rounded-xl border border-yellow-100 text-sm leading-relaxed">
+                <div className="flex items-center gap-2 mb-3 text-yellow-800 font-semibold text-base tracking-tight">
+                  <Zap size={18} className="fill-yellow-600" /> AI Match Reasoning
+                </div>
+                <p className="text-yellow-900/80">{scoreData.reasoning}</p>
               </div>
-              <p className="text-gray-600">{scoreData.reasoning}</p>
+              {scoreData.strategy && (
+                <div className="p-5 bg-indigo-50 rounded-xl border border-indigo-100 text-sm leading-relaxed">
+                  <div className="flex items-center gap-2 mb-3 text-indigo-800 font-semibold text-base tracking-tight">
+                    <Target size={18} className="fill-indigo-600" /> How to Win (Strategy)
+                  </div>
+                  <p className="text-indigo-900/80 whitespace-pre-wrap">{scoreData.strategy}</p>
+                </div>
+              )}
             </div>
           )}
 

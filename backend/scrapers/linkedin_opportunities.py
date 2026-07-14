@@ -32,6 +32,7 @@ def scrape_linkedin():
         "eligibility_criteria": "Open to young innovators (18-35 years old) worldwide. Teams must have a tech-driven solution addressing food security or sustainable agriculture.",
         "selection_criteria": "Innovation, technical feasibility, impact on food security, and team capability.",
         "application_process": "Submit a pitch deck and a 3-minute video presentation via the official portal.",
+        "past_winners": "Previous winners included 'AgriData Analytics' (2024), who won $25k for their drone-based crop monitoring solution. The judges favored highly technical solutions with strong data backing.",
         "link": "https://innovationbridge.info/ibportal/content/global-agriinno-challenge-gac-2026-innovation-challenge-resilient-agrifood-systems-small",
         "status": "open"
     }
@@ -54,6 +55,7 @@ def scrape_linkedin():
             eligibility_criteria=mock_post_extraction["eligibility_criteria"],
             selection_criteria=mock_post_extraction["selection_criteria"],
             application_process=mock_post_extraction["application_process"],
+            past_winners=mock_post_extraction["past_winners"],
             link=mock_post_extraction["link"],
             status=mock_post_extraction["status"],
             source="LinkedIn Scraper"

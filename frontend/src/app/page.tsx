@@ -19,6 +19,7 @@ interface Opportunity {
   past_winners: string | null;
   match_score: number | null;
   match_reasoning: string | null;
+  strategy: string | null;
   status: string;
   link: string | null;
 }
