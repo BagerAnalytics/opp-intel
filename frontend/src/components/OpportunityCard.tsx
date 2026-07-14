@@ -103,24 +103,44 @@ export default function OpportunityCard({ opp }: { opp: Opportunity }) {
         </div>
 
         <div className="shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center gap-3">
-          <button 
-            onClick={handleScoreMatch}
-            disabled={isScoring || hasScore}
-            className={`w-full md:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border
-              ${hasScore 
-                ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
-                : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50 shadow-sm'}`}
-          >
-            {isScoring ? (
-              <><Loader2 size={16} className="animate-spin" /> Analyzing...</>
-            ) : hasScore ? (
-              'Analyzed'
-            ) : (
-              <><Zap size={16} /> Analyze Fit</>
+          <div className="flex flex-col gap-2 w-full md:w-auto">
+            {opp.status === "open" && (
+              <button 
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    await axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=interested`);
+                    window.location.reload();
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                Add to Pipeline
+              </button>
             )}
-          </button>
+            
+            <button 
+              onClick={handleScoreMatch}
+              disabled={isScoring || hasScore}
+              className={`w-full md:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border
+                ${hasScore 
+                  ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed' 
+                  : 'bg-white text-gray-900 border-gray-300 hover:bg-gray-50 shadow-sm'}`}
+            >
+              {isScoring ? (
+                <><Loader2 size={16} className="animate-spin" /> Analyzing...</>
+              ) : hasScore ? (
+                'Analyzed'
+              ) : (
+                <><Zap size={16} /> Analyze Fit</>
+              )}
+            </button>
+          </div>
           
-          <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+          <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors self-start md:self-center mt-2 md:mt-0">
             {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
         </div>

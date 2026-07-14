@@ -12,6 +12,9 @@ export default function Sidebar() {
         <Link href="/" className="block px-3 py-2 rounded-lg bg-gray-100 text-gray-900 font-medium text-sm transition-colors">
           Dashboard
         </Link>
+        <Link href="/pipeline" className="block px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium text-sm transition-colors">
+          Pipeline
+        </Link>
         <Link href="/opportunities" className="block px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium text-sm transition-colors">
           Opportunities
         </Link>

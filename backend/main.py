@@ -22,12 +22,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from datetime import datetime
+from dateutil import parser
+
 def run_all_scrapers():
     print("Running scheduled scrapers...")
     try:
         scrape_opportunity_desk()
         scrape_linkedin()
         print("Scrapers completed successfully.")
+        
+        # Auto-close logic
+        with SessionLocal() as db:
+            opps = db.query(models.Opportunity).all()
+            now = datetime.now()
+            closed_count = 0
+            for opp in opps:
+                if opp.closing_date and opp.status not in ["won", "lost", "closed"]:
+                    try:
+                        dt = parser.parse(opp.closing_date, fuzzy=True)
+                        if dt < now:
+                            opp.status = "closed"
+                            closed_count += 1
+                    except Exception:
+                        pass # Ignore if date is unparseable
+            if closed_count > 0:
+                db.commit()
+                print(f"Auto-closed {closed_count} expired opportunities.")
+                
     except Exception as e:
         print(f"Error running scrapers: {e}")
 
@@ -65,12 +87,32 @@ def get_opportunities(db: Session = Depends(get_db)):
     opps = db.query(models.Opportunity).all()
     return opps
 
+@app.put("/api/opportunities/{opp_id}/status")
+def update_opportunity_status(opp_id: int, status: str, db: Session = Depends(get_db)):
+    """Update the pipeline status of an opportunity."""
+    opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+    if not opp:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    opp.status = status
+    db.commit()
+    return {"status": "success", "new_status": status}
+
 @app.post("/api/opportunities/{opp_id}/score")
 def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     """Generate a match score for a specific opportunity using the LLM."""
     opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
     if not opp:
         raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    # Gather Feedback Loop context (Won/Lost opportunities)
+    won_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "won").all()
+    lost_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "lost").all()
+    
+    feedback_context = "Historical Business Context:\n"
+    if won_opps:
+        feedback_context += "We have WON these types of opportunities in the past: " + ", ".join([o.name for o in won_opps]) + "\n"
+    if lost_opps:
+        feedback_context += "We have LOST these types of opportunities in the past (avoid or adjust strategy): " + ", ".join([o.name for o in lost_opps]) + "\n"
     
     # Combine deep fields for the LLM to analyze
     deep_context = f"Title: {opp.name}\n"
@@ -79,12 +121,12 @@ def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     if opp.selection_criteria: deep_context += f"Selection: {opp.selection_criteria}\n"
     if opp.benefits: deep_context += f"Benefits: {opp.benefits}\n"
     
-    # Run the LLM Matcher
-    result = generate_match_score(deep_context)
+    # Run the LLM Matcher with feedback loop
+    result = generate_match_score(deep_context, feedback_context)
     
     # Run the Strategy Generator
     historical_context = opp.past_winners or "No past winners data available."
-    strategy = generate_strategy(deep_context, historical_context)
+    strategy = generate_strategy(deep_context, historical_context, feedback_context)
     
     import json
     try:

@@ -18,17 +18,21 @@ Criteria for a High Match:
 - Does NOT have to be strictly agriculture, as long as it fits Consulting, Training, Business Plans, or Tech/Data Science.
 """
 
-def generate_match_score(opportunity_description: str) -> dict:
+def generate_match_score(opportunity_description: str, feedback_context: str = "") -> dict:
     """
     Analyzes an opportunity description against the company profile 
     and returns a JSON with a match_score (0-100) and reasoning.
     """
     try:
+        system_prompt = PROFILE_PROMPT + "\nOutput JSON format: {\"match_score\": 85, \"reasoning\": \"...\"}"
+        if feedback_context:
+            system_prompt += f"\n\n{feedback_context}\nUse this feedback to adjust your scoring. If an opportunity is similar to one we've lost, lower the score. If similar to one we've won, raise the score."
+            
         response = client.chat.completions.create(
             model="gpt-4-turbo",
             response_format={ "type": "json_object" },
             messages=[
-                {"role": "system", "content": PROFILE_PROMPT + "\nOutput JSON format: {\"match_score\": 85, \"reasoning\": \"...\"}"},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Analyze this opportunity:\n\n{opportunity_description}"}
             ]
         )
@@ -37,7 +41,7 @@ def generate_match_score(opportunity_description: str) -> dict:
         print(f"LLM Error: {e}")
         return {"match_score": 0, "reasoning": str(e)}
 
-def generate_strategy(opportunity_data: dict, historical_winners_context: str) -> str:
+def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
     """
     Generates an application strategy based on the opportunity and past winners.
     """
@@ -47,6 +51,10 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str) -
 
     Opportunity: {opportunity_data}
     Past Winners Context: {historical_winners_context}
+    
+    Business Feedback Loop Context:
+    {feedback_context}
+    Use this feedback to avoid past mistakes and double-down on winning strategies!
     """
     try:
         response = client.chat.completions.create(

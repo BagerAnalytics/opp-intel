@@ -33,7 +33,8 @@ export default function Home() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         const response = await axios.get(`${apiUrl}/api/opportunities`);
-        setOpportunities(response.data);
+        const openOpps = response.data.filter((opp: Opportunity) => opp.status === 'open');
+        setOpportunities(openOpps);
       } catch (error) {
         console.error("Error fetching opportunities", error);
       } finally {
