@@ -9,7 +9,7 @@ interface Opportunity {
   id: number;
   name: string;
   funder: string;
-  deadline: string;
+  closing_date: string;
   value: string;
   description: string;
   benefits: string | null;
@@ -26,29 +26,35 @@ interface Opportunity {
 
 export default function Home() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const response = await axios.get(`${apiUrl}/api/opportunities`);
-        const openOpps = response.data.filter((opp: Opportunity) => opp.status === 'open');
-        setOpportunities(openOpps);
-      } catch (error) {
-        console.error("Error fetching opportunities", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const [oppResponse, contactsResponse] = await Promise.all([
+        axios.get(`${apiUrl}/api/opportunities`),
+        axios.get(`${apiUrl}/api/contacts`)
+      ]);
+      const openOpps = oppResponse.data.filter((opp: Opportunity) => opp.status === 'open');
+      setOpportunities(openOpps);
+      setContacts(contactsResponse.data);
+    } catch (error) {
+      console.error("Error fetching data", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const scoredOpps = opportunities.filter(o => o.match_score !== null);
   const highMatches = scoredOpps.filter(o => o.match_score! >= 80).length;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto p-8">
       
       {/* Header */}
       <div>
@@ -63,7 +69,7 @@ export default function Home() {
             <Database size={24} />
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Records</h3>
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Open Records</h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
               {isLoading ? <Loader2 className="animate-spin inline" size={24}/> : opportunities.length}
             </p>
@@ -96,7 +102,7 @@ export default function Home() {
       {/* Main Content Area */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-gray-900 tracking-tight">Opportunity Database</h3>
+          <h3 className="text-xl font-semibold text-gray-900 tracking-tight">Inbox (New Opportunities)</h3>
           <div className="text-sm font-medium text-gray-500">
             Showing {opportunities.length} live records
           </div>
@@ -114,7 +120,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {opportunities.map(opp => (
-              <OpportunityCard key={opp.id} opp={opp} />
+              <OpportunityCard key={opp.id} opp={opp} contacts={contacts} />
             ))}
           </div>
         )}

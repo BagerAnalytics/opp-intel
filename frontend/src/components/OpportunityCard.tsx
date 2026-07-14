@@ -4,29 +4,30 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Loader2, Zap, Calendar, Users, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target } from 'lucide-react';
 
-interface Opportunity {
-  id: number;
-  name: string;
-  funder: string;
-  deadline: string;
-  value: string;
-  description: string;
-  
-  // Deep Fields
-  benefits: string | null;
-  eligibility_criteria: string | null;
-  selection_criteria: string | null;
-  application_process: string | null;
-  past_winners: string | null;
-
-  match_score: number | null;
-  match_reasoning: string | null;
-  strategy: string | null;
-  status: string;
-  link: string | null;
+interface OpportunityCardProps {
+  opp: {
+    id: number;
+    name: string;
+    funder: string;
+    deadline: string;
+    value: string;
+    description: string;
+    benefits: string | null;
+    eligibility_criteria: string | null;
+    selection_criteria: string | null;
+    application_process: string | null;
+    past_winners: string | null;
+    match_score: number | null;
+    match_reasoning: string | null;
+    strategy: string | null;
+    status: string;
+    link: string | null;
+  };
+  contacts?: any[];
 }
 
-export default function OpportunityCard({ opp }: { opp: Opportunity }) {
+export default function OpportunityCard({ opp: initialOpp, contacts = [] }: OpportunityCardProps) {
+  const [opp, setOpp] = useState(initialOpp);
   const [isScoring, setIsScoring] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [scoreData, setScoreData] = useState<{score: number | null, reasoning: string | null, strategy: string | null}>({
@@ -56,30 +57,43 @@ export default function OpportunityCard({ opp }: { opp: Opportunity }) {
 
   const hasScore = scoreData.score !== null;
   const hasDeepData = opp.benefits || opp.eligibility_criteria || opp.selection_criteria;
+  const warmConnections = contacts.filter(c => c.organization?.toLowerCase().includes(opp.funder?.toLowerCase() || 'unmatchable') || opp.funder?.toLowerCase().includes(c.organization?.toLowerCase() || 'unmatchable'));
 
   return (
-    <div 
-      className={`bg-white p-6 md:p-8 rounded-xl border transition-all duration-300 cursor-pointer 
-        ${isExpanded ? 'border-gray-300 shadow-md ring-1 ring-gray-100' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'}`}
-      onClick={() => setIsExpanded(!isExpanded)}
-    >
+    <div className={`bg-white rounded-xl border transition-all duration-300 shadow-sm hover:shadow-md overflow-hidden cursor-pointer
+      ${hasScore && scoreData.score! >= 80 ? 'border-green-400 ring-1 ring-green-100' : 'border-gray-200'}
+    `} onClick={() => setIsExpanded(!isExpanded)}>
       
-      {/* Top Header Section */}
-      <div className="flex flex-col md:flex-row gap-6 justify-between items-start">
+      {/* Top Bar / Summary */}
+      <div className="p-6 flex flex-col md:flex-row gap-6 justify-between items-start">
         
         <div className="flex-1 space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <h4 className="text-lg font-semibold text-gray-900 tracking-tight">{opp.name}</h4>
+          <div className="flex items-center gap-3">
+            <h3 className="text-xl font-bold text-gray-900 leading-tight">{opp.name}</h3>
             {hasScore && (
-              <span className={`px-2.5 py-0.5 rounded-md text-xs font-medium flex items-center gap-1 ${scoreData.score! >= 80 ? 'bg-green-50 text-green-700 border border-green-200' : scoreData.score! >= 50 ? 'bg-yellow-50 text-yellow-700 border border-yellow-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                <Zap size={12} className={scoreData.score! >= 80 ? 'fill-green-600' : ''} />
-                {scoreData.score}% FIT
+              <span className={`px-3 py-1 text-sm font-bold rounded-full border
+                ${scoreData.score! >= 80 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'}`}>
+                {scoreData.score}% Match
               </span>
             )}
           </div>
           
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">{opp.funder || "Unknown Funder"}</p>
-          
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 font-medium">
+            <div className="flex items-center gap-2">
+              <Users size={16} className="text-gray-400" /> 
+              {opp.funder}
+              {warmConnections.length > 0 && (
+                <span className="ml-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                  <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></span>
+                  Warm Connection: {warmConnections[0].name}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="text-gray-400" /> {opp.deadline || opp.closing_date || "Open"}
+            </div>
+          </div>
+            
           <p className={`text-gray-600 text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
             {opp.description || "No description provided."}
           </p>

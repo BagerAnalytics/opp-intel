@@ -147,3 +147,30 @@ def sync_compliance():
     """Trigger a WebDAV sync to list compliance documents."""
     docs = nas_service.list_compliance_documents()
     return {"documents_found": len(docs), "files": docs}
+
+from pydantic import BaseModel
+from typing import Optional
+
+class ContactCreate(BaseModel):
+    name: str
+    organization: str
+    role: Optional[str] = None
+    email: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    relationship_strength: Optional[str] = "Cold"
+    notes: Optional[str] = None
+
+@app.get("/api/contacts")
+def get_contacts(db: Session = Depends(get_db)):
+    """Fetch all contacts from the CRM."""
+    contacts = db.query(models.Contact).all()
+    return contacts
+
+@app.post("/api/contacts")
+def create_contact(contact: ContactCreate, db: Session = Depends(get_db)):
+    """Add a new contact to the CRM."""
+    new_contact = models.Contact(**contact.dict())
+    db.add(new_contact)
+    db.commit()
+    db.refresh(new_contact)
+    return new_contact

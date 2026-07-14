@@ -35,3 +35,15 @@ class Opportunity(Base):
     winner_analysis = Column(Text, nullable=True) # "who has won and how they did it"
     match_reasoning = Column(Text, nullable=True)
     strategy = Column(Text, nullable=True)        # The AI-generated winning strategy
+
+class Contact(Base):
+    __tablename__ = "contacts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    organization = Column(String, index=True) # E.g. FAO, ECOWAS
+    role = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    linkedin_url = Column(String, nullable=True)
+    relationship_strength = Column(String, nullable=True) # E.g. "Cold", "Warm", "Strong"
+    notes = Column(Text, nullable=True)
