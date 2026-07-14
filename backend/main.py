@@ -174,3 +174,13 @@ def create_contact(contact: ContactCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_contact)
     return new_contact
+
+@app.delete("/api/contacts/{contact_id}")
+def delete_contact(contact_id: int, db: Session = Depends(get_db)):
+    """Delete a contact from the CRM."""
+    contact = db.query(models.Contact).filter(models.Contact.id == contact_id).first()
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    db.delete(contact)
+    db.commit()
+    return {"message": "Contact deleted"}

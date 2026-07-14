@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, Plus, Users, Building, Mail, ExternalLink, UserPlus, X } from 'lucide-react';
+import { Loader2, Plus, Users, Building, Mail, ExternalLink, UserPlus, X, Trash2 } from 'lucide-react';
 
 interface Contact {
   id: number;
@@ -42,6 +42,17 @@ export default function NetworkPage() {
       console.error("Error fetching contacts", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteContact = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this contact?')) return;
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      await axios.delete(`${apiUrl}/api/contacts/${id}`);
+      fetchContacts();
+    } catch (error) {
+      console.error("Failed to delete contact", error);
     }
   };
 
@@ -109,8 +120,15 @@ export default function NetworkPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {contacts.map(contact => (
               <div key={contact.id} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow group relative">
-                <div className="absolute top-6 right-6">
+                <div className="absolute top-6 right-6 flex items-center gap-3">
                   {getStrengthBadge(contact.relationship_strength)}
+                  <button 
+                    onClick={() => handleDeleteContact(contact.id)}
+                    className="text-gray-300 hover:text-red-500 transition-colors bg-white hover:bg-red-50 p-1.5 rounded-md"
+                    title="Delete Contact"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-blue-700 font-bold text-lg border border-blue-200 shrink-0">
