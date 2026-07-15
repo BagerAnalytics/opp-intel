@@ -11,8 +11,18 @@ interface Opportunity {
   closing_date: string;
   value: string;
   description: string;
+  benefits: string | null;
+  eligibility_criteria: string | null;
+  selection_criteria: string | null;
+  application_process: string | null;
+  past_winners: string | null;
   match_score: number | null;
+  match_reasoning: string | null;
+  strategy: string | null;
   status: string;
+  link: string | null;
+  opp_type?: string;
+  target_entity?: string;
 }
 
 const COLUMNS = [

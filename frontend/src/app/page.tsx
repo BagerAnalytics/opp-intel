@@ -22,6 +22,8 @@ interface Opportunity {
   strategy: string | null;
   status: string;
   link: string | null;
+  opp_type?: string;
+  target_entity?: string;
 }
 
 export default function Home() {
