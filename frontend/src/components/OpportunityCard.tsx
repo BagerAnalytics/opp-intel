@@ -33,15 +33,15 @@ const MatchScoreRing = ({ score }: { score: number | null }) => {
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (actualScore / 100) * circumference;
   
-  let colorClass = "text-emerald-400";
-  if (actualScore < 70) colorClass = "text-yellow-400";
-  if (actualScore < 50) colorClass = "text-red-400";
-  if (!score) colorClass = "text-gray-600";
+  let colorClass = "text-emerald-500";
+  if (actualScore < 70) colorClass = "text-yellow-500";
+  if (actualScore < 50) colorClass = "text-red-500";
+  if (!score) colorClass = "text-slate-300";
 
   return (
     <div className="relative flex items-center justify-center w-[64px] h-[64px]">
       <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 56 56">
-        <circle cx="28" cy="28" r={radius} className="stroke-white/10" strokeWidth="4" fill="none" />
+        <circle cx="28" cy="28" r={radius} className="stroke-slate-100" strokeWidth="4" fill="none" />
         <circle 
           cx="28" cy="28" r={radius} 
           className={colorClass} 
@@ -54,7 +54,7 @@ const MatchScoreRing = ({ score }: { score: number | null }) => {
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center">
-        <span className="text-sm font-bold text-white">{score ? `${score}%` : 'N/A'}</span>
+        <span className="text-sm font-bold text-slate-900">{score ? `${score}%` : 'N/A'}</span>
       </div>
     </div>
   );
@@ -99,8 +99,8 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                    (opp.application_process || '').toLowerCase().includes(doc.document_name.toLowerCase()));
 
   return (
-    <div className={`bg-[#1e2029] rounded-2xl border border-white/[0.04] shadow-md hover:border-white/10 transition-all cursor-pointer relative group overflow-hidden
-      ${missingDocs.length > 0 ? '!border-red-500/30' : ''}
+    <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow hover:border-slate-300 transition-all cursor-pointer relative group overflow-hidden
+      ${missingDocs.length > 0 ? '!border-red-300 !shadow-red-50' : ''}
     `} onClick={() => setIsExpanded(!isExpanded)}>
       
       {/* Top Bar / Summary */}
@@ -109,56 +109,56 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
         <div className="flex-1 space-y-4">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-bold text-white leading-tight tracking-tight mb-2">{opp.name}</h3>
-              <p className="text-sm text-gray-400 uppercase tracking-wider mb-2">{opp.funder}</p>
+              <h3 className="text-xl font-bold text-slate-900 leading-tight tracking-tight mb-2">{opp.name}</h3>
+              <p className="text-sm text-slate-500 uppercase tracking-wider mb-2 font-medium">{opp.funder}</p>
             </div>
             
             <div className="flex flex-col items-center">
-              <p className="text-gray-500 text-[11px] mb-1 font-medium">AI MATCH</p>
+              <p className="text-slate-400 text-[11px] mb-1 font-semibold tracking-wider uppercase">AI Fit</p>
               <MatchScoreRing score={scoreData.score} />
             </div>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
             <div>
-              <p className="text-gray-500 text-[11px] mb-1.5 font-medium">VALUE</p>
-              <p className="text-gray-100 text-[15px] font-bold">{opp.value || '$---'}</p>
+              <p className="text-slate-400 text-[11px] mb-1.5 font-semibold tracking-wider uppercase">VALUE</p>
+              <p className="text-slate-900 text-[15px] font-bold">{opp.value || '$---'}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-[11px] mb-1.5 font-medium">DEADLINE</p>
-              <p className="text-gray-100 text-[15px] font-bold">{opp.closing_date || 'Open'}</p>
+              <p className="text-slate-400 text-[11px] mb-1.5 font-semibold tracking-wider uppercase">DEADLINE</p>
+              <p className="text-slate-900 text-[15px] font-bold">{opp.closing_date || 'Open'}</p>
             </div>
             <div className="col-span-2 flex items-center gap-2">
               {warmConnections.length > 0 ? (
-                <div className="bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-lg flex items-center gap-2 w-full">
-                  <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]"></span>
+                <div className="bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg flex items-center gap-2 w-full">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
                   <div>
-                    <p className="text-blue-400 text-[11px] font-bold leading-none mb-1">WARM CONNECTION</p>
-                    <p className="text-blue-100 text-xs font-medium leading-none">{warmConnections[0].name}</p>
+                    <p className="text-emerald-700 text-[11px] font-bold leading-none mb-1">WARM CONNECTION</p>
+                    <p className="text-emerald-900 text-xs font-semibold leading-none">{warmConnections[0].name}</p>
                   </div>
                 </div>
               ) : (
-                <div className="bg-white/5 border border-white/5 px-3 py-1.5 rounded-lg flex items-center gap-2 w-full">
-                  <Users size={14} className="text-gray-500" />
-                  <p className="text-gray-400 text-xs font-medium">No warm connections found</p>
+                <div className="bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-2 w-full">
+                  <Users size={14} className="text-slate-400" />
+                  <p className="text-slate-500 text-xs font-medium">No warm connections found</p>
                 </div>
               )}
             </div>
           </div>
             
-          <p className={`text-gray-400 text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
+          <p className={`text-slate-600 text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
             {opp.description || "No description provided."}
           </p>
           
           {missingDocs.length > 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-xs font-semibold border border-red-500/20 shadow-[inset_0_0_12px_rgba(239,68,68,0.1)]">
-              <AlertCircle size={14} className="text-red-400" />
+            <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-semibold border border-red-100">
+              <AlertCircle size={14} className="text-red-500" />
               Missing Docs: {missingDocs.map(d => d.document_name).join(', ')}
             </div>
           )}
         </div>
 
-        <div className="shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center gap-3 md:pl-6 md:border-l md:border-white/5 h-full pt-2">
+        <div className="shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center gap-3 md:pl-6 md:border-l md:border-slate-100 h-full pt-2">
           {opp.status === "open" && (
             <button 
               onClick={async (e) => {
@@ -169,7 +169,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                   window.location.reload();
                 } catch (err) {}
               }}
-              className="w-full px-5 py-2.5 bg-[#4352ff] text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+              className="w-full px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-600/20 flex items-center justify-center gap-2"
             >
               <Plus size={16} /> Add to Pipeline
             </button>
@@ -178,21 +178,21 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
           <button 
             onClick={handleScoreMatch}
             disabled={isScoring || hasScore}
-            className={`w-full px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border backdrop-blur-md
+            className={`w-full px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border
               ${hasScore 
-                ? 'bg-white/5 text-gray-500 border-white/5 cursor-not-allowed' 
-                : 'bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20'}`}
+                ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed' 
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'}`}
           >
             {isScoring ? (
-              <><Loader2 size={16} className="animate-spin" /> Analyzing...</>
+              <><Loader2 size={16} className="animate-spin text-emerald-600" /> Analyzing...</>
             ) : hasScore ? (
               'Analyzed Fit'
             ) : (
-              <><Zap size={16} className="text-yellow-400" /> Score Fit</>
+              <><Zap size={16} className="text-yellow-500" /> Score Fit</>
             )}
           </button>
           
-          <button className="p-2 text-gray-500 hover:text-white rounded-xl hover:bg-white/5 transition-colors self-start md:self-center mt-2 relative z-10 border border-transparent">
+          <button className="p-2 text-slate-400 hover:text-slate-900 rounded-xl hover:bg-slate-50 transition-colors self-start md:self-center mt-2 relative z-10">
             {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
         </div>
@@ -200,22 +200,22 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
 
       {/* Expanded Deep Data Section */}
       {isExpanded && (
-        <div className="mt-2 pt-6 border-t border-white/[0.04] p-6 bg-black/20" onClick={(e) => e.stopPropagation()}>
+        <div className="mt-2 border-t border-slate-100 p-6 bg-slate-50" onClick={(e) => e.stopPropagation()}>
           
           {hasScore && scoreData.reasoning && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="p-5 bg-[#16181f] rounded-xl border border-white/5 text-sm leading-relaxed shadow-sm">
-                <div className="flex items-center gap-2 mb-3 text-yellow-400 font-semibold text-[13px] uppercase tracking-wider">
-                  <Zap size={16} className="fill-yellow-500/20" /> AI Match Reasoning
+              <div className="p-5 bg-white rounded-xl border border-slate-200 text-sm leading-relaxed shadow-sm">
+                <div className="flex items-center gap-2 mb-3 text-emerald-700 font-semibold text-[13px] uppercase tracking-wider">
+                  <Zap size={16} className="text-emerald-500" /> AI Match Reasoning
                 </div>
-                <p className="text-gray-300">{scoreData.reasoning}</p>
+                <p className="text-slate-600">{scoreData.reasoning}</p>
               </div>
               {scoreData.strategy && (
-                <div className="p-5 bg-[#16181f] rounded-xl border border-white/5 text-sm leading-relaxed shadow-sm">
-                  <div className="flex items-center gap-2 mb-3 text-blue-400 font-semibold text-[13px] uppercase tracking-wider">
-                    <Target size={16} className="fill-blue-500/20" /> Strategy
+                <div className="p-5 bg-white rounded-xl border border-slate-200 text-sm leading-relaxed shadow-sm">
+                  <div className="flex items-center gap-2 mb-3 text-blue-700 font-semibold text-[13px] uppercase tracking-wider">
+                    <Target size={16} className="text-blue-500" /> Strategy
                   </div>
-                  <p className="text-gray-300 whitespace-pre-wrap">{scoreData.strategy}</p>
+                  <p className="text-slate-600 whitespace-pre-wrap">{scoreData.strategy}</p>
                 </div>
               )}
             </div>
@@ -225,51 +225,51 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {opp.benefits && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <Gift size={16} className="text-blue-400" /> Benefits
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <Gift size={16} className="text-emerald-600" /> Benefits
                   </div>
-                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.benefits}</div>
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{opp.benefits}</div>
                 </div>
               )}
               
               {opp.eligibility_criteria && (
                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <CheckCircle2 size={16} className="text-blue-400" /> Eligibility
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <CheckCircle2 size={16} className="text-emerald-600" /> Eligibility
                   </div>
-                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.eligibility_criteria}</div>
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{opp.eligibility_criteria}</div>
                 </div>
               )}
 
               {opp.selection_criteria && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <ListChecks size={16} className="text-blue-400" /> Selection Criteria
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <ListChecks size={16} className="text-emerald-600" /> Selection Criteria
                   </div>
-                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.selection_criteria}</div>
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{opp.selection_criteria}</div>
                 </div>
               )}
 
               {opp.application_process && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <FileText size={16} className="text-blue-400" /> How to Apply
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <FileText size={16} className="text-emerald-600" /> How to Apply
                   </div>
-                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.application_process}</div>
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{opp.application_process}</div>
                 </div>
               )}
 
               {opp.past_winners && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <Trophy size={16} className="text-blue-400" /> Past Winners
+                  <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                    <Trophy size={16} className="text-emerald-600" /> Past Winners
                   </div>
-                  <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.past_winners}</div>
+                  <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{opp.past_winners}</div>
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-sm text-gray-500 italic text-center py-4">
+            <div className="text-sm text-slate-500 italic text-center py-4">
               Deep data has not been scraped for this historical record.
             </div>
           )}
@@ -280,7 +280,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                 href={opp.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-white text-black text-sm font-semibold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                className="px-6 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
               >
                 Apply Now <ExternalLink size={16} />
               </a>

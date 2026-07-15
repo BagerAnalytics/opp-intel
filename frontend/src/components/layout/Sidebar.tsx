@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { 
   Home, 
   LayoutDashboard, 
@@ -27,21 +28,17 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 h-screen flex flex-col fixed left-0 top-0 z-50 bg-[#1e2029]/40 backdrop-blur-3xl border-r border-white/5 shadow-2xl">
-      <div className="h-20 flex items-center px-6 mt-2">
-        <div className="flex items-center gap-3">
-          {/* Faux Logo mimicking the AETHEL icon */}
-          <div className="relative w-8 h-8 flex items-center justify-center">
-            <div className="absolute w-5 h-5 bg-cyan-400 rounded-sm transform rotate-45 -translate-x-1 mix-blend-screen opacity-90"></div>
-            <div className="absolute w-5 h-5 bg-blue-600 rounded-sm transform rotate-45 translate-x-1 mix-blend-screen opacity-90"></div>
-          </div>
-          <h1 className="text-xl font-bold tracking-widest text-white mt-1 uppercase">
+    <aside className="w-64 h-screen flex flex-col fixed left-0 top-0 z-50 bg-white border-r border-slate-200 shadow-sm">
+      <div className="h-20 flex items-center px-6 mt-4 mb-2">
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/logo.png" alt="Premier Agric" width={48} height={48} className="object-contain" />
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 mt-1">
             OppIntel
           </h1>
-        </div>
+        </Link>
       </div>
       
-      <nav className="flex-1 px-4 py-4 space-y-2 mt-4">
+      <nav className="flex-1 px-4 py-4 space-y-1 mt-2">
         {links.map((link) => {
           const isActive = pathname === link.href || (link.href === '/pipeline' && pathname.includes('/pipeline'));
           const Icon = link.icon;
@@ -49,26 +46,26 @@ export default function Sidebar() {
             <Link 
               key={link.href}
               href={link.href} 
-              className={`flex items-center gap-4 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200
+              className={`flex items-center gap-4 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200
                 ${isActive 
-                  ? 'bg-[#4352ff] text-white shadow-lg shadow-blue-500/20' 
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'}
+                  ? 'bg-emerald-50 text-emerald-700 font-semibold' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}
               `}
             >
-              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-gray-400'} />
+              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-emerald-600' : 'text-slate-400'} />
               {link.label}
             </Link>
           );
         })}
       </nav>
       
-      <div className="p-4 mb-4 space-y-2">
-        <Link href="/settings" className="flex items-center gap-4 px-4 py-3 rounded-xl font-medium text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all">
-          <Settings size={18} strokeWidth={2} />
+      <div className="p-4 mb-4 space-y-1">
+        <Link href="/settings" className="flex items-center gap-4 px-4 py-3 rounded-lg font-medium text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all">
+          <Settings size={18} strokeWidth={2} className="text-slate-400" />
           Settings
         </Link>
-        <Link href="/help" className="flex items-center gap-4 px-4 py-3 rounded-xl font-medium text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-all">
-          <HelpCircle size={18} strokeWidth={2} />
+        <Link href="/help" className="flex items-center gap-4 px-4 py-3 rounded-lg font-medium text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all">
+          <HelpCircle size={18} strokeWidth={2} className="text-slate-400" />
           Help
         </Link>
       </div>
