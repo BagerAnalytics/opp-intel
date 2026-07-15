@@ -39,7 +39,8 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
         return response.choices[0].message.content
     except Exception as e:
         print(f"LLM Error: {e}")
-        return {"match_score": 0, "reasoning": str(e)}
+        import json
+        return json.dumps({"match_score": 0, "reasoning": str(e)})
 
 def extract_opportunity_data(raw_text: str, url: str) -> dict:
     """
