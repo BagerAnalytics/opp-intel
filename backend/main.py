@@ -9,6 +9,7 @@ from services.llm_service import generate_match_score, generate_strategy
 from services.nas_service import nas_service
 from scrapers.opportunity_desk import scrape_opportunity_desk
 from scrapers.linkedin_opportunities import scrape_linkedin
+from scrapers.etenders_sa import scrape_etenders
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # Create tables in the database if they don't exist
@@ -31,6 +32,7 @@ def run_all_scrapers():
     print("Running scheduled scrapers...")
     try:
         scrape_opportunity_desk()
+        scrape_etenders()
         scrape_linkedin()
         print("Scrapers completed successfully.")
         
