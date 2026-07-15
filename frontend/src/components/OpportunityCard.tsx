@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Loader2, Zap, Calendar, Users, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target, AlertCircle } from 'lucide-react';
+import { Loader2, Zap, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target, AlertCircle, Plus } from 'lucide-react';
 
 interface OpportunityCardProps {
   opp: {
@@ -27,6 +27,39 @@ interface OpportunityCardProps {
   complianceDocs?: any[];
 }
 
+const MatchScoreRing = ({ score }: { score: number | null }) => {
+  const actualScore = score || 0;
+  const radius = 24;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (actualScore / 100) * circumference;
+  
+  let colorClass = "text-emerald-400";
+  if (actualScore < 70) colorClass = "text-yellow-400";
+  if (actualScore < 50) colorClass = "text-red-400";
+  if (!score) colorClass = "text-gray-600";
+
+  return (
+    <div className="relative flex items-center justify-center w-[64px] h-[64px]">
+      <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 56 56">
+        <circle cx="28" cy="28" r={radius} className="stroke-white/10" strokeWidth="4" fill="none" />
+        <circle 
+          cx="28" cy="28" r={radius} 
+          className={colorClass} 
+          stroke="currentColor"
+          strokeWidth="4" 
+          fill="none" 
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center justify-center">
+        <span className="text-sm font-bold text-white">{score ? `${score}%` : 'N/A'}</span>
+      </div>
+    </div>
+  );
+};
+
 export default function OpportunityCard({ opp: initialOpp, contacts = [], complianceDocs = [] }: OpportunityCardProps) {
   const [opp, setOpp] = useState(initialOpp);
   const [isScoring, setIsScoring] = useState(false);
@@ -38,7 +71,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
   });
 
   const handleScoreMatch = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // prevent expanding card when clicking score
+    e.stopPropagation();
     setIsScoring(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -48,7 +81,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
         reasoning: response.data.reasoning,
         strategy: response.data.strategy
       });
-      setIsExpanded(true); // Auto expand to show reasoning
+      setIsExpanded(true);
     } catch (error) {
       console.error("Failed to score opportunity", error);
     } finally {
@@ -60,70 +93,62 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
   const hasDeepData = opp.benefits || opp.eligibility_criteria || opp.selection_criteria;
   const warmConnections = contacts.filter(c => c.organization?.toLowerCase().includes(opp.funder?.toLowerCase() || 'unmatchable') || opp.funder?.toLowerCase().includes(c.organization?.toLowerCase() || 'unmatchable'));
 
-  // Calculate missing compliance docs
   const missingDocs = complianceDocs
     .filter(doc => doc.status !== 'Uploaded')
     .filter(doc => (opp.eligibility_criteria || '').toLowerCase().includes(doc.document_name.toLowerCase()) || 
                    (opp.application_process || '').toLowerCase().includes(doc.document_name.toLowerCase()));
 
   return (
-    <div className={`premium-card glow-border rounded-xl overflow-hidden cursor-pointer relative group
-      ${missingDocs.length > 0 ? '!border-red-500/30' : 
-        hasScore && scoreData.score! >= 80 ? '!border-emerald-500/30' : ''}
+    <div className={`bg-[#1e2029] rounded-2xl border border-white/[0.04] shadow-md hover:border-white/10 transition-all cursor-pointer relative group overflow-hidden
+      ${missingDocs.length > 0 ? '!border-red-500/30' : ''}
     `} onClick={() => setIsExpanded(!isExpanded)}>
       
       {/* Top Bar / Summary */}
       <div className="p-6 flex flex-col md:flex-row gap-6 justify-between items-start">
         
-        <div className="flex-1 space-y-3">
-          <div className="flex items-center gap-3">
-            <h3 className="text-xl font-bold text-white leading-tight tracking-tight">{opp.name}</h3>
-            {hasScore && (
-              <span className={`px-3 py-1 text-xs font-bold rounded-full border
-                ${scoreData.score! >= 80 
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[inset_0_0_12px_rgba(16,185,129,0.1)]' 
-                  : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-[inset_0_0_12px_rgba(234,179,8,0.1)]'}`}>
-                {scoreData.score}% Match
-              </span>
-            )}
+        <div className="flex-1 space-y-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold text-white leading-tight tracking-tight mb-2">{opp.name}</h3>
+              <p className="text-sm text-gray-400 uppercase tracking-wider mb-2">{opp.funder}</p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <p className="text-gray-500 text-[11px] mb-1 font-medium">AI MATCH</p>
+              <MatchScoreRing score={scoreData.score} />
+            </div>
           </div>
           
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-400 font-medium">
-            <div className="flex items-center gap-2">
-              <Users size={16} className="text-gray-500" /> 
-              {opp.funder}
-              {warmConnections.length > 0 && (
-                <span className="ml-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-[inset_0_0_12px_rgba(59,130,246,0.1)]">
-                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]"></span>
-                  Warm Connection: {warmConnections[0].name}
-                </span>
-              )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+            <div>
+              <p className="text-gray-500 text-[11px] mb-1.5 font-medium">VALUE</p>
+              <p className="text-gray-100 text-[15px] font-bold">{opp.value || '$---'}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-gray-500" /> {opp.closing_date || "Open"}
+            <div>
+              <p className="text-gray-500 text-[11px] mb-1.5 font-medium">DEADLINE</p>
+              <p className="text-gray-100 text-[15px] font-bold">{opp.closing_date || 'Open'}</p>
+            </div>
+            <div className="col-span-2 flex items-center gap-2">
+              {warmConnections.length > 0 ? (
+                <div className="bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-lg flex items-center gap-2 w-full">
+                  <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]"></span>
+                  <div>
+                    <p className="text-blue-400 text-[11px] font-bold leading-none mb-1">WARM CONNECTION</p>
+                    <p className="text-blue-100 text-xs font-medium leading-none">{warmConnections[0].name}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white/5 border border-white/5 px-3 py-1.5 rounded-lg flex items-center gap-2 w-full">
+                  <Users size={14} className="text-gray-500" />
+                  <p className="text-gray-400 text-xs font-medium">No warm connections found</p>
+                </div>
+              )}
             </div>
           </div>
             
           <p className={`text-gray-400 text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
             {opp.description || "No description provided."}
           </p>
-
-          <div className="flex flex-wrap gap-x-6 gap-y-3 pt-2 text-sm">
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <Calendar size={14} />
-              <span>{opp.closing_date || "Open"}</span>
-            </div>
-            {opp.value && (
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <Gift size={14} />
-                <span>{opp.value}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <Users size={14} />
-              <span className="capitalize">{opp.status}</span>
-            </div>
-          </div>
           
           {missingDocs.length > 0 && (
             <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg text-xs font-semibold border border-red-500/20 shadow-[inset_0_0_12px_rgba(239,68,68,0.1)]">
@@ -133,45 +158,41 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
           )}
         </div>
 
-        <div className="shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center gap-3">
-          <div className="flex flex-col gap-2 w-full md:w-auto relative z-10">
-            {opp.status === "open" && (
-              <button 
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  try {
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                    await axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=interested`);
-                    window.location.reload();
-                  } catch (err) {
-                    console.error(err);
-                  }
-                }}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 transition-colors shadow-[0_0_15px_rgba(99,102,241,0.3)] border border-indigo-500"
-              >
-                Add to Pipeline
-              </button>
-            )}
-            
+        <div className="shrink-0 w-full md:w-auto flex flex-row md:flex-col items-center gap-3 md:pl-6 md:border-l md:border-white/5 h-full pt-2">
+          {opp.status === "open" && (
             <button 
-              onClick={handleScoreMatch}
-              disabled={isScoring || hasScore}
-              className={`w-full md:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 border backdrop-blur-md
-                ${hasScore 
-                  ? 'bg-white/5 text-gray-500 border-white/5 cursor-not-allowed' 
-                  : 'bg-white/10 text-white border-white/10 hover:bg-white/15 hover:border-white/20 shadow-sm'}`}
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  await axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=interested`);
+                  window.location.reload();
+                } catch (err) {}
+              }}
+              className="w-full px-5 py-2.5 bg-[#4352ff] text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
             >
-              {isScoring ? (
-                <><Loader2 size={16} className="animate-spin" /> Analyzing...</>
-              ) : hasScore ? (
-                'Analyzed'
-              ) : (
-                <><Zap size={16} className="text-indigo-400" /> Analyze Fit</>
-              )}
+              <Plus size={16} /> Add to Pipeline
             </button>
-          </div>
+          )}
           
-          <button className="p-2 text-gray-500 hover:text-white rounded-lg hover:bg-white/10 transition-colors self-start md:self-center mt-2 md:mt-0 relative z-10">
+          <button 
+            onClick={handleScoreMatch}
+            disabled={isScoring || hasScore}
+            className={`w-full px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 border backdrop-blur-md
+              ${hasScore 
+                ? 'bg-white/5 text-gray-500 border-white/5 cursor-not-allowed' 
+                : 'bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20'}`}
+          >
+            {isScoring ? (
+              <><Loader2 size={16} className="animate-spin" /> Analyzing...</>
+            ) : hasScore ? (
+              'Analyzed Fit'
+            ) : (
+              <><Zap size={16} className="text-yellow-400" /> Score Fit</>
+            )}
+          </button>
+          
+          <button className="p-2 text-gray-500 hover:text-white rounded-xl hover:bg-white/5 transition-colors self-start md:self-center mt-2 relative z-10 border border-transparent">
             {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
         </div>
@@ -179,20 +200,20 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
 
       {/* Expanded Deep Data Section */}
       {isExpanded && (
-        <div className="mt-4 pt-6 border-t border-white/5 p-6 bg-black/20" onClick={(e) => e.stopPropagation()}>
+        <div className="mt-2 pt-6 border-t border-white/[0.04] p-6 bg-black/20" onClick={(e) => e.stopPropagation()}>
           
           {hasScore && scoreData.reasoning && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="p-5 bg-yellow-500/5 rounded-xl border border-yellow-500/10 text-sm leading-relaxed shadow-sm">
-                <div className="flex items-center gap-2 mb-3 text-yellow-500 font-semibold text-base tracking-tight">
-                  <Zap size={18} className="fill-yellow-500/50" /> AI Match Reasoning
+              <div className="p-5 bg-[#16181f] rounded-xl border border-white/5 text-sm leading-relaxed shadow-sm">
+                <div className="flex items-center gap-2 mb-3 text-yellow-400 font-semibold text-[13px] uppercase tracking-wider">
+                  <Zap size={16} className="fill-yellow-500/20" /> AI Match Reasoning
                 </div>
                 <p className="text-gray-300">{scoreData.reasoning}</p>
               </div>
               {scoreData.strategy && (
-                <div className="p-5 bg-indigo-500/5 rounded-xl border border-indigo-500/10 text-sm leading-relaxed shadow-sm">
-                  <div className="flex items-center gap-2 mb-3 text-indigo-400 font-semibold text-base tracking-tight">
-                    <Target size={18} className="fill-indigo-500/50 text-indigo-400" /> How to Win (Strategy)
+                <div className="p-5 bg-[#16181f] rounded-xl border border-white/5 text-sm leading-relaxed shadow-sm">
+                  <div className="flex items-center gap-2 mb-3 text-blue-400 font-semibold text-[13px] uppercase tracking-wider">
+                    <Target size={16} className="fill-blue-500/20" /> Strategy
                   </div>
                   <p className="text-gray-300 whitespace-pre-wrap">{scoreData.strategy}</p>
                 </div>
@@ -205,16 +226,16 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.benefits && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <Gift size={16} className="text-indigo-400" /> Benefits
+                    <Gift size={16} className="text-blue-400" /> Benefits
                   </div>
                   <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.benefits}</div>
                 </div>
               )}
               
               {opp.eligibility_criteria && (
-                <div className="space-y-2">
+               <div className="space-y-2">
                   <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <CheckCircle2 size={16} className="text-indigo-400" /> Eligibility
+                    <CheckCircle2 size={16} className="text-blue-400" /> Eligibility
                   </div>
                   <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.eligibility_criteria}</div>
                 </div>
@@ -223,7 +244,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.selection_criteria && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <ListChecks size={16} className="text-indigo-400" /> Selection Criteria
+                    <ListChecks size={16} className="text-blue-400" /> Selection Criteria
                   </div>
                   <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.selection_criteria}</div>
                 </div>
@@ -232,7 +253,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.application_process && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <FileText size={16} className="text-indigo-400" /> How to Apply
+                    <FileText size={16} className="text-blue-400" /> How to Apply
                   </div>
                   <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.application_process}</div>
                 </div>
@@ -241,7 +262,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.past_winners && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-white font-medium text-sm">
-                    <Trophy size={16} className="text-indigo-400" /> Past Winners
+                    <Trophy size={16} className="text-blue-400" /> Past Winners
                   </div>
                   <div className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{opp.past_winners}</div>
                 </div>
@@ -259,7 +280,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                 href={opp.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                className="px-6 py-2.5 bg-white text-black text-sm font-semibold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.2)]"
               >
                 Apply Now <ExternalLink size={16} />
               </a>

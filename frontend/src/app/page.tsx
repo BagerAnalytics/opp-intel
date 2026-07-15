@@ -74,17 +74,17 @@ export default function Home() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="glass-panel rounded-xl p-6">
+        <div className="bg-[#16181f]/80 backdrop-blur-md rounded-2xl border border-white/[0.03] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-300">Open Pipeline</h3>
-            <Database className="text-indigo-400" size={20} />
+            <h3 className="font-semibold text-gray-400 text-sm">OPEN PIPELINE</h3>
+            <Database className="text-[#4352ff]" size={20} />
           </div>
           <p className="text-4xl font-bold text-white">{opportunities.length}</p>
         </div>
         
-        <div className="glass-panel rounded-xl p-6">
+        <div className="bg-[#16181f]/80 backdrop-blur-md rounded-2xl border border-white/[0.03] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-300">Avg Fit Score</h3>
+            <h3 className="font-semibold text-gray-400 text-sm">AVG FIT SCORE</h3>
             <TrendingUp className="text-emerald-400" size={20} />
           </div>
           <p className="text-4xl font-bold text-white">
@@ -92,21 +92,21 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="glass-panel rounded-xl p-6 border-indigo-500/30 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+        <div className="bg-[#1e2029]/80 backdrop-blur-md rounded-2xl border border-blue-500/20 p-6 relative overflow-hidden shadow-[0_0_20px_rgba(67,82,255,0.1)]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#4352ff]/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
           <div className="flex items-center justify-between mb-4 relative z-10">
-            <h3 className="font-semibold text-indigo-200">Action Required</h3>
-            <CheckCircle className="text-indigo-400" size={20} />
+            <h3 className="font-semibold text-blue-400 text-sm">ACTION REQUIRED</h3>
+            <CheckCircle className="text-blue-400" size={20} />
           </div>
           <p className="text-4xl font-bold text-white relative z-10">
             {opportunities.filter(o => o.match_score === null).length}
           </p>
-          <p className="text-sm text-indigo-300 mt-2 relative z-10">Unscored grants</p>
+          <p className="text-xs text-blue-300/70 mt-2 relative z-10 font-medium uppercase tracking-wider">Unscored grants</p>
         </div>
       </div>
 
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Latest Opportunities</h2>
+        <h2 className="text-xl font-bold text-white tracking-wide uppercase">Inbox</h2>
         <div className="flex items-center gap-2 text-sm text-gray-400">
           <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div> High Match</span>
           <span className="flex items-center gap-1 ml-4"><div className="w-2 h-2 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]"></div> Med Match</span>

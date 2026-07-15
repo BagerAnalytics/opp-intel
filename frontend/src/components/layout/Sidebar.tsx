@@ -18,13 +18,12 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const links = [
-    { href: "/home", label: "Home", icon: Home },
-    { href: "/", label: "Overview", icon: LayoutDashboard },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
     { href: "/projects", label: "Projects", icon: FolderKanban },
-    { href: "/pipeline", label: "Opportunities", icon: KanbanSquare },
+    { href: "/awards", label: "Awards", icon: TrendingUp },
     { href: "/network", label: "Contacts", icon: Users },
-    { href: "/leads", label: "Leads", icon: TrendingUp },
-    { href: "/compliance", label: "Reports", icon: FileText },
+    { href: "/compliance", label: "Compliance Vault", icon: FileText },
   ];
 
   return (
