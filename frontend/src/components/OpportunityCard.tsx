@@ -22,6 +22,8 @@ interface OpportunityCardProps {
     strategy: string | null;
     status: string;
     link: string | null;
+    opp_type?: string;
+    target_entity?: string;
   };
   contacts?: any[];
   complianceDocs?: any[];
@@ -111,7 +113,27 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-2xl font-extrabold text-slate-900 leading-tight tracking-tight mb-2 group-hover:text-emerald-700 transition-colors">{opp.name}</h3>
-              <p className="text-[13px] text-emerald-600 uppercase tracking-widest font-bold">{opp.funder}</p>
+              <div className="flex items-center gap-3">
+                <p className="text-[13px] text-emerald-600 uppercase tracking-widest font-bold">{opp.funder}</p>
+                {opp.opp_type && (
+                  <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded-md ${
+                    opp.opp_type === 'Grant' ? 'bg-purple-100 text-purple-700' :
+                    opp.opp_type === 'Tender' ? 'bg-amber-100 text-amber-700' :
+                    'bg-rose-100 text-rose-700'
+                  }`}>
+                    {opp.opp_type}
+                  </span>
+                )}
+                {opp.target_entity && (
+                  <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded-md ${
+                    opp.target_entity === 'Premier Agric' ? 'bg-emerald-100 text-emerald-700' :
+                    opp.target_entity === 'Badger Analytics' ? 'bg-sky-100 text-sky-700' :
+                    'bg-slate-200 text-slate-700'
+                  }`}>
+                    {opp.target_entity}
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="flex flex-col items-center">

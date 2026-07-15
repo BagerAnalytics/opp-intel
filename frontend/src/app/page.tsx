@@ -29,6 +29,7 @@ export default function Home() {
   const [contacts, setContacts] = useState<any[]>([]);
   const [complianceDocs, setComplianceDocs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('All');
 
   useEffect(() => {
     fetchData();
@@ -64,6 +65,15 @@ export default function Home() {
   const avgScore = opportunities.length > 0 
     ? Math.round(opportunities.reduce((acc, curr) => acc + (curr.match_score || 0), 0) / opportunities.length)
     : 0;
+
+  const filteredOpportunities = opportunities.filter(opp => {
+    if (activeTab === 'All') return true;
+    if (activeTab === 'Grants' && opp.opp_type === 'Grant') return true;
+    if (activeTab === 'Tenders' && opp.opp_type === 'Tender') return true;
+    if (activeTab === 'Awards' && opp.opp_type === 'Award') return true;
+    if (activeTab === 'Fellowships / Other' && opp.opp_type === 'Other') return true;
+    return false;
+  });
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 relative">
@@ -117,8 +127,22 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mb-8 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Inbox</h2>
+      <div className="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
+        <div className="flex items-center gap-2">
+          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 ${
+                activeTab === tab 
+                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20' 
+                  : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200 hover:text-slate-900'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
         <div className="flex items-center gap-5 text-[13px] font-bold tracking-wide uppercase text-slate-500">
           <span className="flex items-center gap-2">
             <span className="relative flex h-3 w-3">
@@ -135,14 +159,14 @@ export default function Home() {
       </div>
 
       <div className="space-y-6 relative z-10">
-        {opportunities.length === 0 ? (
+        {filteredOpportunities.length === 0 ? (
           <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-16 text-center border border-dashed border-slate-300 shadow-sm">
-            <h3 className="text-2xl font-bold text-slate-900 mb-3">Inbox Zero!</h3>
-            <p className="text-slate-500 text-lg">Run the scrapers to find new grants and tenders.</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">No {activeTab === 'All' ? 'opportunities' : activeTab.toLowerCase()} found</h3>
+            <p className="text-slate-500 text-lg">Run the scrapers to find new ones, or change the filter.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {opportunities.map(opp => (
+            {filteredOpportunities.map(opp => (
               <OpportunityCard key={opp.id} opp={opp} contacts={contacts} complianceDocs={complianceDocs} />
             ))}
           </div>

@@ -5,20 +5,17 @@ import os
 
 db_url = os.environ.get("DATABASE_URL")
 
-# Fallback if empty or not set
-if not db_url or str(db_url).strip() == "":
-    db_url = "postgresql://admin:adminpassword@localhost:5432/oppintel"
+if db_url and str(db_url).strip() != "":
+    db_url = str(db_url).strip().strip('"').strip("'")
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    engine = create_engine(db_url)
+else:
+    db_url = "sqlite:///./oppintel.db"
+    engine = create_engine(
+        db_url, connect_args={"check_same_thread": False}
+    )
 
-# Strip accidental quotes from UI copy-pasting
-db_url = str(db_url).strip().strip('"').strip("'")
-
-# Fix Railway's postgres:// dialect issue
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
-
-SQLALCHEMY_DATABASE_URL = db_url
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

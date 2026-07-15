@@ -21,10 +21,10 @@ Criteria for a High Match:
 def generate_match_score(opportunity_description: str, feedback_context: str = "") -> dict:
     """
     Analyzes an opportunity description against the company profile 
-    and returns a JSON with a match_score (0-100) and reasoning.
+    and returns a JSON with a match_score (0-100), reasoning, opp_type, and target_entity.
     """
     try:
-        system_prompt = PROFILE_PROMPT + "\nOutput JSON format: {\"match_score\": 85, \"reasoning\": \"...\"}"
+        system_prompt = PROFILE_PROMPT + "\nOutput JSON format: {\"match_score\": 85, \"reasoning\": \"...\", \"opp_type\": \"Grant|Tender|Award|Other\", \"target_entity\": \"Premier Agric|Badger Analytics|Both\"}"
         if feedback_context:
             system_prompt += f"\n\n{feedback_context}\nUse this feedback to adjust your scoring. If an opportunity is similar to one we've lost, lower the score. If similar to one we've won, raise the score."
             
@@ -40,6 +40,40 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
     except Exception as e:
         print(f"LLM Error: {e}")
         return {"match_score": 0, "reasoning": str(e)}
+
+def extract_opportunity_data(raw_text: str, url: str) -> dict:
+    """
+    Extracts structured fields from raw webpage text.
+    """
+    system_prompt = """
+    You are an AI data extractor. I will provide you with the raw text from a webpage containing a grant, tender, or award opportunity.
+    Extract the following fields and output as JSON. If a field is not found, leave it as null or an empty string.
+    - name: The title of the opportunity
+    - funder: The organization providing the funding (try to guess if not explicitly stated)
+    - value: The prize or funding amount (e.g. "$15,000", or "Unknown")
+    - closing_date: The deadline (e.g. "July 16, 2026")
+    - description: A short 2-3 sentence summary
+    - benefits: What the winner receives
+    - eligibility_criteria: Who can apply
+    - selection_criteria: How they choose winners
+    - application_process: How to apply
+    
+    Output JSON strictly.
+    """
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",
+            response_format={ "type": "json_object" },
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}"}
+            ]
+        )
+        import json
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        print(f"Extraction Error: {e}")
+        return {}
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
     """

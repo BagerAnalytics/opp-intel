@@ -19,8 +19,8 @@ const COLUMNS = [
   { id: 'interested', title: 'Prospecting' },
   { id: 'drafting', title: 'Qualification' },
   { id: 'submitted', title: 'Proposal Sent' },
-  { id: 'won', title: 'Negotiation' },
-  { id: 'lost', title: 'Closed Won' },
+  { id: 'won', title: 'Closed Won' },
+  { id: 'lost', title: 'Closed Lost' },
 ];
 
 const MatchScoreRing = ({ score }: { score: number | null }) => {

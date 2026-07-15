@@ -80,6 +80,22 @@ export default function CompliancePage() {
     }
   };
 
+  const handleFileUpload = async (id: number, file: File) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      await axios.post(`${apiUrl}/api/compliance/${id}/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      fetchDocs();
+    } catch (error) {
+      console.error("Failed to upload file to NAS", error);
+      alert("Failed to upload file to NAS. Is the server running and Tailscale connected?");
+    }
+  };
+
   const readinessScore = docs.length === 0 ? 0 : Math.round((docs.filter(d => d.status === 'Uploaded').length / docs.length) * 100);
 
   return (
@@ -179,13 +195,26 @@ export default function CompliancePage() {
                     <td className="p-5 text-sm text-slate-600 max-w-[200px] truncate">
                       {doc.notes || '-'}
                     </td>
-                    <td className="p-5 pr-8 text-right">
+                    <td className="p-5 pr-8 text-right flex items-center justify-end gap-3">
                       {doc.file_url ? (
-                        <a href={doc.file_url} target="_blank" rel="noreferrer" className="text-emerald-600 hover:text-emerald-700 transition-colors text-sm font-bold mr-6">View File</a>
-                      ) : null}
+                        <span className="text-emerald-600 text-sm font-bold bg-emerald-50 px-2 py-1 rounded-md">Uploaded to NAS</span>
+                      ) : (
+                        <label className="cursor-pointer text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+                          Upload to NAS
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                handleFileUpload(doc.id, e.target.files[0]);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
                       <button 
                         onClick={() => handleDeleteDoc(doc.id)}
-                        className="text-slate-400 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
+                        className="text-slate-400 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100 rounded-full hover:bg-slate-100"
                         title="Delete Tracker"
                       >
                         <Trash2 size={16} />

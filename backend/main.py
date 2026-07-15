@@ -134,7 +134,14 @@ def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     try:
         data = json.loads(result)
         opp.match_score = data.get("match_score")
-        opp.match_reasoning = data.get("reasoning") # Ensure reasoning is saved if we added it
+        opp.match_reasoning = data.get("reasoning")
+        
+        # New classification fields
+        if "opp_type" in data:
+            opp.opp_type = data.get("opp_type")
+        if "target_entity" in data:
+            opp.target_entity = data.get("target_entity")
+            
         opp.strategy = strategy
         db.commit()
         
@@ -189,11 +196,42 @@ def delete_compliance_doc(doc_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Document deleted"}
 
+from fastapi import UploadFile, File
+import shutil
+import os
+
 @app.get("/api/compliance/sync")
 def sync_compliance():
     """Trigger a WebDAV sync to list compliance documents."""
-    docs = nas_service.list_compliance_documents()
+    docs = nas_service.list_files()
     return {"documents_found": len(docs), "files": docs}
+
+@app.post("/api/compliance/{doc_id}/upload")
+async def upload_compliance_doc(doc_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Upload a file to the WebDAV NAS and link it to the compliance document."""
+    doc = db.query(models.ComplianceDocument).filter(models.ComplianceDocument.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    # Save the file temporarily
+    temp_path = f"temp_{file.filename}"
+    with open(temp_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    try:
+        # Upload to NAS
+        success = nas_service.upload_file(temp_path, file.filename)
+        if success:
+            doc.status = "Uploaded"
+            doc.file_url = f"/compliance/{file.filename}"
+            db.commit()
+            return {"status": "success", "message": "File uploaded to NAS successfully."}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to upload to NAS")
+    finally:
+        # Clean up temp file
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
 class ContactCreate(BaseModel):
     name: str

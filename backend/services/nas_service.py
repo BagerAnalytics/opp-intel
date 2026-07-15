@@ -1,31 +1,47 @@
 import os
+from webdav3.client import Client
 from dotenv import load_dotenv
-import smbclient
 
 load_dotenv()
 
 class NASService:
     def __init__(self):
-        self.ip = os.getenv("NAS_IP")
-        self.username = os.getenv("WEBDAV_USERNAME")
-        self.password = os.getenv("WEBDAV_PASSWORD")
-        
-        # Register the credentials with smbclient
-        if self.ip and self.username and self.password:
-            smbclient.register_session(self.ip, username=self.username, password=self.password)
+        nas_ip = os.getenv('NAS_IP', '100.77.182.88')
+        options = {
+            # Use Tailscale IP directly to bypass DNS/NAT loopback issues
+            # UGREEN WebDAV mounts root shares directly on the port, no /webdav/ path needed
+            'webdav_hostname': f'http://{nas_ip}:5005/',
+            'webdav_login':    os.getenv('WEBDAV_USERNAME', ''),
+            'webdav_password': os.getenv('WEBDAV_PASSWORD', '')
+        }
+        self.client = Client(options)
+        self.base_dir = "/PremierAgric/Compliance" # Matches the original SMB path
 
-    def list_compliance_documents(self, share_name=r"PremierAgric\Compliance"):
-        """List all documents in the NAS Compliance folder."""
-        if not self.ip:
-            return []
-        
+    def upload_file(self, local_file_path: str, remote_file_name: str) -> bool:
+        """Uploads a local file to the NAS."""
         try:
-            # The path format for SMB is \\server\share
-            path = rf"\\{self.ip}\{share_name}"
-            files = smbclient.listdir(path)
-            return files
+            # Check if base dir exists, create if not
+            if not self.client.check(self.base_dir):
+                self.client.mkdir(self.base_dir)
+                
+            remote_path = f"{self.base_dir}/{remote_file_name}"
+            self.client.upload_sync(remote_path=remote_path, local_path=local_file_path)
+            print(f"Successfully uploaded {remote_file_name} to NAS via WebDAV.")
+            return True
         except Exception as e:
-            print(f"Error reading NAS SMB share: {e}")
+            print(f"WebDAV Upload Error: {e}")
+            return False
+            
+    def list_files(self):
+        """Lists all files in the compliance directory on the NAS."""
+        try:
+            if not self.client.check(self.base_dir):
+                return []
+            # list returns a list of items, usually the first item is the directory itself
+            files = self.client.list(self.base_dir)
+            return [f for f in files if f != self.base_dir + '/']
+        except Exception as e:
+            print(f"WebDAV List Error: {e}")
             return []
 
 nas_service = NASService()

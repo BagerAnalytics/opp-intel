@@ -12,6 +12,8 @@ class Opportunity(Base):
     value = Column(String, nullable=True)
     description = Column(String, nullable=True)
     link = Column(String, nullable=True)
+    opp_type = Column(String, nullable=True)     # "Grant", "Tender", "Award"
+    target_entity = Column(String, nullable=True) # "Premier Agric", "Badger Analytics", "Both"
     
     # Deep Scraper Fields
     benefits = Column(Text, nullable=True)
