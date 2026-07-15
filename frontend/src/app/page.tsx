@@ -56,7 +56,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
       </div>
     );
   }
@@ -66,57 +66,79 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-2">Welcome back, Admin.</h1>
-        <p className="text-slate-500 text-lg">You have {opportunities.length} open opportunities waiting to be reviewed.</p>
+    <div className="max-w-5xl mx-auto px-4 py-10 relative">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl -z-10 pointer-events-none" />
+      <div className="absolute top-40 left-0 w-72 h-72 bg-sky-100/40 rounded-full blur-3xl -z-10 pointer-events-none" />
+
+      <div className="mb-10">
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 tracking-tight mb-2">Welcome back, Admin.</h1>
+        <p className="text-slate-500 text-lg font-medium">You have <span className="text-emerald-600 font-bold">{opportunities.length}</span> open opportunities waiting to be reviewed.</p>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-500 text-sm tracking-wide uppercase">OPEN PIPELINE</h3>
-            <Database className="text-emerald-600" size={20} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full blur-2xl -z-10 group-hover:scale-110 transition-transform duration-500" />
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase">Open Pipeline</h3>
+            <div className="p-2.5 bg-slate-50 rounded-xl">
+              <Database className="text-emerald-600" size={20} strokeWidth={2.5} />
+            </div>
           </div>
-          <p className="text-4xl font-bold text-slate-900">{opportunities.length}</p>
+          <p className="text-5xl font-extrabold text-slate-900 tracking-tight">{opportunities.length}</p>
         </div>
         
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-500 text-sm tracking-wide uppercase">AVG FIT SCORE</h3>
-            <TrendingUp className="text-emerald-600" size={20} />
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 rounded-full blur-2xl -z-10 group-hover:scale-110 transition-transform duration-500" />
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase">Avg Fit Score</h3>
+            <div className="p-2.5 bg-emerald-50 rounded-xl">
+              <TrendingUp className="text-emerald-600" size={20} strokeWidth={2.5} />
+            </div>
           </div>
-          <p className="text-4xl font-bold text-slate-900">
+          <p className="text-5xl font-extrabold text-slate-900 tracking-tight">
             {avgScore}%
           </p>
         </div>
 
-        <div className="bg-emerald-50 rounded-2xl border border-emerald-100 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-emerald-700 text-sm tracking-wide uppercase">ACTION REQUIRED</h3>
-            <CheckCircle className="text-emerald-600" size={20} />
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl border border-emerald-400/30 p-7 shadow-[0_8px_30px_rgba(16,185,129,0.2)] hover:shadow-[0_8px_30px_rgba(16,185,129,0.3)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -z-10 group-hover:scale-110 transition-transform duration-500" />
+          <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl -z-10" />
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-emerald-50 text-[13px] tracking-widest uppercase">Action Required</h3>
+            <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur-md">
+              <CheckCircle className="text-white" size={20} strokeWidth={2.5} />
+            </div>
           </div>
-          <p className="text-4xl font-bold text-emerald-900">
+          <p className="text-5xl font-extrabold text-white tracking-tight">
             {opportunities.filter(o => o.match_score === null).length}
           </p>
-          <p className="text-xs text-emerald-600 mt-2 font-medium uppercase tracking-wider">Unscored grants</p>
+          <p className="text-[13px] text-emerald-100 mt-3 font-semibold uppercase tracking-widest">Unscored grants</p>
         </div>
       </div>
 
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">Inbox</h2>
-        <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
-          <span className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div> High Match</span>
-          <span className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div> Med Match</span>
+      <div className="mb-8 flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Inbox</h2>
+        <div className="flex items-center gap-5 text-[13px] font-bold tracking-wide uppercase text-slate-500">
+          <span className="flex items-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            High Match
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-400"></span>
+            Med Match
+          </span>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 relative z-10">
         {opportunities.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-slate-300">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Inbox Zero!</h3>
-            <p className="text-slate-500">Run the scrapers to find new grants and tenders.</p>
+          <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-16 text-center border border-dashed border-slate-300 shadow-sm">
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">Inbox Zero!</h3>
+            <p className="text-slate-500 text-lg">Run the scrapers to find new grants and tenders.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
