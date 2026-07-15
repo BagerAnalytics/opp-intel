@@ -64,6 +64,19 @@ export default function Home() {
     );
   }
 
+  const handleRunScrapers = async () => {
+    try {
+      setIsLoading(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      await axios.post(`${apiUrl}/api/scrapers/run`);
+      await fetchData(); // Refresh data after running scrapers
+    } catch (error) {
+      console.error("Error running scrapers", error);
+      setIsLoading(false);
+      alert("Failed to run scrapers. Please check the backend logs.");
+    }
+  };
+
   const avgScore = opportunities.length > 0 
     ? Math.round(opportunities.reduce((acc, curr) => acc + (curr.match_score || 0), 0) / opportunities.length)
     : 0;
@@ -82,9 +95,17 @@ export default function Home() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl -z-10 pointer-events-none" />
       <div className="absolute top-40 left-0 w-72 h-72 bg-sky-100/40 rounded-full blur-3xl -z-10 pointer-events-none" />
 
-      <div className="mb-10">
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 tracking-tight mb-2">Welcome back, Admin.</h1>
-        <p className="text-slate-500 text-lg font-medium">You have <span className="text-emerald-600 font-bold">{opportunities.length}</span> open opportunities waiting to be reviewed.</p>
+      <div className="mb-10 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 tracking-tight mb-2">Welcome back, Admin.</h1>
+          <p className="text-slate-500 text-lg font-medium">You have <span className="text-emerald-600 font-bold">{opportunities.length}</span> open opportunities waiting to be reviewed.</p>
+        </div>
+        <button 
+          onClick={handleRunScrapers}
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm"
+        >
+          Run AI Scrapers
+        </button>
       </div>
 
       {/* Quick Stats */}
