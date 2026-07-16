@@ -10,7 +10,6 @@ from services.nas_service import nas_service
 from scrapers.opportunity_desk import scrape_opportunity_desk
 from scrapers.linkedin_opportunities import scrape_linkedin
 from scrapers.etenders_sa import scrape_etenders
-from apscheduler.schedulers.background import BackgroundScheduler
 
 # Create tables in the database if they don't exist
 models.Base.metadata.create_all(bind=engine)
@@ -59,11 +58,10 @@ def run_all_scrapers():
 
 @app.on_event("startup")
 def start_scheduler():
-    scheduler = BackgroundScheduler()
-    # Run every Monday at 2:00 AM
-    scheduler.add_job(run_all_scrapers, trigger='cron', day_of_week='mon', hour=2, minute=0)
-    scheduler.start()
-    print("APScheduler started: Bots will run every Monday at 02:00 AM.")
+    # APScheduler has been removed. 
+    # The server is now stateless and Railway's native Cron feature will ping /api/scrapers/run 
+    # at the specified intervals.
+    print("Server starting up. Waiting for external cron triggers.")
     
     # Auto-migrate the database to add the new strategy column
     from sqlalchemy import text

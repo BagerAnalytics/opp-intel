@@ -1,6 +1,7 @@
 import os
 import sys
 from playwright.sync_api import sync_playwright
+from playwright_stealth import stealth_sync
 
 # Add parent directory to path so we can import database, models, and services
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,8 +15,10 @@ def scrape_opportunity_desk():
     
     try:
         with sync_playwright() as p:
+            # We use headless=True for background running
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
+            stealth_sync(page)
             
             # Navigate to homepage to get the latest opportunities
             print(f"Navigating to {base_url}...")
