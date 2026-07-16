@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import models
 from database import SessionLocal
 from services.llm_service import extract_opportunity_data
-from main import score_opportunity
+from services.scorer_service import score_opportunity
 
 def extract_from_url(url: str, opp_id: int = None):
     raw_text = ""

@@ -62,6 +62,19 @@ def start_scheduler():
     except Exception as e:
         print(f"Migration notice (safe to ignore): {e}")
 
+    # Clean up stale ghost records left by failed scraper runs
+    try:
+        with SessionLocal() as db:
+            stale = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").all()
+            count = len(stale)
+            for opp in stale:
+                db.delete(opp)
+            db.commit()
+            if count > 0:
+                print(f"Startup cleanup: Deleted {count} stale 'Scanning...' ghost records.")
+    except Exception as e:
+        print(f"Startup cleanup error (safe to ignore): {e}")
+
 import subprocess
 import sys
 
@@ -292,6 +305,16 @@ def delete_opportunity(opp_id: int, db: Session = Depends(get_db)):
     db.delete(opp)
     db.commit()
     return {"message": "Opportunity deleted successfully"}
+
+@app.delete("/api/opportunities/cleanup")
+def cleanup_stale_opportunities(db: Session = Depends(get_db)):
+    """Delete all stale 'Scanning...' ghost records that failed to extract."""
+    stale = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").all()
+    count = len(stale)
+    for opp in stale:
+        db.delete(opp)
+    db.commit()
+    return {"message": f"Deleted {count} stale ghost records."}
 
 @app.post("/api/opportunities/{opp_id}/score")
 def score_opportunity(opp_id: int, db: Session = Depends(get_db)):

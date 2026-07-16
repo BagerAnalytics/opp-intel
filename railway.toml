@@ -1,0 +1,21 @@
+# railway.toml — Monorepo configuration for OppIntel
+# This tells Railway how to build and run each service from the same repo.
+
+[build]
+builder = "NIXPACKS"
+
+[[services]]
+name = "backend"
+root = "backend"
+
+[services.build]
+buildCommand = "pip install -r requirements.txt && playwright install chromium"
+startCommand = "./start.sh"
+
+[[services]]
+name = "frontend"
+root = "frontend"
+
+[services.build]
+buildCommand = "npm ci && npm run build"
+startCommand = "npm start"
