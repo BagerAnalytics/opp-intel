@@ -53,27 +53,38 @@ def is_valid_url(url):
         return False
 
 def scrape_discovery_engine():
-    print("Starting Discovery Engine using DDGS...")
+    print("Starting Discovery Engine using Serper API...")
     
     discovered_urls = []
+    SERPER_API_KEY = "26da271301eebe35eeac7ef637452e67bd0a04ac"
     
     try:
-        from duckduckgo_search import DDGS
+        import requests
+        headers = {
+            'X-API-KEY': SERPER_API_KEY,
+            'Content-Type': 'application/json'
+        }
         
-        with DDGS() as ddgs:
-            for keyword in KEYWORDS:
-                print(f"Searching for: '{keyword}'")
+        for keyword in KEYWORDS:
+            print(f"Searching for: '{keyword}'")
+            
+            try:
+                payload = {"q": keyword, "num": 10}
+                response = requests.post("https://google.serper.dev/search", headers=headers, json=payload)
                 
-                try:
-                    results = ddgs.text(keyword, max_results=10)
-                    for r in results:
-                        link = r.get('href')
+                if response.status_code == 200:
+                    data = response.json()
+                    organic_results = data.get("organic", [])
+                    for r in organic_results:
+                        link = r.get("link")
                         if link and link not in discovered_urls and is_valid_url(link):
                             discovered_urls.append(link)
-                except Exception as e:
-                    print(f"Warning: Failed to search '{keyword}': {e}")
-                
-                time.sleep(2) # Be nice
+                else:
+                    print(f"Warning: Serper API error {response.status_code}: {response.text}")
+            except Exception as e:
+                print(f"Warning: Failed to search '{keyword}': {e}")
+            
+            time.sleep(1) # Be nice
                 
     except Exception as e:
         print(f"Critical error in Discovery Engine: {e}")
