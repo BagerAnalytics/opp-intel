@@ -1,7 +1,7 @@
 import os
 import sys
 from playwright.sync_api import sync_playwright
-from playwright_stealth import stealth_sync
+from playwright_stealth import stealth
 
 # Add parent directory to path so we can import database, models, and services
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,7 +17,7 @@ def scrape_etenders():
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            stealth_sync(page)
+            stealth(page)
             
             print(f"Navigating to {base_url}...")
             page.goto(base_url, timeout=60000)
