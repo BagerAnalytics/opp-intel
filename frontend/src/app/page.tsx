@@ -23,6 +23,7 @@ interface Opportunity {
   strategy: string | null;
   status: string;
   link: string | null;
+  source?: string;
   opp_type?: string;
   target_entity?: string;
 }
