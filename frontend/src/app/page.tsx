@@ -32,6 +32,7 @@ export default function Home() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [contacts, setContacts] = useState<any[]>([]);
   const [complianceDocs, setComplianceDocs] = useState<any[]>([]);
+  const [portals, setPortals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -75,15 +76,17 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const [oppResponse, contactsResponse, complianceResponse] = await Promise.all([
+      const [oppResponse, contactsResponse, complianceResponse, portalsResponse] = await Promise.all([
         axios.get(`${apiUrl}/api/opportunities`),
         axios.get(`${apiUrl}/api/contacts`),
-        axios.get(`${apiUrl}/api/compliance`)
+        axios.get(`${apiUrl}/api/compliance`),
+        axios.get(`${apiUrl}/api/portals`)
       ]);
       const openOpps = oppResponse.data.filter((opp: Opportunity) => opp.status === 'open');
       setOpportunities(openOpps);
       setContacts(contactsResponse.data);
       setComplianceDocs(complianceResponse.data);
+      setPortals(portalsResponse.data);
     } catch (error) {
       console.error("Error fetching data", error);
     } finally {
@@ -276,7 +279,7 @@ export default function Home() {
 
       <div className="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="flex flex-wrap items-center gap-2">
-          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Manually Added'].map(tab => (
+          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Saved Portals', 'Manually Added'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -306,7 +309,32 @@ export default function Home() {
       </div>
 
       <div className="space-y-6 relative z-10">
-        {filteredOpportunities.length === 0 ? (
+        {activeTab === 'Saved Portals' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {portals.length === 0 ? (
+              <div className="col-span-2 bg-white/60 backdrop-blur-xl rounded-3xl p-16 text-center border border-dashed border-slate-300 shadow-sm">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">No Portals Saved Yet</h3>
+                <p className="text-slate-500">Run the AI Scrapers to find and save portals.</p>
+              </div>
+            ) : (
+              portals.map(portal => (
+                <div key={portal.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col gap-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-lg text-slate-800 line-clamp-1">{portal.name || portal.url}</h3>
+                    <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg uppercase">{portal.status}</span>
+                  </div>
+                  <a href={portal.url} target="_blank" rel="noopener noreferrer" className="text-sky-600 text-sm hover:underline line-clamp-1">
+                    {portal.url}
+                  </a>
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-100">
+                    <span className="text-xs font-semibold text-slate-500">Links Extracted: <span className="text-emerald-600">{portal.opportunities_found}</span></span>
+                    <span className="text-xs font-medium text-slate-400">Last crawled: {portal.last_scraped || 'Never'}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : filteredOpportunities.length === 0 ? (
           <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-16 text-center border border-dashed border-slate-300 shadow-sm">
             <h3 className="text-2xl font-bold text-slate-900 mb-3">No {activeTab === 'All' ? 'opportunities' : activeTab.toLowerCase()} found</h3>
             <p className="text-slate-500 text-lg">Run the scrapers to find new ones, or change the filter.</p>

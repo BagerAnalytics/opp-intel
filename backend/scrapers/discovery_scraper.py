@@ -60,31 +60,50 @@ def scrape_discovery_engine():
     
     try:
         import requests
+        from urllib.parse import urlparse
+        from database import SessionLocal
+        import models
+        
         headers = {
             'X-API-KEY': SERPER_API_KEY,
             'Content-Type': 'application/json'
         }
         
-        for keyword in KEYWORDS:
-            print(f"Searching for: '{keyword}'")
-            
-            try:
-                payload = {"q": keyword, "num": 10}
-                response = requests.post("https://google.serper.dev/search", headers=headers, json=payload)
+        with SessionLocal() as db:
+            for keyword in KEYWORDS:
+                print(f"Searching for: '{keyword}'")
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    organic_results = data.get("organic", [])
-                    for r in organic_results:
-                        link = r.get("link")
-                        if link and link not in discovered_urls and is_valid_url(link):
-                            discovered_urls.append(link)
-                else:
-                    print(f"Warning: Serper API error {response.status_code}: {response.text}")
-            except Exception as e:
-                print(f"Warning: Failed to search '{keyword}': {e}")
-            
-            time.sleep(1) # Be nice
+                try:
+                    payload = {"q": keyword, "num": 10}
+                    response = requests.post("https://google.serper.dev/search", headers=headers, json=payload)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        organic_results = data.get("organic", [])
+                        for r in organic_results:
+                            link = r.get("link")
+                            title = r.get("title", "")
+                            
+                            if link and is_valid_url(link):
+                                # Save the root domain to our Portal memory
+                                parsed_uri = urlparse(link)
+                                root_domain = f"{parsed_uri.scheme}://{parsed_uri.netloc}"
+                                
+                                existing_portal = db.query(models.Portal).filter(models.Portal.url == root_domain).first()
+                                if not existing_portal and "facebook.com" not in root_domain and "linkedin.com" not in root_domain and "twitter.com" not in root_domain:
+                                    print(f"Saving new portal to memory: {root_domain}")
+                                    new_portal = models.Portal(url=root_domain, name=title.split('-')[0].strip())
+                                    db.add(new_portal)
+                                    db.commit()
+                                
+                                if link not in discovered_urls:
+                                    discovered_urls.append(link)
+                    else:
+                        print(f"Warning: Serper API error {response.status_code}: {response.text}")
+                except Exception as e:
+                    print(f"Warning: Failed to search '{keyword}': {e}")
+                
+                time.sleep(1) # Be nice
                 
     except Exception as e:
         print(f"Critical error in Discovery Engine: {e}")

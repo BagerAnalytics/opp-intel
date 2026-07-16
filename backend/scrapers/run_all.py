@@ -12,6 +12,7 @@ from scrapers.discovery_scraper import scrape_discovery_engine
 from scrapers.terraviva_grants import scrape_terraviva
 from scrapers.disrupt_africa import scrape_disrupt_africa
 from scrapers.meta_discovery import scrape_meta_portals
+from scrapers.portal_crawler import scrape_saved_portals
 from database import SessionLocal
 import models
 
@@ -39,6 +40,9 @@ def run_all_scrapers():
     try:
         update_progress(db, 10, "Hunting for new Opportunity Portals...")
         scrape_meta_portals()
+        
+        update_progress(db, 15, "Crawling saved Portals in memory...")
+        scrape_saved_portals()
         
         update_progress(db, 25, "Scraping Discovery Engine...")
         scrape_discovery_engine()

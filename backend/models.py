@@ -38,6 +38,16 @@ class Opportunity(Base):
     match_reasoning = Column(Text, nullable=True)
     strategy = Column(Text, nullable=True)        # The AI-generated winning strategy
 
+class Portal(Base):
+    __tablename__ = "portals"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    url = Column(String, unique=True, index=True)
+    name = Column(String, nullable=True)
+    status = Column(String, default="Active")
+    last_scraped = Column(String, nullable=True)
+    opportunities_found = Column(Integer, default=0)
+
 class ScraperProgress(Base):
     __tablename__ = "scraper_progress"
     

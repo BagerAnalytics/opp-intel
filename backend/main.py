@@ -67,6 +67,16 @@ def start_scheduler():
                     updated_at TEXT
                 )
             '''))
+            conn.execute(text('''
+                CREATE TABLE IF NOT EXISTS portals (
+                    id INTEGER PRIMARY KEY,
+                    url TEXT UNIQUE,
+                    name TEXT,
+                    status TEXT DEFAULT 'Active',
+                    last_scraped TEXT,
+                    opportunities_found INTEGER DEFAULT 0
+                )
+            '''))
             print("Successfully added strategy, opp_type, target_entity, and scraper_progress to database.")
     except Exception as e:
         print(f"Migration notice (safe to ignore): {e}")
@@ -229,6 +239,21 @@ def get_scraper_logs():
             return {"logs": "".join(lines[-100:])}
     except Exception as e:
         return {"logs": f"Error reading logs: {e}"}
+
+@app.get("/api/portals")
+def get_portals(db: Session = Depends(get_db)):
+    """Fetch all saved portals."""
+    portals = db.query(models.Portal).order_by(models.Portal.opportunities_found.desc()).all()
+    return portals
+
+@app.delete("/api/portals/{portal_id}")
+def delete_portal(portal_id: int, db: Session = Depends(get_db)):
+    """Delete a portal."""
+    portal = db.query(models.Portal).filter(models.Portal.id == portal_id).first()
+    if portal:
+        db.delete(portal)
+        db.commit()
+    return {"message": "Portal deleted"}
 
 class OpportunityCreate(BaseModel):
     name: str
