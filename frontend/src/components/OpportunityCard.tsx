@@ -150,7 +150,16 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
           <div className="flex justify-between items-start">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h3 className="text-2xl font-extrabold text-slate-900 leading-tight tracking-tight group-hover:text-emerald-700 transition-colors">{opp.name}</h3>
+                <h3 className="text-2xl font-extrabold text-slate-900 leading-tight tracking-tight group-hover:text-emerald-700 transition-colors">
+                  {opp.link ? (
+                    <a href={opp.link} target="_blank" rel="noopener noreferrer" className="hover:underline inline-flex items-center gap-2" title="Visit exact opportunity page">
+                      {opp.name}
+                      <ExternalLink size={18} className="text-slate-400 group-hover:text-emerald-500 inline" />
+                    </a>
+                  ) : (
+                    opp.name
+                  )}
+                </h3>
                 {(opp.source === 'Manual Entry' || opp.source === 'Smart Link Extraction') && (
                   <button 
                     onClick={handleDelete}
