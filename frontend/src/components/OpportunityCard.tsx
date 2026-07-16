@@ -267,7 +267,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
       </div>
 
       {/* Expanded Deep Data Section */}
-      <div className={`transition-all duration-500 ease-in-out origin-top ${isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+      <div className={`transition-all duration-500 ease-in-out origin-top ${isExpanded ? 'max-h-[15000px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
         <div className="border-t border-slate-100/60 p-7 bg-slate-50/50 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
           
           {hasScore && scoreData.reasoning && (
