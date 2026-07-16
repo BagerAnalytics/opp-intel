@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import OpportunityCard from '@/components/OpportunityCard';
 import AddOpportunityModal from '@/components/AddOpportunityModal';
-import { Filter, Calendar, Trophy, ArrowRight, UserPlus, FileText, CheckCircle2, ChevronRight, Briefcase, Users, LayoutDashboard, Plus, Loader2, Search, X } from 'lucide-react';
+import { Filter, Calendar, Trophy, ArrowRight, UserPlus, FileText, CheckCircle2, ChevronRight, Briefcase, Users, LayoutDashboard, Plus, Loader2, Search, X, Database, TrendingUp, CheckCircle } from 'lucide-react';
 
 interface Opportunity {
   id: number;
@@ -97,6 +97,8 @@ export default function Home() {
         <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
       </div>
     );
+  }
+
   const fetchLogs = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
