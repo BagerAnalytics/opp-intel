@@ -8,17 +8,7 @@ import models
 from database import SessionLocal
 from scrapers.generic_scraper import extract_from_url
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python bulk_scraper.py '[{\"id\": 1, \"url\": \"...\"}]'")
-        return
-        
-    try:
-        tasks = json.loads(sys.argv[1])
-    except Exception as e:
-        print("Failed to parse JSON tasks:", e)
-        return
-        
+def run_bulk_scraper(tasks):
     print(f"Starting bulk import for {len(tasks)} items...")
     
     for task in tasks:
@@ -49,6 +39,19 @@ def main():
                 
         except Exception as e:
             print(f"Unhandled exception on {url}: {e}")
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python bulk_scraper.py '[{\"id\": 1, \"url\": \"...\"}]'")
+        return
+        
+    try:
+        tasks = json.loads(sys.argv[1])
+    except Exception as e:
+        print("Failed to parse JSON tasks:", e)
+        return
+        
+    run_bulk_scraper(tasks)
 
 if __name__ == "__main__":
     main()

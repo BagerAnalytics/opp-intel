@@ -69,17 +69,9 @@ def run_all_scrapers():
             print(f"Found {len(scanning_opps)} queued links. Handing off to AI Extractor...")
             tasks = [{"id": opp.id, "url": opp.link} for opp in scanning_opps if opp.link]
             if tasks:
-                import json
-                import subprocess
-                payload = json.dumps(tasks)
-                # Use absolute path to bulk_scraper.py to ensure it runs correctly from subprocess
-                scraper_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bulk_scraper.py")
-                subprocess.Popen(
-                    [sys.executable, scraper_path, payload],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
-                print("AI Extractor launched in background.")
+                from scrapers.bulk_scraper import run_bulk_scraper
+                run_bulk_scraper(tasks)
+                print("AI Extractor finished processing queue.")
         
         finish_progress(db)
         print("Scrapers completed successfully.")
