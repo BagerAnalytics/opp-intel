@@ -81,6 +81,42 @@ def update_opportunity_status(opp_id: int, status: str, db: Session = Depends(ge
     db.commit()
     return {"status": "success", "new_status": status}
 
+class OpportunityCreate(BaseModel):
+    name: str
+    funder: Optional[str] = None
+    value: Optional[str] = None
+    description: Optional[str] = None
+    link: Optional[str] = None
+    closing_date: Optional[str] = None
+    opp_type: Optional[str] = None
+    target_entity: Optional[str] = None
+    benefits: Optional[str] = None
+    eligibility_criteria: Optional[str] = None
+    selection_criteria: Optional[str] = None
+    application_process: Optional[str] = None
+    past_winners: Optional[str] = None
+
+@app.post("/api/opportunities/manual")
+def add_manual_opportunity(opp: OpportunityCreate, db: Session = Depends(get_db)):
+    """Manually add an opportunity and automatically score it with AI."""
+    new_opp = models.Opportunity(
+        **opp.dict(),
+        status="open",
+        source="Manual Entry"
+    )
+    db.add(new_opp)
+    db.commit()
+    db.refresh(new_opp)
+    
+    # Automatically trigger the AI Matcher
+    try:
+        score_opportunity(new_opp.id, db)
+        db.refresh(new_opp)
+    except Exception as e:
+        print(f"Error automatically scoring manual opportunity: {e}")
+        
+    return new_opp
+
 @app.post("/api/opportunities/{opp_id}/score")
 def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     """Generate a match score for a specific opportunity using the LLM."""

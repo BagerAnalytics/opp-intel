@@ -19,14 +19,6 @@ def run_all_scrapers():
         scrape_linkedin()
         print("Scrapers completed successfully.")
         
-        # Housekeeping: Close old open opportunities
-        try:
-            with engine.begin() as conn:
-                conn.execute(text("UPDATE opportunities SET status = 'closed' WHERE closing_date != 'Open' AND closing_date != 'Unknown' AND closing_date IS NOT NULL"))
-                print("Database housekeeping completed.")
-        except Exception as e:
-            print(f"Housekeeping error: {e}")
-            
     except Exception as e:
         print(f"Scraper execution error: {e}")
 

@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import OpportunityCard from '@/components/OpportunityCard';
-import { Loader2, TrendingUp, CheckCircle, Database } from 'lucide-react';
+import AddOpportunityModal from '@/components/AddOpportunityModal';
+import { Loader2, TrendingUp, CheckCircle, Database, Plus } from 'lucide-react';
 
 interface Opportunity {
   id: number;
@@ -32,6 +33,7 @@ export default function Home() {
   const [complianceDocs, setComplianceDocs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -100,13 +102,28 @@ export default function Home() {
           <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 tracking-tight mb-2">Welcome back, Admin.</h1>
           <p className="text-slate-500 text-lg font-medium">You have <span className="text-emerald-600 font-bold">{opportunities.length}</span> open opportunities waiting to be reviewed.</p>
         </div>
-        <button 
-          onClick={handleRunScrapers}
-          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm"
-        >
-          Run AI Scrapers
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:-translate-y-0.5 transition-all duration-300 shadow-sm"
+          >
+            <Plus size={18} />
+            Add Opportunity
+          </button>
+          <button 
+            onClick={handleRunScrapers}
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm"
+          >
+            Run AI Scrapers
+          </button>
+        </div>
       </div>
+      
+      <AddOpportunityModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onSuccess={fetchData} 
+      />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
