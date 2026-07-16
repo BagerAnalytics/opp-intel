@@ -251,21 +251,48 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
           
           <button 
             onClick={handleScoreMatch}
-            disabled={isScoring || hasScore}
-            className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border
-              ${hasScore 
-                ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed shadow-inner' 
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm hover:scale-[1.02]'}`}
+            disabled={isScoring}
+            className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm hover:scale-[1.02]`}
           >
             {isScoring ? (
               <><Loader2 size={18} className="animate-spin text-emerald-600" /> Analyzing...</>
             ) : hasScore ? (
-              'Analyzed Fit'
+              <><Zap size={18} className="text-yellow-500 drop-shadow-sm" /> Re-Analyze Fit</>
             ) : (
               <><Zap size={18} className="text-yellow-500 drop-shadow-sm" /> Score Fit</>
             )}
           </button>
-          
+
+          {!hasDeepData && (
+            <button 
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!opp.link) return;
+                if (window.confirm('Do you want the AI to visit this link and extract all deep details (Benefits, Eligibility, etc.)?')) {
+                  try {
+                    const btn = e.currentTarget;
+                    btn.innerHTML = '<span class="flex items-center justify-center gap-2 w-full"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
+                    btn.setAttribute('disabled', 'true');
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    await axios.post(`${apiUrl}/api/opportunities/${opp.id}/re-extract`);
+                    if (onDeleteSuccess) onDeleteSuccess(); 
+                  } catch (error) {
+                    alert('Failed to extract details. The AI might be blocked by the website.');
+                    window.location.reload();
+                  }
+                }
+              }}
+              disabled={!opp.link}
+              className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border mt-2
+                ${!opp.link 
+                  ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed' 
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-sm hover:scale-[1.02]'}`}
+              title={!opp.link ? "You must edit this opportunity and add a link first" : "Automatically extract details"}
+            >
+              <Sparkles size={18} className={opp.link ? "text-emerald-500" : ""} />
+              {opp.link ? "Smart Scan Details" : "Cannot Scan: No Link Provided"}
+            </button>
+          )}
           <button className="p-3 text-slate-400 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors self-start md:self-center mt-3 relative z-10 group-hover:bg-slate-50">
             {isExpanded ? <ChevronUp size={22} strokeWidth={2.5} /> : <ChevronDown size={22} strokeWidth={2.5} />}
           </button>
@@ -306,7 +333,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.benefits && (
                 <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
                   <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100"><Gift size={18} className="text-emerald-600" /></div> 
+                    <div className="p-2 bg-emerald-100/50 rounded-xl">
+                      <Gift size={18} className="text-emerald-600" strokeWidth={2.5} />
+                    </div>
                     Benefits
                   </div>
                   <div className="text-[15px] text-slate-600 leading-relaxed whitespace-pre-wrap pl-[52px]">{opp.benefits}</div>
@@ -316,7 +345,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.eligibility_criteria && (
                <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
                   <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100"><CheckCircle2 size={18} className="text-emerald-600" /></div> 
+                    <div className="p-2 bg-blue-100/50 rounded-xl">
+                      <ListChecks size={18} className="text-blue-600" strokeWidth={2.5} />
+                    </div>
                     Eligibility
                   </div>
                   <div className="text-[15px] text-slate-600 leading-relaxed whitespace-pre-wrap pl-[52px]">{opp.eligibility_criteria}</div>
@@ -326,7 +357,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.selection_criteria && (
                 <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
                   <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100"><ListChecks size={18} className="text-emerald-600" /></div> 
+                    <div className="p-2 bg-amber-100/50 rounded-xl">
+                      <Target size={18} className="text-amber-600" strokeWidth={2.5} />
+                    </div>
                     Selection Criteria
                   </div>
                   <div className="text-[15px] text-slate-600 leading-relaxed whitespace-pre-wrap pl-[52px]">{opp.selection_criteria}</div>
@@ -336,7 +369,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.application_process && (
                 <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
                   <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100"><FileText size={18} className="text-emerald-600" /></div> 
+                    <div className="p-2 bg-purple-100/50 rounded-xl">
+                      <FileText size={18} className="text-purple-600" strokeWidth={2.5} />
+                    </div>
                     How to Apply
                   </div>
                   <div className="text-[15px] text-slate-600 leading-relaxed whitespace-pre-wrap pl-[52px]">{opp.application_process}</div>
@@ -346,7 +381,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               {opp.past_winners && (
                 <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
                   <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-slate-100"><Trophy size={18} className="text-emerald-600" /></div> 
+                    <div className="p-2 bg-rose-100/50 rounded-xl">
+                      <Trophy size={18} className="text-rose-600" strokeWidth={2.5} />
+                    </div>
                     Past Winners
                   </div>
                   <div className="text-[15px] text-slate-600 leading-relaxed whitespace-pre-wrap pl-[52px]">{opp.past_winners}</div>
@@ -355,37 +392,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-10 bg-white/40 rounded-3xl border border-dashed border-slate-200">
-              <div className="text-[15px] text-slate-500 italic text-center mb-4">
-                Deep data has not been scraped for this historical record.
+              <div className="text-[15px] text-slate-500 italic text-center">
+                Deep data has not been scraped for this historical record. Please click the Smart Scan button at the top to automatically extract the information.
               </div>
-              <button 
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  if (!opp.link) return;
-                  if (window.confirm('Do you want the AI to visit this link and extract all deep details (Benefits, Eligibility, etc.)?')) {
-                    try {
-                      const btn = e.currentTarget;
-                      btn.innerHTML = '<span class="flex items-center gap-2"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
-                      btn.setAttribute('disabled', 'true');
-                      
-                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/opportunities/${opp.id}/re-extract`);
-                      
-                      if (onDeleteSuccess) onDeleteSuccess(); // trigger a refresh of the list
-                    } catch (error) {
-                      alert('Failed to extract details. The AI might be blocked by the website.');
-                      const btn = e.currentTarget;
-                      btn.removeAttribute('disabled');
-                      btn.innerHTML = '<span class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Smart Scan Details</span>';
-                    }
-                  }
-                }}
-                disabled={!opp.link}
-                className="px-5 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl font-bold transition-colors flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                title={!opp.link ? "You must edit this opportunity and add a link first" : ""}
-              >
-                <Sparkles size={16} />
-                {opp.link ? "Smart Scan Details" : "Cannot Scan: No Link Provided"}
-              </button>
             </div>
           )}
 
