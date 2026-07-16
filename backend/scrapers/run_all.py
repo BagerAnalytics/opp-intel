@@ -8,6 +8,8 @@ from scrapers.opportunity_desk import scrape_opportunity_desk
 from scrapers.linkedin_opportunities import scrape_linkedin
 from scrapers.etenders_sa import scrape_etenders
 from scrapers.discovery_scraper import scrape_discovery_engine
+from scrapers.terraviva_grants import scrape_terraviva
+from scrapers.disrupt_africa import scrape_disrupt_africa
 from database import engine
 from sqlalchemy import text
 import models
@@ -16,6 +18,8 @@ def run_all_scrapers():
     print("Running scheduled scrapers from isolated process...")
     try:
         scrape_discovery_engine()
+        scrape_terraviva()
+        scrape_disrupt_africa()
         scrape_opportunity_desk()
         scrape_etenders()
         scrape_linkedin()
