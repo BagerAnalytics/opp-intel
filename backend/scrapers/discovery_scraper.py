@@ -53,40 +53,28 @@ def is_valid_url(url):
         return False
 
 def scrape_discovery_engine():
-    print("Starting Discovery Engine...")
+    print("Starting Discovery Engine using DDGS...")
     
     discovered_urls = []
     
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            Stealth().apply_stealth_sync(page)
-            
+        from duckduckgo_search import DDGS
+        
+        with DDGS() as ddgs:
             for keyword in KEYWORDS:
                 print(f"Searching for: '{keyword}'")
-                search_url = f"https://html.duckduckgo.com/html/?q={keyword.replace(' ', '+')}"
                 
                 try:
-                    page.goto(search_url, timeout=30000)
-                    page.wait_for_selector('a.result__url', timeout=10000)
-                    
-                    # Extract URLs
-                    links = page.evaluate('''() => {
-                        const anchors = Array.from(document.querySelectorAll('a.result__url'));
-                        return anchors.map(a => a.href);
-                    }''')
-                    
-                    for link in links:
+                    results = ddgs.text(keyword, max_results=10)
+                    for r in results:
+                        link = r.get('href')
                         if link and link not in discovered_urls and is_valid_url(link):
                             discovered_urls.append(link)
-                            
                 except Exception as e:
                     print(f"Warning: Failed to search '{keyword}': {e}")
                 
                 time.sleep(2) # Be nice
                 
-            browser.close()
     except Exception as e:
         print(f"Critical error in Discovery Engine: {e}")
         return

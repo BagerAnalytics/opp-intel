@@ -37,38 +37,28 @@ def is_valid_url(url):
         return False
 
 def scrape_meta_portals():
-    print("Starting Meta-Discovery Engine (Portal Hunter)...")
+    print("Starting Meta-Discovery Engine (Portal Hunter) using DDGS...")
     discovered_urls = []
     
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            Stealth().apply_stealth_sync(page)
-            
+        from duckduckgo_search import DDGS
+        
+        with DDGS() as ddgs:
             for keyword in PORTAL_KEYWORDS:
                 print(f"Meta-Hunter searching for portals: '{keyword}'")
-                search_url = f"https://html.duckduckgo.com/html/?q={keyword.replace(' ', '+')}"
                 
                 try:
-                    page.goto(search_url, timeout=30000)
-                    page.wait_for_selector('a.result__url', timeout=10000)
-                    
-                    links = page.evaluate('''() => {
-                        const anchors = Array.from(document.querySelectorAll('a.result__url'));
-                        return anchors.map(a => a.href);
-                    }''')
-                    
-                    for link in links:
+                    # Search DDG for text results, limit to 10
+                    results = ddgs.text(keyword, max_results=10)
+                    for r in results:
+                        link = r.get('href')
                         if link and link not in discovered_urls and is_valid_url(link):
                             discovered_urls.append(link)
-                            
                 except Exception as e:
                     print(f"Warning: Failed to search '{keyword}': {e}")
                 
                 time.sleep(2)
                 
-            browser.close()
     except Exception as e:
         print(f"Critical error in Meta-Discovery Engine: {e}")
         return
