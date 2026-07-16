@@ -11,9 +11,10 @@ interface AddOpportunityModalProps {
 }
 
 export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddOpportunityModalProps) {
-  const [activeTab, setActiveTab] = useState<'auto' | 'manual'>('auto');
+  const [activeTab, setActiveTab] = useState<'auto' | 'manual' | 'bulk'>('auto');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [urlInput, setUrlInput] = useState('');
+  const [bulkUrlsInput, setBulkUrlsInput] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     funder: '',
@@ -78,6 +79,30 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
     }
   };
 
+  const handleBulkImport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bulkUrlsInput) return;
+    const urls = bulkUrlsInput.split('\n').map(u => u.trim()).filter(u => u.startsWith('http'));
+    if (urls.length === 0) {
+      alert("Please enter valid URLs starting with http.");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await axios.post(`${apiUrl}/api/opportunities/bulk-import`, { urls });
+      alert(response.data.message);
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      console.error("Error bulk extracting", error);
+      alert("Failed to start bulk import. Check console for details.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
@@ -100,6 +125,13 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
           >
             <Sparkles size={18} />
             Smart Auto-Extract
+          </button>
+          <button 
+            onClick={() => setActiveTab('bulk')}
+            className={`flex-1 py-4 font-bold text-sm flex items-center justify-center gap-2 transition-colors ${activeTab === 'bulk' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Sparkles size={18} />
+            Bulk Import
           </button>
           <button 
             onClick={() => setActiveTab('manual')}
@@ -137,7 +169,31 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
                     />
                   </div>
                 </div>
-             </form>
+              </form>
+          ) : activeTab === 'bulk' ? (
+              <form id="bulk-opp-form" onSubmit={handleBulkImport} className="space-y-6 max-w-2xl mx-auto py-10">
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="text-blue-600 w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800">Bulk Import Opportunities</h3>
+                  <p className="text-slate-500 mt-2">Paste multiple links below (one per line). We will instantly queue them up and run the AI crawler on all of them securely in the background!</p>
+                </div>
+                
+                <div>
+                  <div className="relative">
+                    <textarea 
+                      required 
+                      value={bulkUrlsInput}
+                      onChange={(e) => setBulkUrlsInput(e.target.value)}
+                      disabled={isSubmitting}
+                      rows={8}
+                      className="w-full p-4 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-sm shadow-sm font-mono custom-scrollbar" 
+                      placeholder={"https://example.com/grant-opportunity\nhttps://opportunitydesk.org/...\nhttps://etenders.gov.za/..."} 
+                    />
+                  </div>
+                </div>
+              </form>
           ) : (
             <form id="add-opp-form" onSubmit={handleManualSubmit} className="space-y-8">
               {/* Basic Info */}
@@ -240,52 +296,31 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
           )}
         </div>
 
-        <div className="p-6 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-4">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 bg-slate-50/50 mt-auto">
           <button 
-            type="button"
+            type="button" 
             onClick={onClose}
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors disabled:opacity-50"
+            className="px-6 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-xl transition-colors"
           >
             Cancel
           </button>
-          
-          {activeTab === 'auto' ? (
-            <button 
-              type="submit"
-              form="auto-opp-form"
-              disabled={isSubmitting || !urlInput}
-              className="flex items-center gap-2 px-8 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Processing... Please wait
-                </>
-              ) : (
-                <>
-                  <Sparkles size={18} />
-                  Auto-Extract with AI
-                </>
-              )}
-            </button>
-          ) : (
-            <button 
-              type="submit"
-              form="add-opp-form"
-              disabled={isSubmitting}
-              className="flex items-center gap-2 px-8 py-2.5 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Adding & Scoring...
-                </>
-              ) : (
-                'Add Opportunity Manually'
-              )}
-            </button>
-          )}
+          <button 
+            type="submit" 
+            form={activeTab === 'auto' ? "auto-opp-form" : activeTab === 'bulk' ? "bulk-opp-form" : "add-opp-form"}
+            disabled={isSubmitting}
+            className={`px-8 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg transition-all flex items-center gap-2 ${
+              isSubmitting ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-emerald-600/20 hover:-translate-y-0.5'
+            }`}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin" size={18} />
+                {activeTab === 'bulk' ? 'Queueing...' : 'Processing...'}
+              </>
+            ) : (
+              activeTab === 'auto' ? 'Extract with AI' : activeTab === 'bulk' ? 'Start Bulk Import' : 'Save Opportunity'
+            )}
+          </button>
         </div>
       </div>
     </div>

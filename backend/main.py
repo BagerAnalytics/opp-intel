@@ -93,6 +93,70 @@ def update_opportunity_status(opp_id: int, status: str, db: Session = Depends(ge
     db.commit()
     return {"status": "success", "new_status": status}
 
+class BulkImportRequest(BaseModel):
+    urls: List[str]
+
+@app.post("/api/opportunities/bulk-import")
+def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_db)):
+    """Accepts a list of URLs, creates placeholder rows, and kicks off the bulk scraper in the background."""
+    import subprocess
+    import sys
+    import json
+    
+    if not req.urls:
+        raise HTTPException(status_code=400, detail="No URLs provided")
+        
+    tasks = []
+    
+    for url in req.urls:
+        url = url.strip()
+        if not url:
+            continue
+            
+        # Check if already exists
+        existing = db.query(models.Opportunity).filter(models.Opportunity.link == url).first()
+        if existing:
+            continue
+            
+        # Create a stub
+        new_opp = models.Opportunity(
+            name=f"Extracting from {url[:30]}...",
+            funder="Scanning...",
+            value="Scanning...",
+            closing_date="Scanning...",
+            description="Extracting opportunity details...",
+            benefits="",
+            eligibility_criteria="",
+            selection_criteria="",
+            application_process="",
+            past_winners="",
+            link=url,
+            source="Bulk Import",
+            status="Scanning...",
+            match_score=0,
+            match_reasoning="",
+            strategy=""
+        )
+        db.add(new_opp)
+        db.flush() # flush to get the ID
+        
+        tasks.append({"id": new_opp.id, "url": url})
+        
+    if not tasks:
+        return {"message": "No new URLs to import (all already exist)."}
+        
+    db.commit()
+    
+    # Spawn background task out-of-process
+    payload = json.dumps(tasks)
+    subprocess.Popen(
+        [sys.executable, "scrapers/bulk_scraper.py", payload],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    
+    return {"message": f"Successfully queued {len(tasks)} links for background extraction.", "queued_count": len(tasks)}
+
 class OpportunityCreate(BaseModel):
     name: str
     funder: Optional[str] = None
