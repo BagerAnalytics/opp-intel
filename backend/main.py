@@ -27,17 +27,29 @@ app.add_middleware(
 from datetime import datetime
 from dateutil import parser
 
-# The scrapers are now run via an isolated subprocess script
+from apscheduler.schedulers.background import BackgroundScheduler
+import subprocess
+import sys
+import os
+
+# The scrapers are run via an isolated subprocess script
 # (backend/scrapers/run_all.py) to prevent asyncio thread deadlocks 
 # between FastAPI's BackgroundTasks and Playwright's sync_api.
 
+def run_scrapers_subprocess():
+    print("Cron Job: Triggering scheduled scrapers...")
+    script_path = os.path.join(os.path.dirname(__file__), "scrapers", "run_all.py")
+    subprocess.Popen([sys.executable, script_path])
+
 @app.on_event("startup")
 def start_scheduler():
-    # APScheduler has been removed. 
-    # The server is now stateless and Railway's native Cron feature will ping /api/scrapers/run 
-    # at the specified intervals.
-    print("Server starting up. Waiting for external cron triggers.")
-    
+    print("Server starting up. Initializing APScheduler for daily scrapers...")
+    scheduler = BackgroundScheduler()
+    # Run every day at midnight
+    scheduler.add_job(run_scrapers_subprocess, 'cron', hour=0, minute=0)
+    scheduler.start()
+    print("APScheduler started successfully.")
+
     # Auto-migrate the database to add the new strategy column
     from sqlalchemy import text
     from database import engine

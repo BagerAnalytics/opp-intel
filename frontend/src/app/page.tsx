@@ -35,6 +35,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showTopMatches, setShowTopMatches] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -80,19 +82,39 @@ export default function Home() {
     }
   };
 
-  const avgScore = opportunities.length > 0 
-    ? Math.round(opportunities.reduce((acc, curr) => acc + (curr.match_score || 0), 0) / opportunities.length)
-    : 0;
-
   const filteredOpportunities = opportunities.filter(opp => {
-    if (activeTab === 'All') return true;
-    if (activeTab === 'Grants' && opp.opp_type === 'Grant') return true;
-    if (activeTab === 'Tenders' && opp.opp_type === 'Tender') return true;
-    if (activeTab === 'Awards' && opp.opp_type === 'Award') return true;
-    if (activeTab === 'Fellowships / Other' && opp.opp_type === 'Other') return true;
-    if (activeTab === 'Manually Added' && (opp.source === 'Manual Entry' || opp.source === 'Smart Link Extraction')) return true;
-    return false;
+    // 1. Tab filtering
+    let tabMatch = true;
+    if (activeTab !== 'All') {
+      if (activeTab === 'Grants' && opp.opp_type !== 'Grant') tabMatch = false;
+      else if (activeTab === 'Tenders' && opp.opp_type !== 'Tender') tabMatch = false;
+      else if (activeTab === 'Awards' && opp.opp_type !== 'Award') tabMatch = false;
+      else if (activeTab === 'Fellowships / Other' && opp.opp_type !== 'Other') tabMatch = false;
+      else if (activeTab === 'Manually Added' && (opp.source !== 'Manual Entry' && opp.source !== 'Smart Link Extraction')) tabMatch = false;
+    }
+    if (!tabMatch) return false;
+
+    // 2. Search filtering
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchName = opp.name?.toLowerCase().includes(query) || false;
+      const matchFunder = opp.funder?.toLowerCase().includes(query) || false;
+      if (!matchName && !matchFunder) return false;
+    }
+
+    // 3. Top Matches filtering
+    if (showTopMatches && (opp.match_score || 0) < 80) {
+      return false;
+    }
+
+    return true;
   });
+
+  const kpiAvgScore = filteredOpportunities.length > 0 
+    ? Math.round(filteredOpportunities.reduce((acc, curr) => acc + (curr.match_score || 0), 0) / filteredOpportunities.length)
+    : 0;
+    
+  const topMatchesCount = filteredOpportunities.filter(o => (o.match_score || 0) >= 80).length;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 relative">
@@ -132,24 +154,24 @@ export default function Home() {
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full blur-2xl -z-10 group-hover:scale-110 transition-transform duration-500" />
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase">Open Pipeline</h3>
+            <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase">Filtered Pipeline</h3>
             <div className="p-2.5 bg-slate-50 rounded-xl">
               <Database className="text-emerald-600" size={20} strokeWidth={2.5} />
             </div>
           </div>
-          <p className="text-5xl font-extrabold text-slate-900 tracking-tight">{opportunities.length}</p>
+          <p className="text-5xl font-extrabold text-slate-900 tracking-tight">{filteredOpportunities.length}</p>
         </div>
         
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/40 p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 rounded-full blur-2xl -z-10 group-hover:scale-110 transition-transform duration-500" />
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase">Avg Fit Score</h3>
+            <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase">Avg Match Score</h3>
             <div className="p-2.5 bg-emerald-50 rounded-xl">
               <TrendingUp className="text-emerald-600" size={20} strokeWidth={2.5} />
             </div>
           </div>
           <p className="text-5xl font-extrabold text-slate-900 tracking-tight">
-            {avgScore}%
+            {kpiAvgScore}%
           </p>
         </div>
 
@@ -157,15 +179,37 @@ export default function Home() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -z-10 group-hover:scale-110 transition-transform duration-500" />
           <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl -z-10" />
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-emerald-50 text-[13px] tracking-widest uppercase">Action Required</h3>
+            <h3 className="font-bold text-emerald-50 text-[13px] tracking-widest uppercase">Top Matches</h3>
             <div className="p-2.5 bg-white/20 rounded-xl backdrop-blur-md">
               <CheckCircle className="text-white" size={20} strokeWidth={2.5} />
             </div>
           </div>
           <p className="text-5xl font-extrabold text-white tracking-tight">
-            {opportunities.filter(o => o.match_score === null).length}
+            {topMatchesCount}
           </p>
-          <p className="text-[13px] text-emerald-100 mt-3 font-semibold uppercase tracking-widest">Unscored grants</p>
+          <p className="text-[13px] text-emerald-100 mt-3 font-semibold uppercase tracking-widest">Score 80+</p>
+        </div>
+      </div>
+
+      {/* Advanced Filters */}
+      <div className="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-slate-200">
+        <div className="w-full md:w-1/2">
+          <input 
+            type="text" 
+            placeholder="Search opportunities by name or funder..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm bg-white"
+          />
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-bold text-slate-600">Top Matches Only (80+)</span>
+          <button 
+            onClick={() => setShowTopMatches(!showTopMatches)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${showTopMatches ? 'bg-emerald-500' : 'bg-slate-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${showTopMatches ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
         </div>
       </div>
 
