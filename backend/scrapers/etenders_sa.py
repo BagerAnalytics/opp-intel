@@ -33,8 +33,8 @@ def scrape_etenders():
                 unique_links = list(dict.fromkeys(links))
                 target_links = unique_links[:5] # Limit to top 5 to save LLM costs
             except:
-                print("Warning: eTenders table did not load in time (likely anti-bot protection). Falling back to cached demonstration data...")
-                target_links = ["mock_etender_1", "mock_etender_2"]
+                print("Warning: eTenders table did not load in time (likely anti-bot protection).")
+                return
             
             print(f"Found {len(target_links)} new eTender links to scrape.")
             
@@ -48,21 +48,16 @@ def scrape_etenders():
                             
                         print(f"Scraping eTender: {url}")
                         
-                        if url.startswith("mock_"):
-                            # Inject mock HTML
-                            raw_text = "Tender Number: GTAC-2026-01\nTitle: Provision of Data Science Consulting Services for National Treasury\nValue: R 5,000,000\nClosing Date: 2026-08-15\nEligibility: South African companies only. Must have 5 years data science experience." if url == "mock_etender_1" else "Tender Number: DARD-2026-04\nTitle: Agricultural Supply Chain Optimization Study\nValue: R 2,500,000\nClosing Date: 2026-09-01\nEligibility: Agricultural economists and supply chain consultants in South Africa."
-                            full_url = f"https://www.etenders.gov.za/Home/OpportunityDetails/{url}"
-                        else:
-                            full_url = url if url.startswith('http') else f"https://www.etenders.gov.za{url}"
-                            page.goto(full_url, timeout=60000)
-                            
-                            # Wait for details to load
-                            page.wait_for_selector('.container', timeout=15000)
-                            
-                            raw_text = page.evaluate('''() => {
-                                const content = document.querySelector('.container');
-                                return content ? content.innerText : '';
-                            }''')
+                        full_url = url if url.startswith('http') else f"https://www.etenders.gov.za{url}"
+                        page.goto(full_url, timeout=60000)
+                        
+                        # Wait for details to load
+                        page.wait_for_selector('.container', timeout=15000)
+                        
+                        raw_text = page.evaluate('''() => {
+                            const content = document.querySelector('.container');
+                            return content ? content.innerText : '';
+                        }''')
                             
                         if not raw_text or len(raw_text) < 100:
                             print(f"Warning: Extracted text too short for {full_url}")
