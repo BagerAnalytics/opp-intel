@@ -27,34 +27,9 @@ app.add_middleware(
 from datetime import datetime
 from dateutil import parser
 
-def run_all_scrapers():
-    print("Running scheduled scrapers...")
-    try:
-        scrape_opportunity_desk()
-        scrape_etenders()
-        scrape_linkedin()
-        print("Scrapers completed successfully.")
-        
-        # Auto-close logic
-        with SessionLocal() as db:
-            opps = db.query(models.Opportunity).all()
-            now = datetime.now()
-            closed_count = 0
-            for opp in opps:
-                if opp.closing_date and opp.status not in ["won", "lost", "closed"]:
-                    try:
-                        dt = parser.parse(opp.closing_date, fuzzy=True)
-                        if dt < now:
-                            opp.status = "closed"
-                            closed_count += 1
-                    except Exception:
-                        pass # Ignore if date is unparseable
-            if closed_count > 0:
-                db.commit()
-                print(f"Auto-closed {closed_count} expired opportunities.")
-                
-    except Exception as e:
-        print(f"Error running scrapers: {e}")
+# The scrapers are now run via an isolated subprocess script
+# (backend/scrapers/run_all.py) to prevent asyncio thread deadlocks 
+# between FastAPI's BackgroundTasks and Playwright's sync_api.
 
 @app.on_event("startup")
 def start_scheduler():
@@ -75,11 +50,15 @@ def start_scheduler():
     except Exception as e:
         print(f"Migration notice (safe to ignore): {e}")
 
+import subprocess
+import sys
+
 @app.get("/api/scrapers/run")
 @app.post("/api/scrapers/run")
-def trigger_scrapers(background_tasks: BackgroundTasks):
-    """Manually trigger all scrapers to run immediately."""
-    background_tasks.add_task(run_all_scrapers)
+def trigger_scrapers():
+    """Manually trigger all scrapers to run immediately in a detached process."""
+    # We use Popen so it runs in the background and doesn't block the API response
+    subprocess.Popen([sys.executable, "scrapers/run_all.py"])
     return {"status": "Scrapers executed successfully"}
 
 @app.get("/")
