@@ -9,20 +9,31 @@ from database import SessionLocal
 from scrapers.generic_scraper import extract_from_url
 
 def run_bulk_scraper(tasks):
-    print(f"Starting bulk import for {len(tasks)} items...")
+    total = len(tasks)
+    print(f"Starting bulk import for {total} items...")
     
-    for task in tasks:
+    for idx, task in enumerate(tasks):
         opp_id = task.get("id")
         url = task.get("url")
         print(f"\n--- Extracting ID {opp_id}: {url} ---")
         
         try:
-            # Check if it was deleted while in queue
             with SessionLocal() as db:
+                # Check if it was deleted while in queue
                 opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
                 if not opp:
                     print(f"Opportunity ID {opp_id} deleted. Skipping.")
                     continue
+                
+                # Update progress bar
+                progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
+                if progress:
+                    progress.current_task = f"AI Extractor: Processing {idx+1}/{total} links..."
+                    # Scale progress between 98% and 99%
+                    progress.progress_percent = 98
+                    from datetime import datetime
+                    progress.updated_at = datetime.utcnow().isoformat()
+                db.commit()
             
             # This handles playwright, fallback, LLM, saving to DB, and scoring
             result = extract_from_url(url, opp_id=opp_id)

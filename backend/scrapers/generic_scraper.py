@@ -52,12 +52,18 @@ def extract_from_url(url: str, opp_id: int = None):
                     return {"error": "Opportunity not found"}
                 
                 # Update existing
+                new_opp.name = extracted_data.get("name", new_opp.name)
+                new_opp.funder = extracted_data.get("funder", new_opp.funder)
+                new_opp.value = extracted_data.get("value", new_opp.value)
+                new_opp.closing_date = extracted_data.get("closing_date", new_opp.closing_date)
                 new_opp.description = extracted_data.get("description", new_opp.description)
                 new_opp.benefits = extracted_data.get("benefits", new_opp.benefits)
                 new_opp.eligibility_criteria = extracted_data.get("eligibility_criteria", new_opp.eligibility_criteria)
                 new_opp.selection_criteria = extracted_data.get("selection_criteria", new_opp.selection_criteria)
                 new_opp.application_process = extracted_data.get("application_process", new_opp.application_process)
                 new_opp.past_winners = extracted_data.get("past_winners", new_opp.past_winners)
+                if new_opp.status == "Scanning...":
+                    new_opp.status = "open"
             else:
                 # Check if it already exists
                 existing = db.query(models.Opportunity).filter(models.Opportunity.link == url).first()
