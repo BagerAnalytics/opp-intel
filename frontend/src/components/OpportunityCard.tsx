@@ -124,7 +124,13 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
   };
 
   const hasScore = scoreData.score !== null;
-  const hasDeepData = opp.benefits || opp.eligibility_criteria || opp.selection_criteria || opp.application_process || opp.past_winners;
+  const hasDeepData = [
+    opp.benefits, 
+    opp.eligibility_criteria, 
+    opp.selection_criteria, 
+    opp.application_process, 
+    opp.past_winners
+  ].some(str => str && str.trim().length > 0);
   const warmConnections = contacts.filter(c => c.organization?.toLowerCase().includes(opp.funder?.toLowerCase() || 'unmatchable') || opp.funder?.toLowerCase().includes(c.organization?.toLowerCase() || 'unmatchable'));
 
   const missingDocs = complianceDocs
@@ -267,7 +273,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
       </div>
 
       {/* Expanded Deep Data Section */}
-      <div className={`transition-all duration-500 ease-in-out origin-top ${isExpanded ? 'max-h-[15000px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+      <div className={`transition-all duration-500 ease-in-out origin-top ${isExpanded ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="border-t border-slate-100/60 p-7 bg-slate-50/50 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
           
           {hasScore && scoreData.reasoning && (
