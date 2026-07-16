@@ -69,7 +69,9 @@ def start_scheduler():
     try:
         with engine.begin() as conn:
             conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS strategy TEXT;"))
-            print("Successfully added strategy column to database.")
+            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS opp_type TEXT;"))
+            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS target_entity TEXT;"))
+            print("Successfully added strategy, opp_type, and target_entity columns to database.")
     except Exception as e:
         print(f"Migration notice (safe to ignore): {e}")
 
