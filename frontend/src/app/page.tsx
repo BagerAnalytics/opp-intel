@@ -89,6 +89,7 @@ export default function Home() {
     if (activeTab === 'Tenders' && opp.opp_type === 'Tender') return true;
     if (activeTab === 'Awards' && opp.opp_type === 'Award') return true;
     if (activeTab === 'Fellowships / Other' && opp.opp_type === 'Other') return true;
+    if (activeTab === 'Manually Added' && (opp.source === 'Manual Entry' || opp.source === 'Smart Link Extraction')) return true;
     return false;
   });
 
@@ -168,8 +169,8 @@ export default function Home() {
       </div>
 
       <div className="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
-        <div className="flex items-center gap-2">
-          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other'].map(tab => (
+        <div className="flex flex-wrap items-center gap-2">
+          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Manually Added'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -207,7 +208,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {filteredOpportunities.map(opp => (
-              <OpportunityCard key={opp.id} opp={opp} contacts={contacts} complianceDocs={complianceDocs} />
+              <OpportunityCard key={opp.id} opp={opp} contacts={contacts} complianceDocs={complianceDocs} onDeleteSuccess={fetchData} />
             ))}
           </div>
         )}

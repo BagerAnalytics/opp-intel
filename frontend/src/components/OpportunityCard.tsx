@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Loader2, Zap, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target, AlertCircle, Plus, Users } from 'lucide-react';
+import { Loader2, Zap, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, Gift, ListChecks, FileText, Trophy, Target, AlertCircle, Plus, Users, Trash2 } from 'lucide-react';
 
 interface OpportunityCardProps {
   opp: {
@@ -22,11 +22,13 @@ interface OpportunityCardProps {
     strategy: string | null;
     status: string;
     link: string | null;
+    source?: string;
     opp_type?: string;
     target_entity?: string;
   };
   contacts?: any[];
   complianceDocs?: any[];
+  onDeleteSuccess?: () => void;
 }
 
 const MatchScoreRing = ({ score }: { score: number | null }) => {
@@ -63,9 +65,10 @@ const MatchScoreRing = ({ score }: { score: number | null }) => {
   );
 };
 
-export default function OpportunityCard({ opp: initialOpp, contacts = [], complianceDocs = [] }: OpportunityCardProps) {
+export default function OpportunityCard({ opp: initialOpp, contacts = [], complianceDocs = [], onDeleteSuccess }: OpportunityCardProps) {
   const [opp, setOpp] = useState(initialOpp);
   const [isScoring, setIsScoring] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [scoreData, setScoreData] = useState<{score: number | null, reasoning: string | null, strategy: string | null}>({
     score: opp.match_score,
@@ -92,6 +95,25 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
     }
   };
 
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this opportunity?")) return;
+    
+    setIsDeleting(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      await axios.delete(`${apiUrl}/api/opportunities/${opp.id}`);
+      if (onDeleteSuccess) {
+        onDeleteSuccess();
+      }
+    } catch (error) {
+      console.error("Failed to delete opportunity", error);
+      alert("Failed to delete opportunity.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const hasScore = scoreData.score !== null;
   const hasDeepData = opp.benefits || opp.eligibility_criteria || opp.selection_criteria;
   const warmConnections = contacts.filter(c => c.organization?.toLowerCase().includes(opp.funder?.toLowerCase() || 'unmatchable') || opp.funder?.toLowerCase().includes(c.organization?.toLowerCase() || 'unmatchable'));
@@ -112,7 +134,19 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
         <div className="flex-1 space-y-5">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-2xl font-extrabold text-slate-900 leading-tight tracking-tight mb-2 group-hover:text-emerald-700 transition-colors">{opp.name}</h3>
+              <div className="flex items-center gap-3 mb-2">
+                <h3 className="text-2xl font-extrabold text-slate-900 leading-tight tracking-tight group-hover:text-emerald-700 transition-colors">{opp.name}</h3>
+                {(opp.source === 'Manual Entry' || opp.source === 'Smart Link Extraction') && (
+                  <button 
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100 z-20"
+                    title="Delete manually added opportunity"
+                  >
+                    {isDeleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                  </button>
+                )}
+              </div>
               <div className="flex items-center gap-3">
                 <p className="text-[13px] text-emerald-600 uppercase tracking-widest font-bold">{opp.funder}</p>
                 {opp.opp_type && (

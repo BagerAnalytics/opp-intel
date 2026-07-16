@@ -152,6 +152,17 @@ def extract_link(req: LinkExtractRequest):
     except subprocess.TimeoutExpired:
         raise HTTPException(status_code=504, detail="Extraction timed out after 2 minutes.")
 
+@app.delete("/api/opportunities/{opp_id}")
+def delete_opportunity(opp_id: int, db: Session = Depends(get_db)):
+    """Delete an opportunity."""
+    opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+    if not opp:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    db.delete(opp)
+    db.commit()
+    return {"message": "Opportunity deleted successfully"}
+
 @app.post("/api/opportunities/{opp_id}/score")
 def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     """Generate a match score for a specific opportunity using the LLM."""
