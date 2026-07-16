@@ -67,7 +67,7 @@ def scrape_saved_portals():
                                         new_opp = models.Opportunity(
                                             name=text if text else "Discovered Opportunity",
                                             link=full_url,
-                                            status="Scanning...",
+                                            status="queued",
                                             source=f"Portal Crawler: {portal.name}",
                                             target_entity="Pending Analysis",
                                             match_score=0

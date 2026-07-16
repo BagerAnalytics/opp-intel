@@ -62,12 +62,24 @@ def run_all_scrapers():
         update_progress(db, 95, "Scraping LinkedIn Opportunities...")
         scrape_linkedin()
         
-        # Process all queued URLs that were found during this run
+        # Process a batch of 10 queued URLs
         update_progress(db, 98, "Processing AI Extractor queue...")
-        scanning_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").all()
-        if scanning_opps:
-            print(f"Found {len(scanning_opps)} queued links. Handing off to AI Extractor...")
-            tasks = [{"id": opp.id, "url": opp.link} for opp in scanning_opps if opp.link]
+        queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(10).all()
+        
+        # Also grab any old ones that were stuck in "Scanning..." from a previous crash that weren't cleaned up
+        stuck_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").limit(5).all()
+        
+        batch = queued_opps + stuck_opps
+        
+        if batch:
+            print(f"Found {len(batch)} queued links. Handing off to AI Extractor...")
+            tasks = []
+            for opp in batch:
+                if opp.link:
+                    opp.status = "Scanning..."
+                    tasks.append({"id": opp.id, "url": opp.link})
+            db.commit()
+            
             if tasks:
                 from scrapers.bulk_scraper import run_bulk_scraper
                 run_bulk_scraper(tasks)
