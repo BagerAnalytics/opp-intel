@@ -348,18 +348,49 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               )}
             </div>
           ) : (
-            <div className="text-[15px] text-slate-500 italic text-center py-8 bg-white/40 rounded-3xl border border-dashed border-slate-200">
-              Deep data has not been scraped for this historical record.
+            <div className="flex flex-col items-center justify-center py-10 bg-white/40 rounded-3xl border border-dashed border-slate-200">
+              <div className="text-[15px] text-slate-500 italic text-center mb-4">
+                Deep data has not been scraped for this historical record.
+              </div>
+              {opp.link && (
+                <button 
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (window.confirm('Do you want the AI to visit this link and extract all deep details (Benefits, Eligibility, etc.)?')) {
+                      try {
+                        const btn = e.currentTarget;
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '<span class="flex items-center gap-2"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
+                        btn.setAttribute('disabled', 'true');
+                        
+                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/opportunities/${opp.id}/re-extract`);
+                        
+                        if (onDeleteSuccess) onDeleteSuccess(); // trigger a refresh of the list
+                      } catch (error) {
+                        alert('Failed to extract details. The AI might be blocked by the website.');
+                        const btn = e.currentTarget;
+                        btn.removeAttribute('disabled');
+                        btn.innerHTML = '<span class="flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Smart Scan Details</span>';
+                      }
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-xl font-bold transition-colors flex items-center gap-2 text-sm disabled:opacity-50"
+                >
+                  <Sparkles size={16} />
+                  Smart Scan Details
+                </button>
+              )}
             </div>
           )}
 
           {opp.link && (
-            <div className="pt-10 flex justify-end">
+            <div className="mt-8 pt-6 border-t border-slate-200/60 flex justify-end">
               <a 
                 href={opp.link} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="px-8 py-3.5 bg-slate-900 text-white text-[15px] font-bold rounded-2xl hover:bg-slate-800 hover:shadow-lg transition-all flex items-center gap-3 shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-[0_4px_12px_rgba(15,23,42,0.15)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.2)] hover:-translate-y-0.5"
               >
                 Apply Now <ExternalLink size={18} strokeWidth={2.5} />
               </a>

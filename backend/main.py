@@ -157,6 +157,41 @@ def extract_link(req: LinkExtractRequest):
     except subprocess.TimeoutExpired:
         raise HTTPException(status_code=504, detail="Extraction timed out after 2 minutes.")
 
+@app.post("/api/opportunities/{opp_id}/re-extract")
+def re_extract_opportunity(opp_id: int, db: Session = Depends(get_db)):
+    """Re-extract deep details for an existing opportunity using its link."""
+    opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+    if not opp:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    if not opp.link:
+        raise HTTPException(status_code=400, detail="Opportunity does not have a link to extract from.")
+
+    import subprocess
+    import sys
+    import json
+    
+    try:
+        result = subprocess.run(
+            [sys.executable, "scrapers/generic_scraper.py", opp.link, str(opp.id)],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        
+        output_lines = result.stdout.strip().split('\n')
+        last_line = output_lines[-1] if output_lines else ""
+        
+        try:
+            data = json.loads(last_line)
+            if "error" in data:
+                raise HTTPException(status_code=500, detail=data["error"])
+            return data
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=500, detail="Failed to parse extraction result.")
+            
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail="Extraction timed out after 2 minutes.")
+
 @app.delete("/api/opportunities/{opp_id}")
 def delete_opportunity(opp_id: int, db: Session = Depends(get_db)):
     """Delete an opportunity."""

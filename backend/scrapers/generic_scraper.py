@@ -11,67 +11,67 @@ from database import SessionLocal
 from services.llm_service import extract_opportunity_data
 from main import score_opportunity
 
-def scrape_generic_link(url: str):
-    """
-    Scrapes any given URL, extracts text from the body,
-    and runs the AI extraction and matching pipeline synchronously.
-    """
-    print(f"Starting Generic Scraper for URL: {url}")
+def extract_from_url(url: str, opp_id: int = None):
+    print("Launching headless browser...")
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        Stealth().apply_stealth_sync(page)
+        page.goto(url, wait_until="networkidle", timeout=60000)
+        
+        # Get all text from body
+        raw_text = page.evaluate("document.body.innerText")
+        browser.close()
+        
+    print(f"Extracted {len(raw_text)} characters. Sending to LLM for parsing...")
     
-    raw_text = ""
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            Stealth().apply_stealth_sync(page)
-            
-            print(f"Navigating to {url}...")
-            page.goto(url, timeout=60000)
-            
-            # Wait for body to be present
-            page.wait_for_selector('body', timeout=10000)
-            
-            # Extract raw text from the entire body
-            raw_text = page.evaluate('() => document.body.innerText')
-            browser.close()
-    except Exception as e:
-        print(f"Error accessing {url}: {e}")
-        return {"error": "Failed to access URL", "details": str(e)}
-
-    if not raw_text or len(raw_text.strip()) < 50:
-        return {"error": "Failed to extract meaningful text from URL"}
-
-    print("Running AI Extraction pipeline...")
+    # 2. Use LLM to extract structured data
     extracted_data = extract_opportunity_data(raw_text, url)
     
     if not extracted_data:
-        return {"error": "AI Extraction failed"}
-
+        return {"error": "Failed to extract data using LLM"}
+        
+    print("Parsed data:", extracted_data.get("name"))
+    
+    # 3. Save to database
     try:
         with SessionLocal() as db:
-            # Check if it already exists
-            existing = db.query(models.Opportunity).filter(models.Opportunity.link == url).first()
-            if existing:
-                return {"error": "Opportunity from this URL already exists in the database"}
+            if opp_id:
+                new_opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+                if not new_opp:
+                    return {"error": "Opportunity not found"}
+                
+                # Update existing
+                new_opp.description = extracted_data.get("description", new_opp.description)
+                new_opp.benefits = extracted_data.get("benefits", new_opp.benefits)
+                new_opp.eligibility_criteria = extracted_data.get("eligibility_criteria", new_opp.eligibility_criteria)
+                new_opp.selection_criteria = extracted_data.get("selection_criteria", new_opp.selection_criteria)
+                new_opp.application_process = extracted_data.get("application_process", new_opp.application_process)
+                new_opp.past_winners = extracted_data.get("past_winners", new_opp.past_winners)
+            else:
+                # Check if it already exists
+                existing = db.query(models.Opportunity).filter(models.Opportunity.link == url).first()
+                if existing:
+                    return {"error": "Opportunity from this URL already exists in the database"}
 
-            # Map the extracted data to the model
-            new_opp = models.Opportunity(
-                name=extracted_data.get("name", "Unknown Opportunity"),
-                funder=extracted_data.get("funder", ""),
-                value=extracted_data.get("value", ""),
-                closing_date=extracted_data.get("closing_date", "Unknown"),
-                description=extracted_data.get("description", ""),
-                benefits=extracted_data.get("benefits", ""),
-                eligibility_criteria=extracted_data.get("eligibility_criteria", ""),
-                selection_criteria=extracted_data.get("selection_criteria", ""),
-                application_process=extracted_data.get("application_process", ""),
-                past_winners=extracted_data.get("past_winners", ""),
-                link=url,
-                source="Smart Link Extraction",
-                status="open"
-            )
-            
-            db.add(new_opp)
+                # Create new
+                new_opp = models.Opportunity(
+                    name=extracted_data.get("name", "Unknown Opportunity"),
+                    funder=extracted_data.get("funder", ""),
+                    value=extracted_data.get("value", ""),
+                    closing_date=extracted_data.get("closing_date", "Unknown"),
+                    description=extracted_data.get("description", ""),
+                    benefits=extracted_data.get("benefits", ""),
+                    eligibility_criteria=extracted_data.get("eligibility_criteria", ""),
+                    selection_criteria=extracted_data.get("selection_criteria", ""),
+                    application_process=extracted_data.get("application_process", ""),
+                    past_winners=extracted_data.get("past_winners", ""),
+                    link=url,
+                    source="Smart Link Extraction",
+                    status="open"
+                )
+                db.add(new_opp)
+                
             db.commit()
             db.refresh(new_opp)
             
@@ -98,7 +98,16 @@ def scrape_generic_link(url: str):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         url = sys.argv[1]
-        result = scrape_generic_link(url)
+        opp_id = None
+        if len(sys.argv) > 2:
+            opp_id = int(sys.argv[2])
+            
+        print(f"Starting extraction for URL: {url}")
+        
+        # We need an event loop for playwright sync API
+        result = extract_from_url(url, opp_id)
+        
+        # Print the final result as JSON so the backend can parse it
         print(json.dumps(result))
     else:
-        print("Please provide a URL as an argument.")
+        print(json.dumps({"error": "No URL provided"}))
