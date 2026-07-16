@@ -12,17 +12,27 @@ from services.llm_service import extract_opportunity_data
 from main import score_opportunity
 
 def extract_from_url(url: str, opp_id: int = None):
-    print("Launching headless browser...")
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        Stealth().apply_stealth_sync(page)
-        page.goto(url, wait_until="networkidle", timeout=60000)
-        
-        # Get all text from body
-        raw_text = page.evaluate("document.body.innerText")
-        browser.close()
-        
+    raw_text = ""
+    try:
+        print("Launching headless browser...")
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            Stealth().apply_stealth_sync(page)
+            page.goto(url, wait_until="networkidle", timeout=60000)
+            raw_text = page.evaluate("document.body.innerText")
+            browser.close()
+    except Exception as e:
+        print(f"Playwright failed: {e}. Falling back to requests...")
+        import requests
+        from bs4 import BeautifulSoup
+        try:
+            res = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+            soup = BeautifulSoup(res.text, "html.parser")
+            raw_text = soup.get_text(separator="\n", strip=True)
+        except Exception as ex:
+            return {"error": f"Failed to fetch URL with both playwright and requests. Details: {ex}"}
+            
     print(f"Extracted {len(raw_text)} characters. Sending to LLM for parsing...")
     
     # 2. Use LLM to extract structured data
