@@ -99,6 +99,11 @@ class OpportunityCreate(BaseModel):
 @app.post("/api/opportunities/manual")
 def add_manual_opportunity(opp: OpportunityCreate, db: Session = Depends(get_db)):
     """Manually add an opportunity and automatically score it with AI."""
+    if opp.link:
+        existing = db.query(models.Opportunity).filter(models.Opportunity.link == opp.link).first()
+        if existing:
+            raise HTTPException(status_code=409, detail="Opportunity from this URL already exists in the database")
+
     new_opp = models.Opportunity(
         **opp.dict(),
         status="open",

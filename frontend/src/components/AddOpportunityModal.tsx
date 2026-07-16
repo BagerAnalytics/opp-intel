@@ -45,9 +45,13 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
       await axios.post(`${apiUrl}/api/opportunities/manual`, formData);
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding opportunity manually", error);
-      alert("Failed to add opportunity manually. Check console for details.");
+      if (error.response?.status === 409 || error.response?.data?.detail?.includes("already exists")) {
+        alert("Link already exists! This opportunity has already been uploaded.");
+      } else {
+        alert("Failed to add opportunity manually. Check console for details.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -62,9 +66,13 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
       await axios.post(`${apiUrl}/api/opportunities/extract-link`, { url: urlInput });
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error auto-extracting opportunity", error);
-      alert("AI Extraction failed. The link might be protected or unreadable. Try manual entry.");
+      if (error.response?.status === 409 || error.response?.status === 500 && error.response?.data?.detail?.includes("already exists")) {
+        alert("Link already exists! This opportunity has already been uploaded.");
+      } else {
+        alert("AI Extraction failed. The link might be protected or unreadable. Try manual entry.");
+      }
     } finally {
       setIsSubmitting(false);
     }
