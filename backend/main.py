@@ -208,13 +208,27 @@ def trigger_all_scrapers(db: Session = Depends(get_db)):
     progress.updated_at = datetime.utcnow().isoformat()
     db.commit()
     
+    log_file = open("scraper_logs.txt", "w")
     subprocess.Popen(
         [sys.executable, "scrapers/run_all.py"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+        stdout=log_file,
+        stderr=subprocess.STDOUT
     )
     
     return {"message": "All scrapers triggered successfully in the background."}
+
+@app.get("/api/scrapers/logs")
+def get_scraper_logs():
+    """Returns the latest scraper execution logs."""
+    try:
+        import os
+        if not os.path.exists("scraper_logs.txt"):
+            return {"logs": "No logs yet. Run the scrapers first."}
+        with open("scraper_logs.txt", "r") as f:
+            lines = f.readlines()
+            return {"logs": "".join(lines[-100:])}
+    except Exception as e:
+        return {"logs": f"Error reading logs: {e}"}
 
 class OpportunityCreate(BaseModel):
     name: str

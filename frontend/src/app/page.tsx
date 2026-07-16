@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import OpportunityCard from '@/components/OpportunityCard';
 import AddOpportunityModal from '@/components/AddOpportunityModal';
-import { Loader2, TrendingUp, CheckCircle, Database, Plus } from 'lucide-react';
+import { Filter, Calendar, Trophy, ArrowRight, UserPlus, FileText, CheckCircle2, ChevronRight, Briefcase, Users, LayoutDashboard, Plus, Loader2, Search, X } from 'lucide-react';
 
 interface Opportunity {
   id: number;
@@ -35,6 +35,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const [logsContent, setLogsContent] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
   const [showTopMatches, setShowTopMatches] = useState(false);
   const [progress, setProgress] = useState<{is_active: boolean, current_task: string, progress_percent: number}>({
@@ -95,7 +97,18 @@ export default function Home() {
         <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
       </div>
     );
-  }
+  const fetchLogs = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await axios.get(`${apiUrl}/api/scrapers/logs`);
+      setLogsContent(res.data.logs);
+      setIsLogsModalOpen(true);
+    } catch (e) {
+      console.error(e);
+      setLogsContent("Failed to load logs.");
+      setIsLogsModalOpen(true);
+    }
+  };
 
   const handleRunScrapers = async () => {
     if (progress.is_active) return;
@@ -162,6 +175,12 @@ export default function Home() {
           >
             <Plus size={18} />
             Add Opportunity
+          </button>
+          <button 
+            onClick={fetchLogs}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-400 bg-[#1e2029]/80 border border-white/5 hover:bg-white/5 hover:text-white transition-all shadow-sm"
+          >
+            View Logs
           </button>
           <button 
             onClick={handleRunScrapers}
@@ -298,6 +317,30 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Logs Modal */}
+      {isLogsModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#12131a] rounded-2xl w-full max-w-4xl border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Search size={18} className="text-emerald-500" />
+                Live Scraper Logs
+              </h3>
+              <button 
+                onClick={() => setIsLogsModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto font-mono text-xs text-gray-300 bg-black">
+              <pre className="whitespace-pre-wrap">{logsContent}</pre>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
