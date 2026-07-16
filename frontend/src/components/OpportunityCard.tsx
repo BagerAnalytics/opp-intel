@@ -263,36 +263,34 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             )}
           </button>
 
-          {!hasDeepData && (
-            <button 
-              onClick={async (e) => {
-                e.stopPropagation();
-                if (!opp.link) return;
-                if (window.confirm('Do you want the AI to visit this link and extract all deep details (Benefits, Eligibility, etc.)?')) {
-                  try {
-                    const btn = e.currentTarget;
-                    btn.innerHTML = '<span class="flex items-center justify-center gap-2 w-full"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
-                    btn.setAttribute('disabled', 'true');
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                    await axios.post(`${apiUrl}/api/opportunities/${opp.id}/re-extract`);
-                    if (onDeleteSuccess) onDeleteSuccess(); 
-                  } catch (error) {
-                    alert('Failed to extract details. The AI might be blocked by the website.');
-                    window.location.reload();
-                  }
+          <button 
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (!opp.link) return;
+              if (window.confirm('Do you want the AI to visit this link and extract all deep details (Benefits, Eligibility, etc.)?')) {
+                try {
+                  const btn = e.currentTarget;
+                  btn.innerHTML = '<span class="flex items-center justify-center gap-2 w-full"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
+                  btn.setAttribute('disabled', 'true');
+                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  await axios.post(`${apiUrl}/api/opportunities/${opp.id}/re-extract`);
+                  if (onDeleteSuccess) onDeleteSuccess(); 
+                } catch (error) {
+                  alert('Failed to extract details. The AI might be blocked by the website.');
+                  window.location.reload();
                 }
-              }}
-              disabled={!opp.link}
-              className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border mt-2
-                ${!opp.link 
-                  ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed' 
-                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-sm hover:scale-[1.02]'}`}
-              title={!opp.link ? "You must edit this opportunity and add a link first" : "Automatically extract details"}
-            >
-              <Sparkles size={18} className={opp.link ? "text-emerald-500" : ""} />
-              {opp.link ? "Smart Scan Details" : "Cannot Scan: No Link Provided"}
-            </button>
-          )}
+              }
+            }}
+            disabled={!opp.link}
+            className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border mt-2
+              ${!opp.link 
+                ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed' 
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-sm hover:scale-[1.02]'}`}
+            title={!opp.link ? "You must edit this opportunity and add a link first" : "Automatically extract details"}
+          >
+            <Sparkles size={18} className={opp.link ? "text-emerald-500" : ""} />
+            {opp.link ? "Smart Scan Details" : "Cannot Scan: No Link Provided"}
+          </button>
           <button className="p-3 text-slate-400 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors self-start md:self-center mt-3 relative z-10 group-hover:bg-slate-50">
             {isExpanded ? <ChevronUp size={22} strokeWidth={2.5} /> : <ChevronDown size={22} strokeWidth={2.5} />}
           </button>
