@@ -38,6 +38,15 @@ class Opportunity(Base):
     match_reasoning = Column(Text, nullable=True)
     strategy = Column(Text, nullable=True)        # The AI-generated winning strategy
 
+class ScraperProgress(Base):
+    __tablename__ = "scraper_progress"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    is_active = Column(Boolean, default=False)
+    current_task = Column(String, default="Idle")
+    progress_percent = Column(Integer, default=0)
+    updated_at = Column(String, nullable=True)
+
 class Contact(Base):
     __tablename__ = "contacts"
 

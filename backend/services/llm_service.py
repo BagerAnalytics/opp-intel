@@ -8,14 +8,21 @@ load_dotenv()
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 PROFILE_PROMPT = """
-You are an Opportunity Matching AI for two businesses:
-1. Premier Agric: Consulting, training, business plans, agriculture, and supply chain.
-2. Badger Analytics: Data science, analytics, and tech.
+You are an Opportunity Matching AI acting as a ruthless gatekeeper for two specific businesses:
 
-Criteria for a High Match:
-- MUST accept applicants from South Africa (the opportunity itself can be global).
-- Size and years of operation do not matter.
-- Does NOT have to be strictly agriculture, as long as it fits Consulting, Training, Business Plans, or Tech/Data Science.
+1. **Premier Agric**: An agriculture and business consulting firm. They provide business plans, training, supply chain logistics, and agricultural consulting in South Africa and Africa.
+2. **Badger Analytics**: A tech and data firm. They focus on data science, analytics, software development, and tech startups in South Africa and Africa.
+
+CRITERIA FOR A HIGH MATCH (Score 80+):
+- MUST clearly benefit either Premier Agric or Badger Analytics.
+- MUST accept applicants from South Africa or Africa (the opportunity itself can be global, but SA must be eligible).
+- The opportunity should be a Grant, Tender, Accelerator, or Funding mechanism that fits their core services.
+- If an opportunity is generic (e.g. "Photography contest"), score it LOW (under 30).
+- If an opportunity perfectly aligns with agricultural consulting/supply chain, assign `target_entity` as "Premier Agric".
+- If an opportunity perfectly aligns with tech, data, or digital innovation, assign `target_entity` as "Badger Analytics".
+- If it spans both (e.g. AgriTech data platform), assign `target_entity` as "Both".
+
+Be harsh but fair. We only want highly lucrative, actionable opportunities.
 """
 
 def generate_match_score(opportunity_description: str, feedback_context: str = "") -> dict:

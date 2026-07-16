@@ -58,7 +58,16 @@ def start_scheduler():
             conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS strategy TEXT;"))
             conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS opp_type TEXT;"))
             conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS target_entity TEXT;"))
-            print("Successfully added strategy, opp_type, and target_entity columns to database.")
+            conn.execute(text('''
+                CREATE TABLE IF NOT EXISTS scraper_progress (
+                    id INTEGER PRIMARY KEY,
+                    is_active BOOLEAN DEFAULT 0,
+                    current_task TEXT DEFAULT 'Idle',
+                    progress_percent INTEGER DEFAULT 0,
+                    updated_at TEXT
+                )
+            '''))
+            print("Successfully added strategy, opp_type, target_entity, and scraper_progress to database.")
     except Exception as e:
         print(f"Migration notice (safe to ignore): {e}")
 
@@ -170,11 +179,34 @@ def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_
     
     return {"message": f"Successfully queued {len(tasks)} links for background extraction.", "queued_count": len(tasks)}
 
+@app.get("/api/scrapers/progress")
+def get_scraper_progress(db: Session = Depends(get_db)):
+    progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
+    if not progress:
+        progress = models.ScraperProgress(id=1, is_active=False, current_task="Idle", progress_percent=0)
+        db.add(progress)
+        db.commit()
+        db.refresh(progress)
+    return progress
+
 @app.post("/api/scrapers/trigger-all")
-def trigger_all_scrapers():
+def trigger_all_scrapers(db: Session = Depends(get_db)):
     """Manually trigger all background scrapers immediately."""
     import subprocess
     import sys
+    from datetime import datetime
+    
+    # Set initial progress state
+    progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
+    if not progress:
+        progress = models.ScraperProgress(id=1)
+        db.add(progress)
+    
+    progress.is_active = True
+    progress.current_task = "Initializing AI Hunter..."
+    progress.progress_percent = 5
+    progress.updated_at = datetime.utcnow().isoformat()
+    db.commit()
     
     subprocess.Popen(
         [sys.executable, "scrapers/run_all.py"],

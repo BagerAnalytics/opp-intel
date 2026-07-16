@@ -37,9 +37,37 @@ export default function Home() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showTopMatches, setShowTopMatches] = useState(false);
+  const [progress, setProgress] = useState<{is_active: boolean, current_task: string, progress_percent: number}>({
+    is_active: false,
+    current_task: "Idle",
+    progress_percent: 0
+  });
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  // Poll scraper progress
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await axios.get(`${apiUrl}/api/scrapers/progress`);
+        
+        setProgress(prev => {
+          // If it was active and just became inactive, automatically refresh data
+          if (prev.is_active && !res.data.is_active) {
+            fetchData();
+          }
+          return res.data;
+        });
+      } catch (e) {
+        console.error("Progress fetch error", e);
+      }
+    };
+    
+    const interval = setInterval(fetchProgress, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchData = async () => {
@@ -70,11 +98,13 @@ export default function Home() {
   }
 
   const handleRunScrapers = async () => {
+    if (progress.is_active) return;
+    
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       await axios.post(`${apiUrl}/api/scrapers/trigger-all`);
-      alert("All scrapers (including the AI Discovery Engine) have been successfully triggered! They are now hunting for opportunities in the background. Check back in a few minutes to see the new data.");
-      await fetchData(); // Refresh data to see scanning placeholders
+      // Local optimistic update
+      setProgress({ is_active: true, current_task: "Initializing AI Hunter...", progress_percent: 5 });
     } catch (error) {
       console.error("Error running scrapers", error);
       alert("Failed to run scrapers. Please check the backend logs.");
@@ -135,9 +165,20 @@ export default function Home() {
           </button>
           <button 
             onClick={handleRunScrapers}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm"
+            disabled={progress.is_active}
+            className={`px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-300 shadow-sm flex items-center gap-2
+              ${progress.is_active 
+                ? 'bg-slate-600 cursor-not-allowed opacity-80' 
+                : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5'}`}
           >
-            Run AI Scrapers (Force Sync)
+            {progress.is_active ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Scraping... ({progress.progress_percent}%)
+              </>
+            ) : (
+              'Run AI Scrapers (Force Sync)'
+            )}
           </button>
         </div>
       </div>
