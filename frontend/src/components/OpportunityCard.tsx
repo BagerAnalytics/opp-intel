@@ -249,53 +249,49 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             </button>
           )}
           
-          <button 
-            onClick={handleScoreMatch}
-            disabled={isScoring}
-            className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm hover:scale-[1.02]`}
-          >
-            {isScoring ? (
-              <><Loader2 size={18} className="animate-spin text-emerald-600" /> Analyzing...</>
-            ) : hasScore ? (
-              <><Zap size={18} className="text-yellow-500 drop-shadow-sm" /> Re-Analyze Fit</>
-            ) : (
-              <><Zap size={18} className="text-yellow-500 drop-shadow-sm" /> Score Fit</>
-            )}
-          </button>
-
-          <button 
-            onClick={async (e) => {
-              e.stopPropagation();
-              if (!opp.link) return;
-              if (window.confirm('Do you want the AI to visit this link and extract all deep details (Benefits, Eligibility, etc.)?')) {
-                try {
-                  const btn = e.currentTarget;
-                  btn.innerHTML = '<span class="flex items-center justify-center gap-2 w-full"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
-                  btn.setAttribute('disabled', 'true');
-                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                  
-                  // Setup timeout for the axios call
-                  await axios.post(`${apiUrl}/api/opportunities/${opp.id}/re-extract`, {}, { timeout: 110000 });
-                  
-                  if (onDeleteSuccess) onDeleteSuccess(); 
-                } catch (error) {
-                  const btn = e.currentTarget;
-                  btn.removeAttribute('disabled');
-                  btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg> Smart Scan Details';
-                  alert('Failed to extract details. The AI might be blocked by the website or the connection timed out.');
+          {opp.link ? (
+            <button 
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (window.confirm('Do you want the AI to visit this link and extract all deep details (Benefits, Eligibility, etc.)?')) {
+                  try {
+                    const btn = e.currentTarget;
+                    btn.innerHTML = '<span class="flex items-center justify-center gap-2 w-full"><svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
+                    btn.setAttribute('disabled', 'true');
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    
+                    await axios.post(`${apiUrl}/api/opportunities/${opp.id}/re-extract`, {}, { timeout: 110000 });
+                    
+                    if (onDeleteSuccess) onDeleteSuccess(); 
+                  } catch (error) {
+                    const btn = e.currentTarget;
+                    btn.removeAttribute('disabled');
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg> Smart Scan Details';
+                    alert('Failed to extract details. The AI might be blocked by the website or the connection timed out.');
+                  }
                 }
-              }
-            }}
-            disabled={!opp.link}
-            className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border mt-2
-              ${!opp.link 
-                ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed' 
-                : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-sm hover:scale-[1.02]'}`}
-            title={!opp.link ? "You must edit this opportunity and add a link first" : "Automatically extract details"}
-          >
-            <Sparkles size={18} className={opp.link ? "text-emerald-500" : ""} />
-            {opp.link ? "Smart Scan Details" : "Cannot Scan: No Link Provided"}
-          </button>
+              }}
+              className="w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border mt-2 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-sm hover:scale-[1.02]"
+              title="Automatically extract details and score fit"
+            >
+              <Sparkles size={18} className="text-emerald-500" />
+              Smart Scan Details
+            </button>
+          ) : (
+            <button 
+              onClick={handleScoreMatch}
+              disabled={isScoring}
+              className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm hover:scale-[1.02] mt-2`}
+            >
+              {isScoring ? (
+                <><Loader2 size={18} className="animate-spin text-emerald-600" /> Analyzing...</>
+              ) : hasScore ? (
+                <><Zap size={18} className="text-yellow-500 drop-shadow-sm" /> Re-Analyze Fit</>
+              ) : (
+                <><Zap size={18} className="text-yellow-500 drop-shadow-sm" /> Score Fit</>
+              )}
+            </button>
+          )}
           <button className="p-3 text-slate-400 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors self-start md:self-center mt-3 relative z-10 group-hover:bg-slate-50">
             {isExpanded ? <ChevronUp size={22} strokeWidth={2.5} /> : <ChevronDown size={22} strokeWidth={2.5} />}
           </button>
