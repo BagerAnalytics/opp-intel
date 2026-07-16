@@ -62,6 +62,25 @@ def run_all_scrapers():
         update_progress(db, 95, "Scraping LinkedIn Opportunities...")
         scrape_linkedin()
         
+        # Process all queued URLs that were found during this run
+        update_progress(db, 98, "Processing AI Extractor queue...")
+        scanning_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").all()
+        if scanning_opps:
+            print(f"Found {len(scanning_opps)} queued links. Handing off to AI Extractor...")
+            tasks = [{"id": opp.id, "url": opp.link} for opp in scanning_opps if opp.link]
+            if tasks:
+                import json
+                import subprocess
+                payload = json.dumps(tasks)
+                # Use absolute path to bulk_scraper.py to ensure it runs correctly from subprocess
+                scraper_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bulk_scraper.py")
+                subprocess.Popen(
+                    [sys.executable, scraper_path, payload],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
+                print("AI Extractor launched in background.")
+        
         finish_progress(db)
         print("Scrapers completed successfully.")
         
