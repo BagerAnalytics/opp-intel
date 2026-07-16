@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -75,9 +75,9 @@ def start_scheduler():
 
 @app.get("/api/scrapers/run")
 @app.post("/api/scrapers/run")
-def trigger_scrapers():
+def trigger_scrapers(background_tasks: BackgroundTasks):
     """Manually trigger all scrapers to run immediately."""
-    run_all_scrapers()
+    background_tasks.add_task(run_all_scrapers)
     return {"status": "Scrapers executed successfully"}
 
 @app.get("/")
