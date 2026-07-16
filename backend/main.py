@@ -201,7 +201,9 @@ def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     
     import json
     try:
-        data = json.loads(result)
+        # Strip markdown json tags if present
+        cleaned_result = result.replace("```json", "").replace("```", "").strip()
+        data = json.loads(cleaned_result)
         opp.match_score = data.get("match_score")
         opp.match_reasoning = data.get("reasoning")
         

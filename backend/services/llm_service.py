@@ -71,7 +71,8 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
             ]
         )
         import json
-        return json.loads(response.choices[0].message.content)
+        cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
+        return json.loads(cleaned_result)
     except Exception as e:
         print(f"Extraction Error: {e}")
         return {}

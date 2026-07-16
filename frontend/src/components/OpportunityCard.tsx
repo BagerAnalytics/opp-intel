@@ -76,6 +76,15 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
     strategy: opp.strategy
   });
 
+  React.useEffect(() => {
+    setOpp(initialOpp);
+    setScoreData({
+      score: initialOpp.match_score,
+      reasoning: initialOpp.match_reasoning,
+      strategy: initialOpp.strategy
+    });
+  }, [initialOpp]);
+
   const handleScoreMatch = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsScoring(true);
@@ -115,7 +124,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
   };
 
   const hasScore = scoreData.score !== null;
-  const hasDeepData = opp.benefits || opp.eligibility_criteria || opp.selection_criteria;
+  const hasDeepData = opp.benefits || opp.eligibility_criteria || opp.selection_criteria || opp.application_process || opp.past_winners;
   const warmConnections = contacts.filter(c => c.organization?.toLowerCase().includes(opp.funder?.toLowerCase() || 'unmatchable') || opp.funder?.toLowerCase().includes(c.organization?.toLowerCase() || 'unmatchable'));
 
   const missingDocs = complianceDocs
