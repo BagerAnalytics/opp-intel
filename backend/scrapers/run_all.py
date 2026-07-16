@@ -62,12 +62,12 @@ def run_all_scrapers():
         update_progress(db, 95, "Scraping LinkedIn Opportunities...")
         scrape_linkedin()
         
-        # Process a batch of 10 queued URLs
+        # Process a batch of 50 queued URLs
         update_progress(db, 98, "Processing AI Extractor queue...")
-        queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(10).all()
+        queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(50).all()
         
         # Also grab any old ones that were stuck in "Scanning..." from a previous crash that weren't cleaned up
-        stuck_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").limit(5).all()
+        stuck_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").limit(10).all()
         
         batch = queued_opps + stuck_opps
         
