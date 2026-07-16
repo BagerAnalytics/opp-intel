@@ -71,13 +71,12 @@ export default function Home() {
 
   const handleRunScrapers = async () => {
     try {
-      setIsLoading(true);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      await axios.post(`${apiUrl}/api/scrapers/run`);
-      await fetchData(); // Refresh data after running scrapers
+      await axios.post(`${apiUrl}/api/scrapers/trigger-all`);
+      alert("All scrapers (including the AI Discovery Engine) have been successfully triggered! They are now hunting for opportunities in the background. Check back in a few minutes to see the new data.");
+      await fetchData(); // Refresh data to see scanning placeholders
     } catch (error) {
       console.error("Error running scrapers", error);
-      setIsLoading(false);
       alert("Failed to run scrapers. Please check the backend logs.");
     }
   };
@@ -138,7 +137,7 @@ export default function Home() {
             onClick={handleRunScrapers}
             className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm"
           >
-            Run AI Scrapers
+            Run AI Scrapers (Force Sync)
           </button>
         </div>
       </div>

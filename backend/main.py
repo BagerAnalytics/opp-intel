@@ -157,6 +157,20 @@ def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_
     
     return {"message": f"Successfully queued {len(tasks)} links for background extraction.", "queued_count": len(tasks)}
 
+@app.post("/api/scrapers/trigger-all")
+def trigger_all_scrapers():
+    """Manually trigger all background scrapers immediately."""
+    import subprocess
+    import sys
+    
+    subprocess.Popen(
+        [sys.executable, "scrapers/run_all.py"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    
+    return {"message": "All scrapers triggered successfully in the background."}
+
 class OpportunityCreate(BaseModel):
     name: str
     funder: Optional[str] = None
