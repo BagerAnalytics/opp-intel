@@ -73,6 +73,7 @@ def start_scheduler():
     except Exception as e:
         print(f"Migration notice (safe to ignore): {e}")
 
+@app.get("/api/scrapers/run")
 @app.post("/api/scrapers/run")
 def trigger_scrapers():
     """Manually trigger all scrapers to run immediately."""
