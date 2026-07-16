@@ -117,6 +117,41 @@ def add_manual_opportunity(opp: OpportunityCreate, db: Session = Depends(get_db)
         
     return new_opp
 
+class LinkExtractRequest(BaseModel):
+    url: str
+
+@app.post("/api/opportunities/extract-link")
+def extract_link(req: LinkExtractRequest):
+    """Extract an opportunity from a URL out-of-process and return the result synchronously."""
+    import subprocess
+    import sys
+    import json
+    
+    try:
+        result = subprocess.run(
+            [sys.executable, "scrapers/generic_scraper.py", req.url],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        
+        # The script prints debug info and then JSON at the end.
+        output_lines = result.stdout.strip().split('\n')
+        last_line = output_lines[-1] if output_lines else ""
+        
+        try:
+            data = json.loads(last_line)
+            if "error" in data:
+                raise HTTPException(status_code=500, detail=data["error"])
+            return data
+        except json.JSONDecodeError:
+            print("Failed to parse JSON from scraper:", result.stdout)
+            print("Stderr:", result.stderr)
+            raise HTTPException(status_code=500, detail="Failed to parse extraction result.")
+            
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail="Extraction timed out after 2 minutes.")
+
 @app.post("/api/opportunities/{opp_id}/score")
 def score_opportunity(opp_id: int, db: Session = Depends(get_db)):
     """Generate a match score for a specific opportunity using the LLM."""
