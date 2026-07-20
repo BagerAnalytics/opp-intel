@@ -146,6 +146,31 @@ def test_anthropic_models():
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/api/debug/counts")
+def get_debug_counts(db: Session = Depends(get_db)):
+    queued = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").count()
+    failed = db.query(models.Opportunity).filter(models.Opportunity.status == "failed").count()
+    paused = db.query(models.Opportunity).filter(models.Opportunity.status == "paused").count()
+    open_count = db.query(models.Opportunity).filter(models.Opportunity.status == "open").count()
+    scanning = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").count()
+    total = db.query(models.Opportunity).count()
+    
+    return {
+        "queued": queued,
+        "failed": failed,
+        "paused": paused,
+        "open": open_count,
+        "scanning": scanning,
+        "total": total
+    }
+
+@app.post("/api/debug/unpause")
+def unpause_queue(db: Session = Depends(get_db)):
+    db.query(models.Opportunity).filter(models.Opportunity.status == "paused").update({"status": "queued"})
+    db.query(models.Opportunity).filter(models.Opportunity.status == "failed").update({"status": "queued"})
+    db.commit()
+    return {"message": "Queue unpaused!"}
+
 @app.post("/api/opportunities/bulk-import")
 def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_db)):
     """Accepts a list of URLs, creates placeholder rows, and kicks off the bulk scraper in the background."""
