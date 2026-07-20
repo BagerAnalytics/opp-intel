@@ -44,26 +44,8 @@ def run_all_scrapers():
         update_progress(db, 15, "Crawling saved Portals in memory...")
         scrape_saved_portals()
         
-        update_progress(db, 25, "Scraping Discovery Engine...")
-        scrape_discovery_engine()
-        
-        update_progress(db, 40, "Scraping TerraViva Grants...")
-        scrape_terraviva()
-        
-        update_progress(db, 55, "Scraping Disrupt Africa...")
-        scrape_disrupt_africa()
-        
-        update_progress(db, 70, "Scraping Opportunity Desk...")
-        scrape_opportunity_desk()
-        
-        update_progress(db, 85, "Scraping eTenders SA...")
-        scrape_etenders()
-        
-        update_progress(db, 95, "Scraping LinkedIn Opportunities...")
-        scrape_linkedin()
-        
-        # Process a batch of 50 queued URLs
-        update_progress(db, 98, "Processing AI Extractor queue...")
+        # Process a batch of 50 queued URLs FIRST so the user sees results immediately
+        update_progress(db, 10, "Processing AI Extractor queue...")
         queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(50).all()
         
         # Also grab any old ones that were stuck in "Scanning..." from a previous crash that weren't cleaned up
@@ -84,6 +66,33 @@ def run_all_scrapers():
                 from scrapers.bulk_scraper import run_bulk_scraper
                 run_bulk_scraper(tasks)
                 print("AI Extractor finished processing queue.")
+
+        update_progress(db, 20, "Hunting for new Opportunity Portals...")
+        scrape_meta_portals()
+        
+        update_progress(db, 30, "Scraping Disrupt Africa...")
+        scrape_disrupt_africa()
+        
+        update_progress(db, 40, "Scraping TerraViva Grants...")
+        scrape_terraviva()
+        
+        update_progress(db, 50, "Scraping Meta-Portals...")
+        scrape_meta_portals()
+        
+        update_progress(db, 60, "Scraping Discovery Engine...")
+        scrape_discovery_engine()
+        
+        update_progress(db, 70, "Crawling Saved Portals...")
+        scrape_saved_portals()
+        
+        update_progress(db, 80, "Scraping Opportunity Desk...")
+        scrape_opportunity_desk()
+        
+        update_progress(db, 90, "Scraping eTenders SA...")
+        scrape_etenders()
+        
+        update_progress(db, 95, "Scraping LinkedIn Opportunities...")
+        scrape_linkedin()
         
         finish_progress(db)
         print("Scrapers completed successfully.")

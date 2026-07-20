@@ -211,6 +211,19 @@ def trigger_all_scrapers(db: Session = Depends(get_db)):
     if not progress:
         progress = models.ScraperProgress(id=1)
         db.add(progress)
+    elif progress.is_active:
+        # Check if it's a stale lock (e.g. older than 30 minutes)
+        import datetime as dt
+        if progress.updated_at:
+            try:
+                last_update = dt.datetime.fromisoformat(progress.updated_at)
+                if (datetime.utcnow() - last_update).total_seconds() > 1800:
+                    progress.is_active = False # stale lock, override
+            except Exception:
+                pass
+        
+        if progress.is_active:
+            return {"message": "Scrapers are already running!"}
     
     progress.is_active = True
     progress.current_task = "Initializing AI Hunter..."
