@@ -14,17 +14,35 @@ from services.scorer_service import score_opportunity
 def extract_from_url(url: str, opp_id: int = None):
     raw_text = ""
     try:
-        print("Fetching via ScraperAPI...")
         import requests
         from bs4 import BeautifulSoup
         
-        API_KEY = "54c796e10be2f82a70de0e92f1806e89"
-        scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={url}&render=true"
+        # 1. Try free normal requests first (costs 0 credits)
+        print(f"Trying normal fetch for {url}...")
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
         
-        res = requests.get(scraper_url, timeout=60)
-        res.raise_for_status()
+        html_content = ""
+        try:
+            res = requests.get(url, headers=headers, timeout=15)
+            # Check if it was blocked by Cloudflare or similar (403, 401, 429)
+            if res.status_code in [403, 401, 429] or "cloudflare" in res.text.lower() or "captcha" in res.text.lower() or "access denied" in res.text.lower():
+                raise Exception("Bot protection detected")
+            res.raise_for_status()
+            html_content = res.text
+            print("Successfully fetched via normal requests (0 credits used).")
+        except Exception as e:
+            print(f"Normal fetch failed ({e}). Falling back to ScraperAPI...")
+            
+            # 2. Fall back to ScraperAPI (costs 5 credits)
+            API_KEY = "54c796e10be2f82a70de0e92f1806e89"
+            scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={url}&render=true"
+            
+            res = requests.get(scraper_url, timeout=60)
+            res.raise_for_status()
+            html_content = res.text
+            print("Successfully fetched via ScraperAPI.")
         
-        soup = BeautifulSoup(res.text, "html.parser")
+        soup = BeautifulSoup(html_content, "html.parser")
         raw_text = soup.get_text(separator="\n", strip=True)
     except Exception as ex:
         return {"error": f"Failed to fetch URL with ScraperAPI. Details: {ex}"}
