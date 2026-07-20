@@ -65,11 +65,18 @@ def run_all_scrapers():
         # Centralized Extraction Queue Processor
         update_progress(db, 50, "Processing AI Extractor queue...")
         
-        # Process up to 100 items per run to avoid infinite hanging
+        # Process until queue is empty
         items_processed = 0
         from scrapers.bulk_scraper import run_bulk_scraper
         
-        while items_processed < 100:
+        # Get total count for progress math
+        total_in_queue = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").count()
+        total_stuck = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").count()
+        total_tasks = total_in_queue + total_stuck
+        if total_tasks == 0:
+            total_tasks = 1 # prevent div by zero
+            
+        while True:
             queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(10).all()
             stuck_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").limit(5).all()
             
@@ -88,8 +95,8 @@ def run_all_scrapers():
             
             if tasks:
                 # Update progress based on how many we've done (50% to 95%)
-                progress_val = 50 + int((items_processed / 100.0) * 45)
-                update_progress(db, progress_val, f"AI Extractor: Processing {items_processed}/100 max...")
+                progress_val = min(99, 50 + int((items_processed / float(total_tasks)) * 45))
+                update_progress(db, progress_val, f"AI Extractor: Processing {items_processed}/{total_tasks}...")
                 run_bulk_scraper(tasks)
                 items_processed += len(tasks)
         

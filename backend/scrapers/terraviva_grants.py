@@ -58,7 +58,6 @@ def scrape_terraviva():
     
     if new_urls:
         try:
-            tasks = []
             with SessionLocal() as db:
                 for url in new_urls:
                     new_opp = models.Opportunity(
@@ -74,23 +73,15 @@ def scrape_terraviva():
                         past_winners="",
                         link=url,
                         source="Terra Viva Grants",
-                        status="Scanning...",
+                        status="queued",
                         match_score=0,
                         match_reasoning="",
                         strategy=""
                     )
                     db.add(new_opp)
-                    db.flush()
-                    tasks.append({"id": new_opp.id, "url": url})
                 db.commit()
             
-            payload = json.dumps(tasks)
-            subprocess.Popen(
-                [sys.executable, "scrapers/bulk_scraper.py", payload],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-            print(f"Successfully queued {len(tasks)} Terra Viva grants for extraction.")
+            print(f"Successfully queued {len(new_urls)} Terra Viva grants for extraction.")
         except Exception as e:
             print(f"Failed to queue Terra Viva scraper: {e}")
     else:
