@@ -109,7 +109,6 @@ def scrape_meta_portals():
     
     if new_urls:
         try:
-            tasks = []
             with SessionLocal() as db:
                 for url in new_urls:
                     new_opp = models.Opportunity(
@@ -120,22 +119,15 @@ def scrape_meta_portals():
                         description="Discovered via Meta-Hunter...",
                         link=url,
                         source="Meta-Discovery",
-                        status="Scanning...",
+                        status="queued",
                         match_score=0
                     )
                     db.add(new_opp)
-                    db.flush()
-                    tasks.append({"id": new_opp.id, "url": url})
                 db.commit()
             
-            payload = json.dumps(tasks)
-            subprocess.Popen(
-                [sys.executable, "scrapers/bulk_scraper.py", payload],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
+            print(f"Successfully queued {len(new_urls)} URLs for deep extraction.")
         except Exception as e:
-            print(f"Failed to queue bulk scraper: {e}")
+            print(f"Failed to queue URLs: {e}")
 
 if __name__ == "__main__":
     scrape_meta_portals()

@@ -126,12 +126,8 @@ def scrape_discovery_engine():
     
     # Send new URLs to the bulk scraper
     if new_urls:
-        print("Passing new URLs to the Generic Scraper pipeline...")
-        # To avoid blocking or recursively opening playwright in the same thread,
-        # we call the bulk scraper script natively.
+        print("Queueing new URLs for the Generic Scraper pipeline...")
         try:
-            # We must create mock placeholder DB entries so bulk scraper can process them
-            tasks = []
             with SessionLocal() as db:
                 for url in new_urls:
                     new_opp = models.Opportunity(
@@ -147,25 +143,17 @@ def scrape_discovery_engine():
                         past_winners="",
                         link=url,
                         source="Discovery Engine",
-                        status="Scanning...",
+                        status="queued",
                         match_score=0,
                         match_reasoning="",
                         strategy=""
                     )
                     db.add(new_opp)
-                    db.flush()
-                    tasks.append({"id": new_opp.id, "url": url})
                 db.commit()
             
-            payload = json.dumps(tasks)
-            subprocess.Popen(
-                [sys.executable, "scrapers/bulk_scraper.py", payload],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-            print(f"Successfully queued {len(tasks)} discovered links for background extraction.")
+            print(f"Successfully queued {len(new_urls)} discovered links for extraction.")
         except Exception as e:
-            print(f"Failed to queue bulk scraper: {e}")
+            print(f"Failed to queue discovered links: {e}")
     else:
         print("No new opportunities discovered this run.")
 

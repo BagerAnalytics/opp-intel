@@ -82,8 +82,8 @@ export default function Home() {
         axios.get(`${apiUrl}/api/compliance`),
         axios.get(`${apiUrl}/api/portals`)
       ]);
-      const openOpps = oppResponse.data.filter((opp: Opportunity) => opp.status === 'open');
-      setOpportunities(openOpps);
+      // Remove strict filtering so we can view the queue in the UI
+      setOpportunities(oppResponse.data);
       setContacts(contactsResponse.data);
       setComplianceDocs(complianceResponse.data);
       setPortals(portalsResponse.data);
@@ -132,13 +132,24 @@ export default function Home() {
   const filteredOpportunities = opportunities.filter(opp => {
     // 1. Tab filtering
     let tabMatch = true;
-    if (activeTab !== 'All') {
+    if (activeTab !== 'All' && activeTab !== 'Queued for Extraction' && activeTab !== 'Failed Extraction') {
       if (activeTab === 'Grants' && opp.opp_type !== 'Grant') tabMatch = false;
       else if (activeTab === 'Tenders' && opp.opp_type !== 'Tender') tabMatch = false;
       else if (activeTab === 'Awards' && opp.opp_type !== 'Award') tabMatch = false;
       else if (activeTab === 'Fellowships / Other' && opp.opp_type !== 'Other') tabMatch = false;
       else if (activeTab === 'Manually Added' && (opp.source !== 'Manual Entry' && opp.source !== 'Smart Link Extraction')) tabMatch = false;
     }
+    
+    // Status filtering based on Tab
+    if (activeTab === 'Queued for Extraction') {
+      if (opp.status !== 'queued' && opp.status !== 'Scanning...') tabMatch = false;
+    } else if (activeTab === 'Failed Extraction') {
+      if (opp.status !== 'failed') tabMatch = false;
+    } else {
+      // Standard tabs should ONLY show 'open' status (successfully extracted)
+      if (opp.status !== 'open') tabMatch = false;
+    }
+    
     if (!tabMatch) return false;
 
     // 2. Search filtering
@@ -162,6 +173,9 @@ export default function Home() {
     : 0;
     
   const topMatchesCount = filteredOpportunities.filter(o => (o.match_score || 0) >= 80).length;
+  const queuedCount = opportunities.filter(o => o.status === 'queued' || o.status === 'Scanning...').length;
+  const failedCount = opportunities.filter(o => o.status === 'failed').length;
+  const openCount = opportunities.filter(o => o.status === 'open').length;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10 relative">
@@ -171,7 +185,7 @@ export default function Home() {
       <div className="mb-10 flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 tracking-tight mb-2">Welcome back, Admin.</h1>
-          <p className="text-slate-500 text-lg font-medium">You have <span className="text-emerald-600 font-bold">{opportunities.length}</span> open opportunities waiting to be reviewed.</p>
+          <p className="text-slate-500 text-lg font-medium">You have <span className="text-emerald-600 font-bold">{openCount}</span> open opportunities ready for review.</p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -255,6 +269,33 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Queue & Error Stats */}
+      {(queuedCount > 0 || failedCount > 0) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="bg-slate-100 rounded-3xl p-7 border border-slate-200 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+            <div>
+              <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase mb-1">Queue Backlog</h3>
+              <p className="text-4xl font-extrabold text-slate-700">{queuedCount}</p>
+              <p className="text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wide">Links waiting for AI extraction</p>
+            </div>
+            <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100">
+              <Loader2 className="text-slate-400 animate-spin" size={28} />
+            </div>
+          </div>
+          
+          <div className="bg-red-50/50 rounded-3xl p-7 border border-red-100 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+            <div>
+              <h3 className="font-bold text-red-500 text-[13px] tracking-widest uppercase mb-1">Failed Extraction</h3>
+              <p className="text-4xl font-extrabold text-red-600">{failedCount}</p>
+              <p className="text-xs font-semibold text-red-400 mt-2 uppercase tracking-wide">Dead links or blocked by paywalls</p>
+            </div>
+            <div className="p-4 bg-white rounded-2xl shadow-sm border border-red-50">
+              <X className="text-red-400" size={28} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Advanced Filters */}
       <div className="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-slate-200">
         <div className="w-full md:w-1/2">
@@ -279,7 +320,7 @@ export default function Home() {
 
       <div className="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="flex flex-wrap items-center gap-2">
-          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Saved Portals', 'Manually Added'].map(tab => (
+          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Saved Portals', 'Manually Added', 'Queued for Extraction', 'Failed Extraction'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}

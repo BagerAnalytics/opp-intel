@@ -25,15 +25,11 @@ def run_bulk_scraper(tasks):
                     print(f"Opportunity ID {opp_id} deleted. Skipping.")
                     continue
                 
-                # Update progress bar
-                progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
-                if progress:
-                    progress.current_task = f"AI Extractor: Processing {idx+1}/{total} links..."
-                    # Scale progress between 98% and 99%
-                    progress.progress_percent = 98
-                    from datetime import datetime
-                    progress.updated_at = datetime.utcnow().isoformat()
-                db.commit()
+                # Database connection check
+                opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+                if not opp:
+                    print(f"Opportunity ID {opp_id} deleted. Skipping.")
+                    continue
             
             # This handles playwright, fallback, LLM, saving to DB, and scoring
             result = extract_from_url(url, opp_id=opp_id)

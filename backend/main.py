@@ -138,7 +138,7 @@ def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_
     if not req.urls:
         raise HTTPException(status_code=400, detail="No URLs provided")
         
-    tasks = []
+    queued_count = 0
     
     for url in req.urls:
         url = url.strip()
@@ -164,30 +164,20 @@ def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_
             past_winners="",
             link=url,
             source="Bulk Import",
-            status="Scanning...",
+            status="queued",
             match_score=0,
             match_reasoning="",
             strategy=""
         )
         db.add(new_opp)
-        db.flush() # flush to get the ID
+        queued_count += 1
         
-        tasks.append({"id": new_opp.id, "url": url})
-        
-    if not tasks:
+    if queued_count == 0:
         return {"message": "No new URLs to import (all already exist)."}
         
     db.commit()
     
-    # Spawn background task out-of-process
-    payload = json.dumps(tasks)
-    subprocess.Popen(
-        [sys.executable, "scrapers/bulk_scraper.py", payload],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
-    
-    return {"message": f"Successfully queued {len(tasks)} links for background extraction.", "queued_count": len(tasks)}
+    return {"message": f"Successfully queued {queued_count} links for background extraction.", "queued_count": queued_count}
 
 @app.get("/api/scrapers/progress")
 def get_scraper_progress(db: Session = Depends(get_db)):

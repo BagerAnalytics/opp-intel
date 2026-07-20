@@ -38,23 +38,47 @@ def run_all_scrapers():
     print("Running scheduled scrapers from isolated process...")
     db = SessionLocal()
     try:
-        update_progress(db, 10, "Hunting for new Opportunity Portals...")
+        update_progress(db, 5, "Hunting for new Opportunity Portals...")
         scrape_meta_portals()
         
-        update_progress(db, 15, "Crawling saved Portals in memory...")
+        update_progress(db, 10, "Scraping Disrupt Africa...")
+        scrape_disrupt_africa()
+        
+        update_progress(db, 15, "Scraping TerraViva Grants...")
+        scrape_terraviva()
+        
+        update_progress(db, 20, "Scraping Discovery Engine...")
+        scrape_discovery_engine()
+        
+        update_progress(db, 25, "Crawling Saved Portals...")
         scrape_saved_portals()
         
-        # Process a batch of 50 queued URLs FIRST so the user sees results immediately
-        update_progress(db, 10, "Processing AI Extractor queue...")
-        queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(50).all()
+        update_progress(db, 35, "Scraping Opportunity Desk...")
+        scrape_opportunity_desk()
         
-        # Also grab any old ones that were stuck in "Scanning..." from a previous crash that weren't cleaned up
-        stuck_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").limit(10).all()
+        update_progress(db, 40, "Scraping eTenders SA...")
+        scrape_etenders()
         
-        batch = queued_opps + stuck_opps
+        update_progress(db, 45, "Scraping LinkedIn Opportunities...")
+        scrape_linkedin()
         
-        if batch:
-            print(f"Found {len(batch)} queued links. Handing off to AI Extractor...")
+        # Centralized Extraction Queue Processor
+        update_progress(db, 50, "Processing AI Extractor queue...")
+        
+        # Process up to 100 items per run to avoid infinite hanging
+        items_processed = 0
+        from scrapers.bulk_scraper import run_bulk_scraper
+        
+        while items_processed < 100:
+            queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(10).all()
+            stuck_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").limit(5).all()
+            
+            batch = queued_opps + stuck_opps
+            if not batch:
+                print("Queue is empty.")
+                break
+                
+            print(f"Pulled {len(batch)} links from queue. Sending to AI Extractor...")
             tasks = []
             for opp in batch:
                 if opp.link:
@@ -63,36 +87,13 @@ def run_all_scrapers():
             db.commit()
             
             if tasks:
-                from scrapers.bulk_scraper import run_bulk_scraper
+                # Update progress based on how many we've done (50% to 95%)
+                progress_val = 50 + int((items_processed / 100.0) * 45)
+                update_progress(db, progress_val, f"AI Extractor: Processing {items_processed}/100 max...")
                 run_bulk_scraper(tasks)
-                print("AI Extractor finished processing queue.")
-
-        update_progress(db, 20, "Hunting for new Opportunity Portals...")
-        scrape_meta_portals()
+                items_processed += len(tasks)
         
-        update_progress(db, 30, "Scraping Disrupt Africa...")
-        scrape_disrupt_africa()
-        
-        update_progress(db, 40, "Scraping TerraViva Grants...")
-        scrape_terraviva()
-        
-        update_progress(db, 50, "Scraping Meta-Portals...")
-        scrape_meta_portals()
-        
-        update_progress(db, 60, "Scraping Discovery Engine...")
-        scrape_discovery_engine()
-        
-        update_progress(db, 70, "Crawling Saved Portals...")
-        scrape_saved_portals()
-        
-        update_progress(db, 80, "Scraping Opportunity Desk...")
-        scrape_opportunity_desk()
-        
-        update_progress(db, 90, "Scraping eTenders SA...")
-        scrape_etenders()
-        
-        update_progress(db, 95, "Scraping LinkedIn Opportunities...")
-        scrape_linkedin()
+        print(f"AI Extractor finished processing {items_processed} items.")
         
         finish_progress(db)
         print("Scrapers completed successfully.")

@@ -57,7 +57,6 @@ def scrape_disrupt_africa():
     
     if new_urls:
         try:
-            tasks = []
             with SessionLocal() as db:
                 for url in new_urls:
                     new_opp = models.Opportunity(
@@ -73,25 +72,17 @@ def scrape_disrupt_africa():
                         past_winners="",
                         link=url,
                         source="Disrupt Africa",
-                        status="Scanning...",
+                        status="queued",
                         match_score=0,
                         match_reasoning="",
                         strategy=""
                     )
                     db.add(new_opp)
-                    db.flush()
-                    tasks.append({"id": new_opp.id, "url": url})
                 db.commit()
             
-            payload = json.dumps(tasks)
-            subprocess.Popen(
-                [sys.executable, "scrapers/bulk_scraper.py", payload],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-            print(f"Successfully queued {len(tasks)} Disrupt Africa opportunities for extraction.")
+            print(f"Successfully queued {len(new_urls)} Disrupt Africa opportunities for extraction.")
         except Exception as e:
-            print(f"Failed to queue Disrupt Africa scraper: {e}")
+            print(f"Failed to queue Disrupt Africa opportunities: {e}")
     else:
         print("No new Disrupt Africa opportunities this run.")
 
