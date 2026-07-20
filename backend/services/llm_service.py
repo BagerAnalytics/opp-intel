@@ -36,7 +36,7 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
     try:
         # Try Anthropic first
         response = anthropic_client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-3-5-sonnet-20240620",
             max_tokens=1000,
             system=system_prompt,
             messages=[
@@ -85,7 +85,7 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
     try:
         # Try Anthropic first
         response = anthropic_client.messages.create(
-            model="claude-3-haiku-20240307",
+            model="claude-3-5-sonnet-20240620",
             max_tokens=2000,
             system=system_prompt,
             messages=[
