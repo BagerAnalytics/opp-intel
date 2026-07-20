@@ -1,11 +1,12 @@
 import os
+import json
 from dotenv import load_dotenv
-import openai
+import anthropic
 
 load_dotenv()
 
-# We will use OpenAI for the Matcher and Strategy Generator
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# We will use Anthropic for the Matcher and Strategy Generator
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 PROFILE_PROMPT = """
 You are an Opportunity Matching AI acting as a ruthless gatekeeper for two specific businesses:
@@ -35,18 +36,22 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
         if feedback_context:
             system_prompt += f"\n\n{feedback_context}\nUse this feedback to adjust your scoring. If an opportunity is similar to one we've lost, lower the score. If similar to one we've won, raise the score."
             
-        response = client.chat.completions.create(
-            model="gpt-4-turbo",
-            response_format={ "type": "json_object" },
+        response = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=1000,
+            system=system_prompt,
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Analyze this opportunity:\n\n{opportunity_description}"}
+                {"role": "user", "content": f"Analyze this opportunity and output ONLY valid JSON format:\n\n{opportunity_description}"}
             ]
         )
-        return response.choices[0].message.content
+        cleaned_result = response.content[0].text
+        if "```json" in cleaned_result:
+            cleaned_result = cleaned_result.split("```json")[1].split("```")[0].strip()
+        elif "```" in cleaned_result:
+            cleaned_result = cleaned_result.split("```")[1].split("```")[0].strip()
+        return cleaned_result
     except Exception as e:
         print(f"LLM Error: {e}")
-        import json
         return json.dumps({"match_score": 0, "reasoning": str(e)})
 
 def extract_opportunity_data(raw_text: str, url: str) -> dict:
@@ -69,16 +74,19 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
     Output JSON strictly.
     """
     try:
-        response = client.chat.completions.create(
-            model="gpt-4-turbo",
-            response_format={ "type": "json_object" },
+        response = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=2000,
+            system=system_prompt,
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}"}
+                {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput ONLY valid JSON format."}
             ]
         )
-        import json
-        cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
+        cleaned_result = response.content[0].text
+        if "```json" in cleaned_result:
+            cleaned_result = cleaned_result.split("```json")[1].split("```")[0].strip()
+        elif "```" in cleaned_result:
+            cleaned_result = cleaned_result.split("```")[1].split("```")[0].strip()
         return json.loads(cleaned_result)
     except Exception as e:
         print(f"Extraction Error: {e}")
@@ -100,14 +108,15 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
     Use this feedback to avoid past mistakes and double-down on winning strategies!
     """
     try:
-        response = client.chat.completions.create(
-            model="gpt-4-turbo",
+        response = client.messages.create(
+            model="claude-3-haiku-20240307",
+            max_tokens=1500,
+            system="You are an expert grant and funding strategist.",
             messages=[
-                {"role": "system", "content": "You are an expert grant and funding strategist."},
                 {"role": "user", "content": prompt}
             ]
         )
-        return response.choices[0].message.content
+        return response.content[0].text
     except Exception as e:
         print(f"LLM Error: {e}")
         return "Failed to generate strategy."
