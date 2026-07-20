@@ -2,11 +2,13 @@ import os
 import json
 from dotenv import load_dotenv
 import anthropic
+import openai
 
 load_dotenv()
 
-# We will use Anthropic for the Matcher and Strategy Generator
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+# Initialize both clients
+anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 PROFILE_PROMPT = """
 You are an Opportunity Matching AI acting as a ruthless gatekeeper for two specific businesses:
@@ -27,16 +29,13 @@ Be harsh but fair. We only want highly lucrative, actionable opportunities.
 """
 
 def generate_match_score(opportunity_description: str, feedback_context: str = "") -> dict:
-    """
-    Analyzes an opportunity description against the company profile 
-    and returns a JSON with a match_score (0-100), reasoning, opp_type, and target_entity.
-    """
+    system_prompt = PROFILE_PROMPT + "\nOutput JSON format: {\"match_score\": 85, \"reasoning\": \"...\", \"opp_type\": \"Grant|Tender|Award|Other\", \"target_entity\": \"Premier Agric|Badger Analytics|Both\"}"
+    if feedback_context:
+        system_prompt += f"\n\n{feedback_context}\nUse this feedback to adjust your scoring. If an opportunity is similar to one we've lost, lower the score. If similar to one we've won, raise the score."
+        
     try:
-        system_prompt = PROFILE_PROMPT + "\nOutput JSON format: {\"match_score\": 85, \"reasoning\": \"...\", \"opp_type\": \"Grant|Tender|Award|Other\", \"target_entity\": \"Premier Agric|Badger Analytics|Both\"}"
-        if feedback_context:
-            system_prompt += f"\n\n{feedback_context}\nUse this feedback to adjust your scoring. If an opportunity is similar to one we've lost, lower the score. If similar to one we've won, raise the score."
-            
-        response = client.messages.create(
+        # Try Anthropic first
+        response = anthropic_client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=1000,
             system=system_prompt,
@@ -50,14 +49,24 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
         elif "```" in cleaned_result:
             cleaned_result = cleaned_result.split("```")[1].split("```")[0].strip()
         return cleaned_result
-    except Exception as e:
-        print(f"LLM Error: {e}")
-        return json.dumps({"match_score": 0, "reasoning": str(e)})
+    except Exception as e1:
+        print(f"Anthropic Matcher Error: {e1}. Falling back to OpenAI...")
+        try:
+            # Fallback to OpenAI
+            response = openai_client.chat.completions.create(
+                model="gpt-4-turbo",
+                response_format={ "type": "json_object" },
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Analyze this opportunity:\n\n{opportunity_description}"}
+                ]
+            )
+            return response.choices[0].message.content
+        except Exception as e2:
+            print(f"OpenAI Matcher Error: {e2}")
+            return json.dumps({"match_score": 0, "reasoning": f"Both LLMs failed. Anthropic: {e1} | OpenAI: {e2}"})
 
 def extract_opportunity_data(raw_text: str, url: str) -> dict:
-    """
-    Extracts structured fields from raw webpage text.
-    """
     system_prompt = """
     You are an AI data extractor. I will provide you with the raw text from a webpage containing a grant, tender, or award opportunity.
     Extract the following fields and output as JSON. If a field is not found, leave it as null or an empty string.
@@ -74,7 +83,8 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
     Output JSON strictly.
     """
     try:
-        response = client.messages.create(
+        # Try Anthropic first
+        response = anthropic_client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=2000,
             system=system_prompt,
@@ -88,14 +98,25 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
         elif "```" in cleaned_result:
             cleaned_result = cleaned_result.split("```")[1].split("```")[0].strip()
         return json.loads(cleaned_result)
-    except Exception as e:
-        print(f"Extraction Error: {e}")
-        return {}
+    except Exception as e1:
+        print(f"Anthropic Extraction Error: {e1}. Falling back to OpenAI...")
+        try:
+            # Fallback to OpenAI
+            response = openai_client.chat.completions.create(
+                model="gpt-4-turbo",
+                response_format={ "type": "json_object" },
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}"}
+                ]
+            )
+            cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
+            return json.loads(cleaned_result)
+        except Exception as e2:
+            print(f"OpenAI Extraction Error: {e2}")
+            return {}
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
-    """
-    Generates an application strategy based on the opportunity and past winners.
-    """
     prompt = f"""
     Based on the following opportunity and the historical context of past winners, generate a 
     winning application strategy tailored for Premier Agric or Badger Analytics.
@@ -108,7 +129,8 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
     Use this feedback to avoid past mistakes and double-down on winning strategies!
     """
     try:
-        response = client.messages.create(
+        # Try Anthropic first
+        response = anthropic_client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=1500,
             system="You are an expert grant and funding strategist.",
@@ -117,6 +139,18 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
             ]
         )
         return response.content[0].text
-    except Exception as e:
-        print(f"LLM Error: {e}")
-        return "Failed to generate strategy."
+    except Exception as e1:
+        print(f"Anthropic Strategy Error: {e1}. Falling back to OpenAI...")
+        try:
+            # Fallback to OpenAI
+            response = openai_client.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[
+                    {"role": "system", "content": "You are an expert grant and funding strategist."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return response.choices[0].message.content
+        except Exception as e2:
+            print(f"OpenAI Strategy Error: {e2}")
+            return "Failed to generate strategy on both LLMs."
