@@ -14,24 +14,20 @@ from services.scorer_service import score_opportunity
 def extract_from_url(url: str, opp_id: int = None):
     raw_text = ""
     try:
-        print("Launching headless browser...")
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            Stealth().apply_stealth_sync(page)
-            page.goto(url, wait_until="networkidle", timeout=60000)
-            raw_text = page.evaluate("document.body.innerText")
-            browser.close()
-    except Exception as e:
-        print(f"Playwright failed: {e}. Falling back to requests...")
+        print("Fetching via ScraperAPI...")
         import requests
         from bs4 import BeautifulSoup
-        try:
-            res = requests.get(url, timeout=30, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
-            soup = BeautifulSoup(res.text, "html.parser")
-            raw_text = soup.get_text(separator="\n", strip=True)
-        except Exception as ex:
-            return {"error": f"Failed to fetch URL with both playwright and requests. Details: {ex}"}
+        
+        API_KEY = "54c796e10be2f82a70de0e92f1806e89"
+        scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={url}&render=true"
+        
+        res = requests.get(scraper_url, timeout=60)
+        res.raise_for_status()
+        
+        soup = BeautifulSoup(res.text, "html.parser")
+        raw_text = soup.get_text(separator="\n", strip=True)
+    except Exception as ex:
+        return {"error": f"Failed to fetch URL with ScraperAPI. Details: {ex}"}
             
     print(f"Extracted {len(raw_text)} characters. Sending to LLM for parsing...")
     

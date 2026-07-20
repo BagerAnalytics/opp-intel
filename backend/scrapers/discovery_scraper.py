@@ -4,8 +4,7 @@ import json
 import time
 import subprocess
 from urllib.parse import urlparse
-from playwright.sync_api import sync_playwright
-from playwright_stealth import Stealth
+from urllib.parse import urlparse
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

@@ -38,7 +38,10 @@ def scrape_saved_portals():
             for portal in portals:
                 print(f"Crawling portal: {portal.url} ({portal.name})")
                 try:
-                    res = requests.get(portal.url, headers=headers, timeout=15)
+                    API_KEY = "54c796e10be2f82a70de0e92f1806e89"
+                    scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={portal.url}&render=true"
+                    
+                    res = requests.get(scraper_url, timeout=45)
                     if res.status_code == 200:
                         soup = BeautifulSoup(res.text, 'html.parser')
                         anchors = soup.find_all('a', href=True)

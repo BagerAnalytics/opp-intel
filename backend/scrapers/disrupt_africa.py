@@ -17,25 +17,24 @@ def scrape_disrupt_africa():
     extracted_urls = []
     
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            Stealth().apply_stealth_sync(page)
-            
-            # Navigate to latest funding news
-            page.goto(base_url, timeout=60000)
-            
-            # Extract URLs from article titles
-            links = page.evaluate('''() => {
-                const anchors = Array.from(document.querySelectorAll('h3.entry-title a, h2.entry-title a'));
-                return [...new Set(anchors.map(a => a.href).filter(href => href && href.includes('disrupt-africa.com')))];
-            }''')
-            
-            for link in links:
-                if link and "/category/" not in link and "/about/" not in link:
-                    extracted_urls.append(link)
-            
-            browser.close()
+        import requests
+        from bs4 import BeautifulSoup
+        
+        API_KEY = "54c796e10be2f82a70de0e92f1806e89"
+        scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={base_url}&render=true"
+        
+        res = requests.get(scraper_url, timeout=60)
+        res.raise_for_status()
+        
+        soup = BeautifulSoup(res.text, "html.parser")
+        
+        anchors = soup.select('h3.entry-title a, h2.entry-title a')
+        for a in anchors:
+            link = a.get('href')
+            if link and 'disrupt-africa.com' in link:
+                if "/category/" not in link and "/about/" not in link:
+                    if link not in extracted_urls:
+                        extracted_urls.append(link)
     except Exception as e:
         print(f"Error scraping Disrupt Africa: {e}")
         return
