@@ -88,6 +88,13 @@ def start_scheduler():
             count = len(stale)
             for opp in stale:
                 db.delete(opp)
+            
+            # CLEAR THE SCRAPER LOCK ON STARTUP
+            progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
+            if progress:
+                progress.is_active = False
+                print("Startup cleanup: Cleared active scraper lock.")
+            
             db.commit()
             if count > 0:
                 print(f"Startup cleanup: Deleted {count} stale 'Scanning...' ghost records.")
