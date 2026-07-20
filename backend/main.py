@@ -135,6 +135,17 @@ def update_opportunity_status(opp_id: int, status: str, db: Session = Depends(ge
 class BulkImportRequest(BaseModel):
     urls: List[str]
 
+@app.get("/api/test-models")
+def test_anthropic_models():
+    try:
+        import os
+        import anthropic
+        client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        models = client.models.list()
+        return {"models": [m.id for m in models.data]}
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.post("/api/opportunities/bulk-import")
 def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_db)):
     """Accepts a list of URLs, creates placeholder rows, and kicks off the bulk scraper in the background."""
