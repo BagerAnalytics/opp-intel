@@ -146,6 +146,15 @@ def test_anthropic_models():
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/api/debug/restore")
+def restore_failed_opportunities(db: Session = Depends(get_db)):
+    try:
+        count = db.query(models.Opportunity).filter(models.Opportunity.status == "failed").update({"status": "queued"})
+        db.commit()
+        return {"message": f"Successfully restored {count} failed opportunities to the queue."}
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/api/debug/counts")
 def get_debug_counts(db: Session = Depends(get_db)):
     queued = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").count()
