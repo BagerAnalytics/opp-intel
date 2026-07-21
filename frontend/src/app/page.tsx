@@ -34,7 +34,7 @@ export default function Home() {
   const [complianceDocs, setComplianceDocs] = useState<any[]>([]);
   const [portals, setPortals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('All');
+  const [activeTab, setActiveTab] = useState('Grants');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
   const [logsContent, setLogsContent] = useState("");
@@ -132,7 +132,7 @@ export default function Home() {
   const filteredOpportunities = opportunities.filter(opp => {
     // 1. Tab filtering
     let tabMatch = true;
-    if (activeTab !== 'All' && activeTab !== 'Queued for Extraction' && activeTab !== 'Failed Extraction') {
+    if (activeTab !== 'Queued for Extraction' && activeTab !== 'Failed Extraction') {
       if (activeTab === 'Grants' && opp.opp_type !== 'Grant') tabMatch = false;
       else if (activeTab === 'Tenders' && opp.opp_type !== 'Tender') tabMatch = false;
       else if (activeTab === 'Awards' && opp.opp_type !== 'Award') tabMatch = false;
@@ -320,7 +320,7 @@ export default function Home() {
 
       <div className="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="flex flex-wrap items-center gap-2">
-          {['All', 'Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Saved Portals', 'Manually Added', 'Queued for Extraction', 'Failed Extraction'].map(tab => (
+          {['Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Saved Portals', 'Manually Added', 'Queued for Extraction', 'Failed Extraction'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -377,7 +377,7 @@ export default function Home() {
           </div>
         ) : filteredOpportunities.length === 0 ? (
           <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-16 text-center border border-dashed border-slate-300 shadow-sm">
-            <h3 className="text-2xl font-bold text-slate-900 mb-3">No {activeTab === 'All' ? 'opportunities' : activeTab.toLowerCase()} found</h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">No {activeTab.toLowerCase()} found</h3>
             <p className="text-slate-500 text-lg">Run the scrapers to find new ones, or change the filter.</p>
           </div>
         ) : (
