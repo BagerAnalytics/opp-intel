@@ -136,7 +136,7 @@ export default function Home() {
       if (activeTab === 'Grants' && opp.opp_type !== 'Grant') tabMatch = false;
       else if (activeTab === 'Tenders' && opp.opp_type !== 'Tender') tabMatch = false;
       else if (activeTab === 'Awards' && opp.opp_type !== 'Award') tabMatch = false;
-      else if (activeTab === 'Fellowships / Other' && opp.opp_type !== 'Other') tabMatch = false;
+      else if (activeTab === 'Fellowships / Other' && (opp.opp_type === 'Grant' || opp.opp_type === 'Tender' || opp.opp_type === 'Award')) tabMatch = false;
       else if (activeTab === 'Manually Added' && (opp.source !== 'Manual Entry' && opp.source !== 'Smart Link Extraction')) tabMatch = false;
     }
     
