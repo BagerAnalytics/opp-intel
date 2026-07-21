@@ -39,29 +39,30 @@ def run_all_scrapers():
     db = SessionLocal()
     try:
         # TEMP BYPASS: Skip discovery to process queue instantly!
-        # update_progress(db, 5, "Hunting for new Opportunity Portals...")
-        # scrape_meta_portals()
-        # 
-        # update_progress(db, 10, "Scraping Disrupt Africa...")
-        # scrape_disrupt_africa()
-        # 
-        # update_progress(db, 15, "Scraping TerraViva Grants...")
-        # scrape_terraviva()
-        # 
-        # update_progress(db, 20, "Scraping Discovery Engine...")
-        # scrape_discovery_engine()
-        # 
-        # update_progress(db, 25, "Crawling Saved Portals...")
-        # scrape_saved_portals()
-        # 
-        # update_progress(db, 35, "Scraping Opportunity Desk...")
-        # scrape_opportunity_desk()
-        # 
-        # update_progress(db, 40, "Scraping eTenders SA...")
-        # scrape_etenders()
-        # 
-        # update_progress(db, 45, "Scraping LinkedIn Opportunities...")
-        # scrape_linkedin()
+        # Discovery phases restored
+        update_progress(db, 5, "Hunting for new Opportunity Portals...")
+        scrape_meta_portals()
+        
+        update_progress(db, 10, "Scraping Disrupt Africa...")
+        scrape_disrupt_africa()
+        
+        update_progress(db, 15, "Scraping TerraViva Grants...")
+        scrape_terraviva()
+        
+        update_progress(db, 20, "Scraping Discovery Engine...")
+        scrape_discovery_engine()
+        
+        update_progress(db, 25, "Crawling Saved Portals...")
+        scrape_saved_portals()
+        
+        update_progress(db, 35, "Scraping Opportunity Desk...")
+        scrape_opportunity_desk()
+        
+        update_progress(db, 40, "Scraping eTenders SA...")
+        scrape_etenders()
+        
+        update_progress(db, 45, "Scraping LinkedIn Opportunities...")
+        scrape_linkedin()
         
         # Centralized Extraction Queue Processor
         update_progress(db, 50, "Processing AI Extractor queue...")

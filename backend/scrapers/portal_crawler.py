@@ -38,12 +38,29 @@ def scrape_saved_portals():
             for portal in portals:
                 print(f"Crawling portal: {portal.url} ({portal.name})")
                 try:
-                    API_KEY = "54c796e10be2f82a70de0e92f1806e89"
-                    scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={portal.url}&render=true"
+                    print(f"Trying normal fetch for {portal.url}...")
+                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
                     
-                    res = requests.get(scraper_url, timeout=45)
-                    if res.status_code == 200:
-                        soup = BeautifulSoup(res.text, 'html.parser')
+                    html_content = ""
+                    try:
+                        res = requests.get(portal.url, headers=headers, timeout=15)
+                        if res.status_code in [403, 401, 429] or "cloudflare" in res.text.lower() or "captcha" in res.text.lower() or "access denied" in res.text.lower():
+                            raise Exception("Bot protection detected")
+                        res.raise_for_status()
+                        html_content = res.text
+                        print("Successfully fetched via normal requests (0 credits used).")
+                    except Exception as e:
+                        print(f"Normal fetch failed ({e}). Falling back to ScraperAPI...")
+                        API_KEY = "7b28cf7f504c52e899376a3897d2cbc7"
+                        scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={portal.url}&render=true"
+                        
+                        res = requests.get(scraper_url, timeout=45)
+                        res.raise_for_status()
+                        html_content = res.text
+                        print("Successfully fetched via ScraperAPI.")
+                        
+                    if html_content:
+                        soup = BeautifulSoup(html_content, 'html.parser')
                         anchors = soup.find_all('a', href=True)
                         
                         found_links = 0

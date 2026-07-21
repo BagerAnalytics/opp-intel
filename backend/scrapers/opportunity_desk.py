@@ -18,7 +18,7 @@ def scrape_opportunity_desk():
         from bs4 import BeautifulSoup
         import re
         
-        API_KEY = "54c796e10be2f82a70de0e92f1806e89"
+        API_KEY = "7b28cf7f504c52e899376a3897d2cbc7"
         scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={base_url}&render=true"
         
         print(f"Navigating to {base_url} via ScraperAPI...")
