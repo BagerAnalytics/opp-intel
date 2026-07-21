@@ -171,6 +171,14 @@ def unpause_queue(db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Queue unpaused!"}
 
+@app.post("/api/debug/wipe")
+def wipe_opportunities(db: Session = Depends(get_db)):
+    # The user wants to wipe the whole table and start fresh
+    count = db.query(models.Opportunity).count()
+    db.query(models.Opportunity).delete()
+    db.commit()
+    return {"message": f"Wiped {count} items!"}
+
 @app.post("/api/opportunities/bulk-import")
 def bulk_import_opportunities(req: BulkImportRequest, db: Session = Depends(get_db)):
     """Accepts a list of URLs, creates placeholder rows, and kicks off the bulk scraper in the background."""
