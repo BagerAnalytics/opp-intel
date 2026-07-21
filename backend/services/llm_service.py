@@ -80,6 +80,11 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
     - selection_criteria: How they choose winners
     - application_process: How to apply
     
+    CRITICAL INSTRUCTION:
+    If this webpage is a generic platform homepage, a portal, an 'About Us' page, or a list of multiple grants WITHOUT specific, concrete application details for a single opportunity, you MUST reject it.
+    If you are rejecting it, you MUST return an EXACTLY empty JSON object: {}
+    ONLY extract data if the webpage is a specific, individual, concrete grant/tender/award.
+    
     Output JSON strictly.
     """
     try:
