@@ -64,6 +64,8 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
             return response.choices[0].message.content
         except Exception as e2:
             print(f"OpenAI Matcher Error: {e2}")
+            if "insufficient_quota" in str(e2) or "429" in str(e2):
+                raise Exception("API_QUOTA_EXCEEDED")
             return json.dumps({"match_score": 0, "reasoning": f"Both LLMs failed. Anthropic: {e1} | OpenAI: {e2}"})
 
 def extract_opportunity_data(raw_text: str, url: str) -> dict:
@@ -119,6 +121,8 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
             return json.loads(cleaned_result)
         except Exception as e2:
             print(f"OpenAI Extraction Error: {e2}")
+            if "insufficient_quota" in str(e2) or "429" in str(e2):
+                raise Exception("API_QUOTA_EXCEEDED")
             return {}
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
@@ -158,4 +162,6 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
             return response.choices[0].message.content
         except Exception as e2:
             print(f"OpenAI Strategy Error: {e2}")
+            if "insufficient_quota" in str(e2) or "429" in str(e2):
+                raise Exception("API_QUOTA_EXCEEDED")
             return "Failed to generate strategy on both LLMs."

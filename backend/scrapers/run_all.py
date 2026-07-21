@@ -99,7 +99,12 @@ def run_all_scrapers():
                 # Update progress based on how many we've done (50% to 95%)
                 progress_val = min(99, 50 + int((items_processed / float(total_tasks)) * 45))
                 update_progress(db, progress_val, f"AI Extractor: Processing {items_processed}/{total_tasks}...")
-                run_bulk_scraper(tasks)
+                try:
+                    run_bulk_scraper(tasks)
+                except Exception as ex:
+                    if "API_QUOTA_EXCEEDED" in str(ex):
+                        print("CRITICAL: API Quota Exceeded. Halting all scrapers immediately.")
+                        break # Break the while True loop
                 items_processed += len(tasks)
         
         print(f"AI Extractor finished processing {items_processed} items.")

@@ -46,6 +46,17 @@ def run_bulk_scraper(tasks):
                 
         except Exception as e:
             print(f"Unhandled exception on {url}: {e}")
+            if "API_QUOTA_EXCEEDED" in str(e):
+                print("FATAL ERROR: API Quota Exceeded! Halting bulk scraper to prevent data loss.")
+                
+                # Revert this opp to queued so we don't lose it
+                with SessionLocal() as db:
+                    opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+                    if opp:
+                        opp.status = "queued"
+                        db.commit()
+                        
+                raise e # Throw it up to run_all.py to stop the whole process
 
 def main():
     if len(sys.argv) < 2:
