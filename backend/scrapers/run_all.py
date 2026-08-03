@@ -1,6 +1,51 @@
 import os
 import sys
 from datetime import datetime
+import requests
+import urllib.parse
+from urllib.parse import urlparse, parse_qs
+
+# --- MONKEY PATCH TO SAVE SCRAPER API CREDITS ---
+original_get = requests.get
+
+def smart_get(url, *args, **kwargs):
+    if url.startswith('http://api.scraperapi.com'):
+        parsed = urlparse(url)
+        params = parse_qs(parsed.query)
+        original_target = params.get('url', [None])[0]
+        
+        if original_target:
+            print(f'[Credit Saver] Intercepted request to {original_target}')
+            try:
+                # Direct Fetch first
+                headers = kwargs.get('headers', {})
+                if 'User-Agent' not in headers:
+                    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                kwargs['headers'] = headers
+                
+                # We need to temporarily swap the timeout
+                old_timeout = kwargs.get('timeout', 60)
+                kwargs['timeout'] = 15
+                
+                res = original_get(original_target, *args, **kwargs)
+                kwargs['timeout'] = old_timeout # Restore
+                
+                if res.status_code == 200 or res.status_code == 404:
+                    print('[Credit Saver] Direct fetch successful! Saved 1 API credit.')
+                    return res
+                else:
+                    print(f'[Credit Saver] Direct fetch got {res.status_code}. Falling back to ScraperAPI proxy...')
+            except requests.RequestException as e:
+                kwargs['timeout'] = old_timeout # Restore
+                print(f'[Credit Saver] Direct fetch failed. Falling back to ScraperAPI proxy...')
+                
+            # Fallback
+            return original_get(url, *args, **kwargs)
+            
+    return original_get(url, *args, **kwargs)
+
+requests.get = smart_get
+# ------------------------------------------------
 
 # Add parent directory to path so we can import database, models, and services
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
