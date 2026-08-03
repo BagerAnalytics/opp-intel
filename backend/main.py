@@ -85,10 +85,23 @@ def start_scheduler():
     # Clean up stale ghost records left by failed scraper runs
     try:
         with SessionLocal() as db:
+            # Clean up stale ghost records left by failed scraper runs
             stale = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").all()
             count = len(stale)
             for opp in stale:
                 db.delete(opp)
+                
+            # PURGE DISCOVERY GARBAGE LINKS
+            garbage_count = db.query(models.Opportunity).filter(
+                (models.Opportunity.description == None) | 
+                (models.Opportunity.description == '') | 
+                (models.Opportunity.description.like('Discovered via AI Engine%')) |
+                (models.Opportunity.name == 'Discovered Opportunity') |
+                (models.Opportunity.name.like('Extracting from %')) |
+                (models.Opportunity.funder == 'Scanning...')
+            ).delete(synchronize_session=False)
+            if garbage_count > 0:
+                print(f"Startup cleanup: Purged {garbage_count} garbage links from Discovery scrapers.")
             
             # CLEAR THE SCRAPER LOCK ON STARTUP
             progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
