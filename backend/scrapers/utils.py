@@ -51,8 +51,13 @@ def validate_and_queue_link(db, url: str, source: str, api_key: str):
     if not html_content:
         return False
         
+    # Strip HTML to avoid exceeding Gemini token limits
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html_content, "html.parser")
+    raw_text = soup.get_text(separator="\n", strip=True)
+        
     # Phase 1: Lightweight Extraction
-    basic_data = extract_opportunity_data(html_content, url)
+    basic_data = extract_opportunity_data(raw_text, url)
     
     # If the LLM rejected it as a non-opportunity or closed opportunity
     if not basic_data or not basic_data.get("name"):
@@ -91,7 +96,7 @@ def validate_and_queue_link(db, url: str, source: str, api_key: str):
         source=source,
         target_entity=target_entity,
         match_score=match_score,
-        raw_text=html_content
+        raw_text=raw_text
     )
     
     db.add(new_opp)
