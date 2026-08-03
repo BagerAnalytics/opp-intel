@@ -150,16 +150,20 @@ def test_anthropic_models():
 @app.get("/api/debug/restore")
 def restore_failed_opportunities(db: Session = Depends(get_db)):
     try:
-        count = db.query(models.Opportunity).filter(models.Opportunity.status == "failed").update({"status": "queued"})
+        count = db.query(models.Opportunity).filter(
+            models.Opportunity.status.in_(["failed", "Scanning..."])
+        ).update({"status": "queued"})
         db.commit()
-        return {"message": f"Successfully restored {count} failed opportunities to the queue."}
+        return {"message": f"Successfully restored {count} stuck/failed opportunities to the queue."}
     except Exception as e:
         return {"error": str(e)}
 
 @app.get("/api/debug/counts")
 def get_debug_counts(db: Session = Depends(get_db)):
     queued = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").count()
-    failed = db.query(models.Opportunity).filter(models.Opportunity.status == "failed").count()
+    failed = db.query(models.Opportunity).filter(
+        models.Opportunity.status.in_(["failed", "Scanning..."])
+    ).count()
     paused = db.query(models.Opportunity).filter(models.Opportunity.status == "paused").count()
     open_count = db.query(models.Opportunity).filter(models.Opportunity.status == "open").count()
     scanning = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").count()

@@ -67,48 +67,7 @@ def run_all_scrapers():
         # Centralized Extraction Queue Processor
         update_progress(db, 50, "Processing AI Extractor queue...")
         
-        # Process until queue is empty
-        items_processed = 0
-        from scrapers.bulk_scraper import run_bulk_scraper
-        
-        # Get total count for progress math
-        total_in_queue = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").count()
-        total_stuck = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").count()
-        total_tasks = total_in_queue + total_stuck
-        if total_tasks == 0:
-            total_tasks = 1 # prevent div by zero
-            
-        while True:
-            queued_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "queued").limit(10).all()
-            stuck_opps = db.query(models.Opportunity).filter(models.Opportunity.status == "Scanning...").limit(5).all()
-            
-            batch = queued_opps + stuck_opps
-            if not batch:
-                print("Queue is empty.")
-                break
-                
-            print(f"Pulled {len(batch)} links from queue. Sending to AI Extractor...")
-            tasks = []
-            for opp in batch:
-                if opp.link:
-                    opp.status = "Scanning..."
-                    tasks.append({"id": opp.id, "url": opp.link})
-            db.commit()
-            
-            if tasks:
-                # Update progress based on how many we've done (50% to 95%)
-                progress_val = min(99, 50 + int((items_processed / float(total_tasks)) * 45))
-                update_progress(db, progress_val, f"AI Extractor: Processing {items_processed}/{total_tasks}...")
-                # Removed deep extraction to allow manual Smart Scan triggers
-                # try:
-                #     run_bulk_scraper(tasks)
-                # except Exception as ex:
-                #     if "API_QUOTA_EXCEEDED" in str(ex):
-                #         print("CRITICAL: API Quota Exceeded. Halting all scrapers immediately.")
-                #         break # Break the while True loop
-                items_processed += len(tasks)
-        
-        print(f"AI Extractor finished processing {items_processed} items.")
+
         
         finish_progress(db)
         print("Scrapers completed successfully.")
