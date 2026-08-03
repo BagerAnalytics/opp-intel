@@ -424,8 +424,31 @@ def re_extract_opportunity(opp_id: int, db: Session = Depends(get_db)):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to fetch page text: {e}")
 
-    from services.llm_service import deep_extract_opportunity, generate_strategy
+    from services.llm_service import deep_extract_opportunity, generate_strategy, extract_opportunity_data, generate_match_score
+    import json
     
+    # If the opportunity came from a raw URL discovery and lacks a proper description, run Phase 1 first
+    if not opp.description or "Discovered via AI Engine" in opp.description:
+        basic_data = extract_opportunity_data(opp.raw_text, opp.link)
+        if basic_data:
+            opp.name = basic_data.get("name", opp.name)
+            opp.funder = basic_data.get("funder", opp.funder)
+            opp.closing_date = basic_data.get("closing_date", opp.closing_date)
+            opp.value = basic_data.get("value", opp.value)
+            opp.description = basic_data.get("description", opp.description)
+            opp.benefits = basic_data.get("benefits", opp.benefits)
+            opp.eligibility_criteria = basic_data.get("eligibility_criteria", opp.eligibility_criteria)
+            
+            # Match score it to populate AI Fit
+            if opp.description:
+                match_json = generate_match_score(opp.description)
+                try:
+                    match_data = json.loads(match_json)
+                    opp.match_score = match_data.get("match_score", 0)
+                    opp.target_entity = match_data.get("target_entity", "Unknown")
+                except Exception:
+                    pass
+
     deep_data = deep_extract_opportunity(opp.raw_text)
     if "error" in deep_data or not deep_data:
         raise HTTPException(status_code=500, detail="Failed to extract deep data from LLM")
