@@ -40,6 +40,7 @@ export default function Home() {
   const [logsContent, setLogsContent] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
   const [showTopMatches, setShowTopMatches] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(50);
   const [progress, setProgress] = useState<{is_active: boolean, current_task: string, progress_percent: number}>({
     is_active: false,
     current_task: "Idle",
@@ -49,6 +50,11 @@ export default function Home() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [activeTab, searchQuery, showTopMatches]);
 
   // Poll scraper progress
   useEffect(() => {
@@ -381,10 +387,24 @@ export default function Home() {
             <p className="text-slate-500 text-lg">Run the scrapers to find new ones, or change the filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {filteredOpportunities.map(opp => (
-              <OpportunityCard key={opp.id} opp={opp} contacts={contacts} complianceDocs={complianceDocs} onDeleteSuccess={fetchData} />
-            ))}
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 gap-6">
+              {filteredOpportunities.slice(0, visibleCount).map(opp => (
+                <OpportunityCard key={opp.id} opp={opp} contacts={contacts} complianceDocs={complianceDocs} onDeleteSuccess={fetchData} />
+              ))}
+            </div>
+            
+            {visibleCount < filteredOpportunities.length && (
+              <div className="flex justify-center mt-6">
+                <button 
+                  onClick={() => setVisibleCount(prev => prev + 50)}
+                  className="px-8 py-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-2 group"
+                >
+                  Load More Opportunities
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
