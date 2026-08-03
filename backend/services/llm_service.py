@@ -1,14 +1,13 @@
 import os
 import json
 from dotenv import load_dotenv
-import anthropic
-import openai
+import google.generativeai as genai
+from google.api_core import exceptions
 
 load_dotenv()
 
-# Initialize both clients
-anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Initialize Gemini Client
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 PROFILE_PROMPT = """
 You are an Opportunity Matching AI acting as a ruthless gatekeeper for two specific businesses:
@@ -29,101 +28,70 @@ Be harsh but fair. We only want highly lucrative, actionable opportunities.
 """
 
 def generate_match_score(opportunity_description: str, feedback_context: str = "") -> dict:
-    system_prompt = PROFILE_PROMPT + "\nOutput JSON format: {\"match_score\": 85, \"reasoning\": \"...\", \"opp_type\": \"Grant|Tender|Award|Other\", \"target_entity\": \"Premier Agric|Badger Analytics|Both\"}"
+    system_prompt = PROFILE_PROMPT
     if feedback_context:
         system_prompt += f"\n\n{feedback_context}\nUse this feedback to adjust your scoring. If an opportunity is similar to one we've lost, lower the score. If similar to one we've won, raise the score."
         
     try:
-        # Try Anthropic first
-        response = anthropic_client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1000,
-            system=system_prompt,
-            messages=[
-                {"role": "user", "content": f"Analyze this opportunity and output ONLY valid JSON format:\n\n{opportunity_description}"}
-            ]
-        )
-        cleaned_result = response.content[0].text
-        if "```json" in cleaned_result:
-            cleaned_result = cleaned_result.split("```json")[1].split("```")[0].strip()
-        elif "```" in cleaned_result:
-            cleaned_result = cleaned_result.split("```")[1].split("```")[0].strip()
-        return cleaned_result
-    except Exception as e1:
-        print(f"Anthropic Matcher Error: {e1}. Falling back to OpenAI...")
-        try:
-            # Fallback to OpenAI
-            response = openai_client.chat.completions.create(
-                model="gpt-4-turbo",
-                response_format={ "type": "json_object" },
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Analyze this opportunity:\n\n{opportunity_description}"}
-                ]
+        model = genai.GenerativeModel(
+            'models/gemini-1.5-flash',
+            system_instruction=system_prompt,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json",
+                response_schema={
+                    "type": "object",
+                    "properties": {
+                        "match_score": {"type": "integer"},
+                        "reasoning": {"type": "string"},
+                        "opp_type": {"type": "string", "enum": ["Grant", "Tender", "Award", "Accelerator", "Other"]},
+                        "target_entity": {"type": "string", "enum": ["Premier Agric", "Badger Analytics", "Both"]}
+                    },
+                    "required": ["match_score", "reasoning", "opp_type", "target_entity"]
+                }
             )
-            return response.choices[0].message.content
-        except Exception as e2:
-            print(f"OpenAI Matcher Error: {e2}")
-            if "insufficient_quota" in str(e2) or "429" in str(e2):
-                raise Exception("API_QUOTA_EXCEEDED")
-            return json.dumps({"match_score": 0, "reasoning": f"Both LLMs failed. Anthropic: {e1} | OpenAI: {e2}"})
+        )
+        response = model.generate_content(f"Analyze this opportunity:\n\n{opportunity_description}")
+        return response.text
+    except exceptions.ResourceExhausted as e:
+        print(f"Gemini API Quota Error: {e}")
+        raise Exception("API_QUOTA_EXCEEDED")
+    except Exception as e:
+        print(f"Gemini Matcher Error: {e}")
+        return json.dumps({"match_score": 0, "reasoning": f"LLM failed: {e}"})
 
 def extract_opportunity_data(raw_text: str, url: str) -> dict:
     system_prompt = """
     You are an AI data extractor. I will provide you with the raw text from a webpage containing a grant, tender, or award opportunity.
     Extract the following fields and output as JSON. If a field is not found, leave it as null or an empty string.
-    - name: The title of the opportunity
-    - funder: The organization providing the funding (try to guess if not explicitly stated)
-    - value: The prize or funding amount (e.g. "$15,000", or "Unknown")
-    - closing_date: The deadline (e.g. "July 16, 2026")
-    - description: A short 2-3 sentence summary
-    - benefits: What the winner receives
-    - eligibility_criteria: Who can apply
-    - selection_criteria: How they choose winners
-    - application_process: How to apply
     
     CRITICAL INSTRUCTION:
     If this webpage is a generic platform homepage, a portal, an 'About Us' page, or a list of multiple grants WITHOUT specific, concrete application details for a single opportunity, you MUST reject it.
     If you are rejecting it, you MUST return an EXACTLY empty JSON object: {}
     ONLY extract data if the webpage is a specific, individual, concrete grant/tender/award.
-    
-    Output JSON strictly.
     """
+    
+    # We use string manipulation to handle the empty JSON object {} fallback because response_schema strictly enforces fields.
+    # So we don't enforce a schema, just standard JSON parsing.
+    
     try:
-        # Try Anthropic first
-        response = anthropic_client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=2000,
-            system=system_prompt,
-            messages=[
-                {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput ONLY valid JSON format."}
-            ]
-        )
-        cleaned_result = response.content[0].text
-        if "```json" in cleaned_result:
-            cleaned_result = cleaned_result.split("```json")[1].split("```")[0].strip()
-        elif "```" in cleaned_result:
-            cleaned_result = cleaned_result.split("```")[1].split("```")[0].strip()
-        return json.loads(cleaned_result)
-    except Exception as e1:
-        print(f"Anthropic Extraction Error: {e1}. Falling back to OpenAI...")
-        try:
-            # Fallback to OpenAI
-            response = openai_client.chat.completions.create(
-                model="gpt-4-turbo",
-                response_format={ "type": "json_object" },
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}"}
-                ]
+        model = genai.GenerativeModel(
+            'models/gemini-1.5-flash',
+            system_instruction=system_prompt,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json"
             )
-            cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
-            return json.loads(cleaned_result)
-        except Exception as e2:
-            print(f"OpenAI Extraction Error: {e2}")
-            if "insufficient_quota" in str(e2) or "429" in str(e2):
-                raise Exception("API_QUOTA_EXCEEDED")
-            return {}
+        )
+        response = model.generate_content(
+            f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput fields: name, funder, value, closing_date, description, benefits, eligibility_criteria, selection_criteria, application_process. If rejecting, output {{}}."
+        )
+        cleaned_result = response.text.replace("```json", "").replace("```", "").strip()
+        return json.loads(cleaned_result)
+    except exceptions.ResourceExhausted as e:
+        print(f"Gemini API Quota Error: {e}")
+        raise Exception("API_QUOTA_EXCEEDED")
+    except Exception as e:
+        print(f"Gemini Extraction Error: {e}")
+        return {}
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
     prompt = f"""
@@ -138,30 +106,15 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
     Use this feedback to avoid past mistakes and double-down on winning strategies!
     """
     try:
-        # Try Anthropic first
-        response = anthropic_client.messages.create(
-            model="claude-3-haiku-20240307",
-            max_tokens=1500,
-            system="You are an expert grant and funding strategist.",
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
+        model = genai.GenerativeModel(
+            'models/gemini-1.5-flash',
+            system_instruction="You are an expert grant and funding strategist."
         )
-        return response.content[0].text
-    except Exception as e1:
-        print(f"Anthropic Strategy Error: {e1}. Falling back to OpenAI...")
-        try:
-            # Fallback to OpenAI
-            response = openai_client.chat.completions.create(
-                model="gpt-4-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an expert grant and funding strategist."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            return response.choices[0].message.content
-        except Exception as e2:
-            print(f"OpenAI Strategy Error: {e2}")
-            if "insufficient_quota" in str(e2) or "429" in str(e2):
-                raise Exception("API_QUOTA_EXCEEDED")
-            return "Failed to generate strategy on both LLMs."
+        response = model.generate_content(prompt)
+        return response.text
+    except exceptions.ResourceExhausted as e:
+        print(f"Gemini API Quota Error: {e}")
+        raise Exception("API_QUOTA_EXCEEDED")
+    except Exception as e:
+        print(f"Gemini Strategy Error: {e}")
+        return "Failed to generate strategy on LLM."
