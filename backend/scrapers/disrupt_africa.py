@@ -71,6 +71,7 @@ def scrape_disrupt_africa():
                         application_process="",
                         past_winners="",
                         link=url,
+                    raw_text=raw_text,
                         source="Disrupt Africa",
                         status="queued",
                         match_score=0,

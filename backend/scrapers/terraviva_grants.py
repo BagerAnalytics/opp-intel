@@ -72,6 +72,7 @@ def scrape_terraviva():
                         application_process="",
                         past_winners="",
                         link=url,
+                    raw_text=raw_text,
                         source="Terra Viva Grants",
                         status="queued",
                         match_score=0,

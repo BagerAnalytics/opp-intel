@@ -142,6 +142,7 @@ def scrape_discovery_engine():
                         application_process="",
                         past_winners="",
                         link=url,
+                    raw_text=raw_text,
                         source="Discovery Engine",
                         status="queued",
                         match_score=0,

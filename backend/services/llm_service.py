@@ -82,7 +82,7 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
             )
         )
         response = model.generate_content(
-            f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput fields: name, funder, value, closing_date, description, benefits, eligibility_criteria, selection_criteria, application_process. If rejecting, output {{}}."
+            f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput fields: name, funder, value, closing_date, description (short 2-sentence summary), benefits (short bullet points), eligibility_criteria (short bullet points). DO NOT output selection_criteria or application_process. If rejecting, output {{}}."
         )
         cleaned_result = response.text.replace("```json", "").replace("```", "").strip()
         return json.loads(cleaned_result)
@@ -91,6 +91,28 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
         raise Exception("API_QUOTA_EXCEEDED")
     except Exception as e:
         print(f"Gemini Extraction Error: {e}")
+        return {}
+
+def deep_extract_opportunity(raw_text: str) -> dict:
+    system_prompt = """
+    You are an AI data extractor. Extract the deep, complex fields from this opportunity webpage text.
+    Output ONLY valid JSON format.
+    """
+    try:
+        model = genai.GenerativeModel(
+            'models/gemini-1.5-flash',
+            system_instruction=system_prompt,
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="application/json"
+            )
+        )
+        response = model.generate_content(
+            f"Raw Text:\n{raw_text}\n\nOutput fields: selection_criteria, application_process, past_winners."
+        )
+        cleaned_result = response.text.replace("```json", "").replace("```", "").strip()
+        return json.loads(cleaned_result)
+    except Exception as e:
+        print(f"Gemini Deep Extraction Error: {e}")
         return {}
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:

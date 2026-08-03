@@ -104,6 +104,7 @@ def scrape_opportunity_desk():
                         application_process=extracted_data.get('application_process') or "",
                         past_winners="", # Usually not found in the raw text directly
                         link=url,
+                    raw_text=raw_text,
                         status="open",
                         source="OpportunityDesk AI Scraper",
                         match_score=match_data.get('match_score'),

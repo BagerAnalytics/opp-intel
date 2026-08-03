@@ -58,6 +58,7 @@ def start_scheduler():
             conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS strategy TEXT;"))
             conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS opp_type TEXT;"))
             conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS target_entity TEXT;"))
+            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS raw_text TEXT;"))
             conn.execute(text('''
                 CREATE TABLE IF NOT EXISTS scraper_progress (
                     id INTEGER PRIMARY KEY,
@@ -396,38 +397,60 @@ def extract_link(req: LinkExtractRequest):
 
 @app.post("/api/opportunities/{opp_id}/re-extract")
 def re_extract_opportunity(opp_id: int, db: Session = Depends(get_db)):
-    """Re-extract deep details for an existing opportunity using its link."""
+    """Re-extract deep details for an existing opportunity using cached raw text."""
     opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
     if not opp:
         raise HTTPException(status_code=404, detail="Opportunity not found")
-    if not opp.link:
-        raise HTTPException(status_code=400, detail="Opportunity does not have a link to extract from.")
-
-    import subprocess
-    import sys
-    import json
-    
-    try:
-        result = subprocess.run(
-            [sys.executable, "scrapers/generic_scraper.py", opp.link, str(opp.id)],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
         
-        output_lines = result.stdout.strip().split('\n')
-        last_line = output_lines[-1] if output_lines else ""
-        
+    # If we don't have raw_text, we could fallback to generic_scraper, but for now we expect raw_text
+    if not opp.raw_text:
+        # Fallback to fetching it live
+        import requests
+        from bs4 import BeautifulSoup
         try:
-            data = json.loads(last_line)
-            if "error" in data:
-                raise HTTPException(status_code=500, detail=data["error"])
-            return data
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=500, detail="Failed to parse extraction result.")
-            
-    except subprocess.TimeoutExpired:
-        raise HTTPException(status_code=504, detail="Extraction timed out after 2 minutes.")
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            res = requests.get(opp.link, headers=headers, timeout=15)
+            if res.status_code in [403, 401, 429]:
+                API_KEY = "d7e94ec58c8702974d2669c1baae88cb"
+                scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={opp.link}&render=true"
+                res = requests.get(scraper_url, timeout=60)
+            res.raise_for_status()
+            soup = BeautifulSoup(res.text, "html.parser")
+            opp.raw_text = soup.get_text(separator="\n", strip=True)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to fetch page text: {e}")
+
+    from services.llm_service import deep_extract_opportunity, generate_strategy
+    
+    deep_data = deep_extract_opportunity(opp.raw_text)
+    if "error" in deep_data or not deep_data:
+        raise HTTPException(status_code=500, detail="Failed to extract deep data from LLM")
+        
+    opp.selection_criteria = deep_data.get("selection_criteria", opp.selection_criteria)
+    opp.application_process = deep_data.get("application_process", opp.application_process)
+    opp.past_winners = deep_data.get("past_winners", opp.past_winners)
+    
+    # Grab historical context for strategy
+    historical_context = ""
+    past = db.query(models.Opportunity).filter(
+        models.Opportunity.status.in_(["won", "lost", "in-progress"])
+    ).limit(10).all()
+    for h in past:
+        historical_context += f"Name: {h.name}, Status: {h.status}, Strategy Used: {h.strategy}\n"
+        
+    feedback_objs = db.query(models.BusinessFeedback).order_by(models.BusinessFeedback.created_at.desc()).limit(5).all()
+    feedback_context = " ".join([f.feedback for f in feedback_objs]) if feedback_objs else ""
+        
+    opp.strategy = generate_strategy(
+        {"name": opp.name, "description": opp.description, "benefits": opp.benefits},
+        historical_context,
+        feedback_context
+    )
+    
+    opp.status = "open"
+    db.commit()
+    
+    return {"message": "Details extracted successfully", "status": opp.status}
 
 @app.delete("/api/opportunities/{opp_id}")
 def delete_opportunity(opp_id: int, db: Session = Depends(get_db)):
@@ -619,3 +642,52 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db)):
     db.delete(contact)
     db.commit()
     return {"message": "Contact deleted"}
+
+@app.post("/api/scrapers/smart-scan/{opp_id}")
+def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
+    try:
+        opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+        if not opp:
+            raise HTTPException(status_code=404, detail="Opportunity not found")
+            
+        if not opp.raw_text:
+            raise HTTPException(status_code=400, detail="No raw text cached for this opportunity. Cannot run deep scan.")
+            
+        from services.llm_service import deep_extract_opportunity, generate_strategy
+        
+        print(f"Running deep extraction on Opportunity ID {opp_id}...")
+        deep_data = deep_extract_opportunity(opp.raw_text)
+        
+        if "error" in deep_data or not deep_data:
+            raise HTTPException(status_code=500, detail="Failed to extract deep data from LLM")
+            
+        opp.selection_criteria = deep_data.get("selection_criteria", opp.selection_criteria)
+        opp.application_process = deep_data.get("application_process", opp.application_process)
+        opp.past_winners = deep_data.get("past_winners", opp.past_winners)
+        
+        # Grab historical context for strategy
+        historical_context = ""
+        past = db.query(models.Opportunity).filter(
+            models.Opportunity.status.in_(["won", "lost", "in-progress"])
+        ).limit(10).all()
+        for h in past:
+            historical_context += f"Name: {h.name}, Status: {h.status}, Strategy Used: {h.strategy}\n"
+            
+        # Get business feedback
+        feedback_objs = db.query(models.BusinessFeedback).order_by(models.BusinessFeedback.created_at.desc()).limit(5).all()
+        feedback_context = " ".join([f.feedback for f in feedback_objs]) if feedback_objs else ""
+            
+        print(f"Generating strategy for Opportunity ID {opp_id}...")
+        opp.strategy = generate_strategy(
+            {"name": opp.name, "description": opp.description, "benefits": opp.benefits},
+            historical_context,
+            feedback_context
+        )
+        
+        opp.status = "open"
+        db.commit()
+        
+        return {"message": "Smart Scan Details completed successfully!", "status": opp.status}
+    except Exception as e:
+        print(f"Smart Scan Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -118,6 +118,7 @@ def scrape_meta_portals():
                         closing_date="Scanning...",
                         description="Discovered via Meta-Hunter...",
                         link=url,
+                    raw_text=raw_text,
                         source="Meta-Discovery",
                         status="queued",
                         match_score=0

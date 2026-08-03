@@ -76,6 +76,7 @@ def extract_from_url(url: str, opp_id: int = None):
                 new_opp.selection_criteria = extracted_data.get("selection_criteria", new_opp.selection_criteria)
                 new_opp.application_process = extracted_data.get("application_process", new_opp.application_process)
                 new_opp.past_winners = extracted_data.get("past_winners", new_opp.past_winners)
+                new_opp.raw_text = raw_text
                 if new_opp.status == "Scanning...":
                     new_opp.status = "open"
             else:
@@ -97,6 +98,7 @@ def extract_from_url(url: str, opp_id: int = None):
                     application_process=extracted_data.get("application_process", ""),
                     past_winners=extracted_data.get("past_winners", ""),
                     link=url,
+                    raw_text=raw_text,
                     source="Smart Link Extraction",
                     status="open"
                 )

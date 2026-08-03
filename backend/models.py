@@ -21,6 +21,7 @@ class Opportunity(Base):
     selection_criteria = Column(Text, nullable=True)
     application_process = Column(Text, nullable=True)
     past_winners = Column(Text, nullable=True)
+    raw_text = Column(Text, nullable=True)
     
     # AI Engine Fields
     match_score = Column(Integer, nullable=True)
