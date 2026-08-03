@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import models
 from database import SessionLocal
+from scrapers.utils import validate_and_queue_link
 
 PORTAL_KEYWORDS = [
     "top grant portals for agriculture africa",
@@ -106,25 +107,12 @@ def scrape_meta_portals():
         return
         
     print(f"Queueing {len(new_urls)} new URLs for deep extraction.")
-    
+        
     if new_urls:
         try:
             with SessionLocal() as db:
                 for url in new_urls:
-                    new_opp = models.Opportunity(
-                        name=f"Hunting portal: {url[:30]}...",
-                        funder="Scanning...",
-                        value="Scanning...",
-                        closing_date="Scanning...",
-                        description="Discovered via Meta-Hunter...",
-                        link=url,
-                    raw_text=raw_text,
-                        source="Meta-Discovery",
-                        status="queued",
-                        match_score=0
-                    )
-                    db.add(new_opp)
-                db.commit()
+                    validate_and_queue_link(db, url, "Meta-Discovery", "d7e94ec58c8702974d2669c1baae88cb")
             
             print(f"Successfully queued {len(new_urls)} URLs for deep extraction.")
         except Exception as e:

@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import models
 from database import SessionLocal
+from scrapers.utils import validate_and_queue_link
 
 KEYWORDS = [
     "agriculture grants south africa",
@@ -130,27 +131,7 @@ def scrape_discovery_engine():
         try:
             with SessionLocal() as db:
                 for url in new_urls:
-                    new_opp = models.Opportunity(
-                        name=f"Extracting from {url[:30]}...",
-                        funder="Scanning...",
-                        value="Scanning...",
-                        closing_date="Scanning...",
-                        description="Discovered via AI Engine...",
-                        benefits="",
-                        eligibility_criteria="",
-                        selection_criteria="",
-                        application_process="",
-                        past_winners="",
-                        link=url,
-                    raw_text=raw_text,
-                        source="Discovery Engine",
-                        status="queued",
-                        match_score=0,
-                        match_reasoning="",
-                        strategy=""
-                    )
-                    db.add(new_opp)
-                db.commit()
+                    validate_and_queue_link(db, url, "Discovery Engine", "d7e94ec58c8702974d2669c1baae88cb")
             
             print(f"Successfully queued {len(new_urls)} discovered links for extraction.")
         except Exception as e:

@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 import time
 from database import SessionLocal
+from scrapers.utils import validate_and_queue_link
 import models
 from datetime import datetime
 import re
@@ -81,18 +82,9 @@ def scrape_saved_portals():
                                 
                                 if is_opportunity_link(full_url, text):
                                     # Check if already in DB
-                                    existing = db.query(models.Opportunity).filter(models.Opportunity.link == full_url).first()
-                                    if not existing:
-                                        print(f"Discovered new potential opportunity via {portal.url}: {full_url}")
-                                        new_opp = models.Opportunity(
-                                            name=text if text else "Discovered Opportunity",
-                                            link=full_url,
-                                            status="queued",
-                                            source=f"Portal Crawler: {portal.name}",
-                                            target_entity="Pending Analysis",
-                                            match_score=0
-                                        )
-                                        db.add(new_opp)
+                                    print(f"Discovered new potential opportunity via {portal.url}: {full_url}")
+                                    is_valid = validate_and_queue_link(db, full_url, f"Portal Crawler: {portal.name}", "d7e94ec58c8702974d2669c1baae88cb")
+                                    if is_valid:
                                         found_links += 1
                                         portal.opportunities_found += 1
                         

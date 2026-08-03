@@ -479,6 +479,20 @@ def re_extract_opportunity(opp_id: int, db: Session = Depends(get_db)):
     
     return {"message": "Details extracted successfully", "status": opp.status}
 
+@app.delete("/api/opportunities/cleanup-garbage")
+def cleanup_garbage(db: Session = Depends(get_db)):
+    """Delete all placeholder links dumped by Discovery scrapers."""
+    count = db.query(models.Opportunity).filter(
+        (models.Opportunity.description == None) | 
+        (models.Opportunity.description == '') | 
+        (models.Opportunity.description.like('Discovered via AI Engine%')) |
+        (models.Opportunity.name == 'Discovered Opportunity') |
+        (models.Opportunity.name.like('Extracting from %')) |
+        (models.Opportunity.funder == 'Scanning...')
+    ).delete(synchronize_session=False)
+    db.commit()
+    return {"message": f"Deleted {count} garbage records"}
+
 @app.delete("/api/opportunities/{opp_id}")
 def delete_opportunity(opp_id: int, db: Session = Depends(get_db)):
     """Delete an opportunity."""
