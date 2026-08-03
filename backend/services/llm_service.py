@@ -23,6 +23,7 @@ CRITERIA FOR A HIGH MATCH (Score 80+):
 - If an opportunity perfectly aligns with agricultural consulting/supply chain, assign `target_entity` as "Premier Agric".
 - If an opportunity perfectly aligns with tech, data, or digital innovation, assign `target_entity` as "Badger Analytics".
 - If it spans both (e.g. AgriTech data platform), assign `target_entity` as "Both".
+- IF THE OPPORTUNITY DEADLINE HAS PASSED OR IT IS EXPLICITLY STATED AS CLOSED, SCORE IT 0.
 
 Be harsh but fair. We only want highly lucrative, actionable opportunities.
 """
@@ -66,8 +67,9 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
     
     CRITICAL INSTRUCTION:
     If this webpage is a generic platform homepage, a portal, an 'About Us' page, or a list of multiple grants WITHOUT specific, concrete application details for a single opportunity, you MUST reject it.
+    If the opportunity deadline has passed, or it is explicitly stated as EXPIRED or CLOSED, you MUST reject it.
     If you are rejecting it, you MUST return an EXACTLY empty JSON object: {}
-    ONLY extract data if the webpage is a specific, individual, concrete grant/tender/award.
+    ONLY extract data if the webpage is a specific, individual, concrete grant/tender/award that is STILL OPEN.
     """
     
     # We use string manipulation to handle the empty JSON object {} fallback because response_schema strictly enforces fields.
