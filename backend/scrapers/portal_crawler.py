@@ -52,7 +52,7 @@ def scrape_saved_portals():
                         print("Successfully fetched via normal requests (0 credits used).")
                     except Exception as e:
                         print(f"Normal fetch failed ({e}). Falling back to ScraperAPI...")
-                        API_KEY = "d7e94ec58c8702974d2669c1baae88cb"
+                        API_KEY = "560f9d320dd92822005946b1eb2060ee"
                         scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={portal.url}&render=true"
                         
                         res = requests.get(scraper_url, timeout=45)
@@ -83,7 +83,7 @@ def scrape_saved_portals():
                                 if is_opportunity_link(full_url, text):
                                     # Check if already in DB
                                     print(f"Discovered new potential opportunity via {portal.url}: {full_url}")
-                                    is_valid = validate_and_queue_link(db, full_url, f"Portal Crawler: {portal.name}", "d7e94ec58c8702974d2669c1baae88cb")
+                                    is_valid = validate_and_queue_link(db, full_url, f"Portal Crawler: {portal.name}", "560f9d320dd92822005946b1eb2060ee")
                                     if is_valid:
                                         found_links += 1
                                         portal.opportunities_found += 1

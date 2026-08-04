@@ -428,7 +428,7 @@ def re_extract_opportunity(opp_id: int, db: Session = Depends(get_db)):
             headers = {'User-Agent': 'Mozilla/5.0'}
             res = requests.get(opp.link, headers=headers, timeout=15)
             if res.status_code in [403, 401, 429]:
-                API_KEY = "d7e94ec58c8702974d2669c1baae88cb"
+                API_KEY = "560f9d320dd92822005946b1eb2060ee"
                 scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={opp.link}&render=true"
                 res = requests.get(scraper_url, timeout=60)
             res.raise_for_status()

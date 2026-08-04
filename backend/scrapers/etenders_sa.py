@@ -18,7 +18,7 @@ def scrape_etenders():
         from bs4 import BeautifulSoup
         import re
         
-        API_KEY = "d7e94ec58c8702974d2669c1baae88cb"
+        API_KEY = "560f9d320dd92822005946b1eb2060ee"
         scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={base_url}&render=true"
         
         print(f"Navigating to {base_url} via ScraperAPI...")
