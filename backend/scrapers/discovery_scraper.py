@@ -75,7 +75,7 @@ def scrape_discovery_engine():
                 
                 try:
                     payload = {"q": keyword, "num": 10}
-                    response = requests.post("https://google.serper.dev/search", headers=headers, json=payload)
+                    response = requests.post("https://google.serper.dev/search", headers=headers, json=payload, timeout=15)
                     
                     if response.status_code == 200:
                         data = response.json()
@@ -101,11 +101,13 @@ def scrape_discovery_engine():
                     else:
                         print(f"Warning: Serper API error {response.status_code}: {response.text}")
                 except Exception as e:
+        if str(e) == 'API_QUOTA_EXCEEDED': raise e
                     print(f"Warning: Failed to search '{keyword}': {e}")
                 
                 time.sleep(1) # Be nice
                 
     except Exception as e:
+        if str(e) == 'API_QUOTA_EXCEEDED': raise e
         print(f"Critical error in Discovery Engine: {e}")
         return
         
@@ -120,6 +122,7 @@ def scrape_discovery_engine():
                 if not existing:
                     new_urls.append(url)
     except Exception as e:
+        if str(e) == 'API_QUOTA_EXCEEDED': raise e
         print(f"Database error during discovery: {e}")
         return
         
@@ -135,6 +138,7 @@ def scrape_discovery_engine():
             
             print(f"Successfully queued {len(new_urls)} discovered links for extraction.")
         except Exception as e:
+        if str(e) == 'API_QUOTA_EXCEEDED': raise e
             print(f"Failed to queue discovered links: {e}")
     else:
         print("No new opportunities discovered this run.")

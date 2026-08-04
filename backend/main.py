@@ -301,7 +301,7 @@ def trigger_all_scrapers(db: Session = Depends(get_db)):
     
     log_file = open("scraper_logs.txt", "w")
     subprocess.Popen(
-        [sys.executable, "scrapers/run_all.py"],
+        [sys.executable, "-u", "scrapers/run_all.py"],
         stdout=log_file,
         stderr=subprocess.STDOUT
     )
