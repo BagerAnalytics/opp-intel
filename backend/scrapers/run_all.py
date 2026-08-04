@@ -119,7 +119,15 @@ def run_all_scrapers():
         
     except Exception as e:
         print(f"Scraper execution error: {e}")
-        finish_progress(db)
+        if str(e) == "API_QUOTA_EXCEEDED":
+            update_progress(db, 0, "ERROR: Gemini AI Quota Exhausted! Please update your API Key.")
+            # Set is_active to False manually instead of calling finish_progress to keep the error visible
+            progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
+            if progress:
+                progress.is_active = False
+                db.commit()
+        else:
+            finish_progress(db)
     finally:
         db.close()
 
