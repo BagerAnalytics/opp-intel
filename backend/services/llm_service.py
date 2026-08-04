@@ -37,7 +37,7 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
     for attempt in range(4):
         try:
             model = genai.GenerativeModel(
-                'models/gemini-1.5-flash',
+                'models/gemini-3.6-flash',
                 system_instruction=system_prompt,
                 generation_config=genai.types.GenerationConfig(
                     response_mime_type="application/json",
@@ -61,7 +61,7 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
                 time.sleep(5 * (attempt + 1))
             else:
                 print(f"Gemini API Quota Error fully exhausted: {e}")
-                return json.dumps({"match_score": 0, "reasoning": f"LLM failed quota: {e}", "opp_type": "Other", "target_entity": "Unknown"})
+                raise Exception("API_QUOTA_EXCEEDED")
         except Exception as e:
             print(f"Gemini Matcher Error: {e}")
             return json.dumps({"match_score": 0, "reasoning": f"LLM failed: {e}", "opp_type": "Other", "target_entity": "Unknown"})
@@ -85,7 +85,7 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
     for attempt in range(4):
         try:
             model = genai.GenerativeModel(
-                'models/gemini-1.5-flash',
+                'models/gemini-3.6-flash',
                 system_instruction=system_prompt,
                 generation_config=genai.types.GenerationConfig(
                     response_mime_type="application/json"
@@ -102,7 +102,7 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
                 time.sleep(5 * (attempt + 1))
             else:
                 print(f"Gemini API Quota Error fully exhausted: {e}")
-                return {}
+                raise Exception("API_QUOTA_EXCEEDED")
         except Exception as e:
             print(f"Gemini Extraction Error: {e}")
             return {}
@@ -116,7 +116,7 @@ def deep_extract_opportunity(raw_text: str) -> dict:
     for attempt in range(4):
         try:
             model = genai.GenerativeModel(
-                'models/gemini-1.5-flash',
+                'models/gemini-3.6-flash',
                 system_instruction=system_prompt,
                 generation_config=genai.types.GenerationConfig(
                     response_mime_type="application/json"
@@ -152,7 +152,7 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
     """
     try:
         model = genai.GenerativeModel(
-            'models/gemini-1.5-flash',
+            'models/gemini-3.6-flash',
             system_instruction="You are an expert grant and funding strategist."
         )
         response = model.generate_content(prompt)
