@@ -101,7 +101,7 @@ def scrape_discovery_engine():
                     else:
                         print(f"Warning: Serper API error {response.status_code}: {response.text}")
                 except Exception as e:
-        if str(e) == 'API_QUOTA_EXCEEDED': raise e
+                    if str(e) == 'API_QUOTA_EXCEEDED': raise e
                     print(f"Warning: Failed to search '{keyword}': {e}")
                 
                 time.sleep(1) # Be nice
@@ -138,7 +138,7 @@ def scrape_discovery_engine():
             
             print(f"Successfully queued {len(new_urls)} discovered links for extraction.")
         except Exception as e:
-        if str(e) == 'API_QUOTA_EXCEEDED': raise e
+            if str(e) == 'API_QUOTA_EXCEEDED': raise e
             print(f"Failed to queue discovered links: {e}")
     else:
         print("No new opportunities discovered this run.")

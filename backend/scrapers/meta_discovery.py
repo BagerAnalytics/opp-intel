@@ -84,7 +84,7 @@ def scrape_meta_portals():
                         print(f"Warning: Serper API error {response.status_code}: {response.text}")
                         
                 except Exception as e:
-        if str(e) == 'API_QUOTA_EXCEEDED': raise e
+                    if str(e) == 'API_QUOTA_EXCEEDED': raise e
                     print(f"Warning: Failed to search '{keyword}': {e}")
                 
                 time.sleep(1) # Be nice to the API
@@ -119,7 +119,7 @@ def scrape_meta_portals():
             
             print(f"Successfully queued {len(new_urls)} URLs for deep extraction.")
         except Exception as e:
-        if str(e) == 'API_QUOTA_EXCEEDED': raise e
+            if str(e) == 'API_QUOTA_EXCEEDED': raise e
             print(f"Failed to queue URLs: {e}")
 
 if __name__ == "__main__":

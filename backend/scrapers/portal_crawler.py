@@ -51,7 +51,7 @@ def scrape_saved_portals():
                         html_content = res.text
                         print("Successfully fetched via normal requests (0 credits used).")
                     except Exception as e:
-        if str(e) == 'API_QUOTA_EXCEEDED': raise e
+                        if str(e) == 'API_QUOTA_EXCEEDED': raise e
                         print(f"Normal fetch failed ({e}). Falling back to ScraperAPI...")
                         API_KEY = "560f9d320dd92822005946b1eb2060ee"
                         scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={portal.url}&render=true"
@@ -95,7 +95,7 @@ def scrape_saved_portals():
                     else:
                         print(f"Warning: Failed to crawl {portal.url} (Status {res.status_code})")
                 except Exception as e:
-        if str(e) == 'API_QUOTA_EXCEEDED': raise e
+                    if str(e) == 'API_QUOTA_EXCEEDED': raise e
                     print(f"Warning: Failed to crawl portal {portal.url}: {e}")
                 
                 time.sleep(2) # Be nice to the portals
