@@ -59,7 +59,7 @@ export default function Home() {
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
         const res = await axios.get(`${apiUrl}/api/scrapers/progress`);
         
         setProgress(prev => {
@@ -80,7 +80,7 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const [oppResponse, contactsResponse, complianceResponse, portalsResponse] = await Promise.all([
         axios.get(`${apiUrl}/api/opportunities`),
         axios.get(`${apiUrl}/api/contacts`),
@@ -109,7 +109,7 @@ export default function Home() {
 
   const fetchLogs = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const res = await axios.get(`${apiUrl}/api/scrapers/logs`);
       setLogsContent(res.data.logs);
       setIsLogsModalOpen(true);
@@ -124,7 +124,7 @@ export default function Home() {
     if (progress.is_active) return;
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.post(`${apiUrl}/api/scrapers/trigger-all`);
       // Local optimistic update
       setProgress({ is_active: true, current_task: "Initializing AI Hunter...", progress_percent: 5 });

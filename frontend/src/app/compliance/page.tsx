@@ -31,7 +31,7 @@ export default function CompliancePage() {
 
   const fetchDocs = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const response = await axios.get(`${apiUrl}/api/compliance`);
       setDocs(response.data);
     } catch (error) {
@@ -44,7 +44,7 @@ export default function CompliancePage() {
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.post(`${apiUrl}/api/compliance`, formData);
       setIsModalOpen(false);
       setFormData({
@@ -59,7 +59,7 @@ export default function CompliancePage() {
   const handleDeleteDoc = async (id: number) => {
     if (!confirm('Are you sure you want to remove this document tracker?')) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.delete(`${apiUrl}/api/compliance/${id}`);
       fetchDocs();
     } catch (error) {
@@ -69,7 +69,7 @@ export default function CompliancePage() {
 
   const handleStatusUpdate = async (id: number, newStatus: string) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const doc = docs.find(d => d.id === id);
       if (doc) {
         await axios.put(`${apiUrl}/api/compliance/${id}`, { ...doc, status: newStatus });
@@ -82,7 +82,7 @@ export default function CompliancePage() {
 
   const handleFileUpload = async (id: number, file: File) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const formData = new FormData();
       formData.append('file', file);
       

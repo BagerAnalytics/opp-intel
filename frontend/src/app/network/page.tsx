@@ -35,7 +35,7 @@ export default function NetworkPage() {
 
   const fetchContacts = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const response = await axios.get(`${apiUrl}/api/contacts`);
       setContacts(response.data);
     } catch (error) {
@@ -48,7 +48,7 @@ export default function NetworkPage() {
   const handleDeleteContact = async (id: number) => {
     if (!confirm('Are you sure you want to delete this contact?')) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.delete(`${apiUrl}/api/contacts/${id}`);
       fetchContacts();
     } catch (error) {
@@ -59,7 +59,7 @@ export default function NetworkPage() {
   const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.post(`${apiUrl}/api/contacts`, formData);
       setIsModalOpen(false);
       setFormData({
