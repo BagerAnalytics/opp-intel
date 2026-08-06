@@ -34,12 +34,11 @@ export default function Home() {
   const [complianceDocs, setComplianceDocs] = useState<any[]>([]);
   const [portals, setPortals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('Grants');
+  const [activeTab, setActiveTab] = useState('All Open');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
   const [logsContent, setLogsContent] = useState("");
   const [searchQuery, setSearchQuery] = useState('');
-  const [showTopMatches, setShowTopMatches] = useState(false);
   const [visibleCount, setVisibleCount] = useState(50);
   const [progress, setProgress] = useState<{is_active: boolean, current_task: string, progress_percent: number}>({
     is_active: false,
@@ -54,7 +53,7 @@ export default function Home() {
   // Reset pagination when filters change
   useEffect(() => {
     setVisibleCount(50);
-  }, [activeTab, searchQuery, showTopMatches]);
+  }, [activeTab, searchQuery]);
 
   // Poll scraper progress
   useEffect(() => {
@@ -138,20 +137,11 @@ export default function Home() {
   const filteredOpportunities = opportunities.filter(opp => {
     // 1. Tab filtering
     let tabMatch = true;
-    if (activeTab !== 'Queued for Extraction' && activeTab !== 'Failed Extraction') {
-      if (activeTab === 'Grants' && opp.opp_type !== 'Grant') tabMatch = false;
-      else if (activeTab === 'Tenders' && opp.opp_type !== 'Tender') tabMatch = false;
-      else if (activeTab === 'Awards' && opp.opp_type !== 'Award') tabMatch = false;
-      else if (activeTab === 'Fellowships / Other' && (opp.opp_type === 'Grant' || opp.opp_type === 'Tender' || opp.opp_type === 'Award')) tabMatch = false;
-      else if (activeTab === 'Manually Added' && (opp.source !== 'Manual Entry' && opp.source !== 'Smart Link Extraction')) tabMatch = false;
-    }
     
     // Status filtering based on Tab
-    if (activeTab === 'Queued for Extraction') {
-      if (opp.status !== 'queued' && opp.status !== 'Scanning...') tabMatch = false;
-    } else if (activeTab === 'Failed Extraction') {
-      if (opp.status !== 'failed') tabMatch = false;
-    } else {
+    if (activeTab === 'Queue Backlog') {
+      if (opp.status !== 'queued' && opp.status !== 'Scanning...' && opp.status !== 'failed') tabMatch = false;
+    } else if (activeTab === 'All Open') {
       // Standard tabs should ONLY show 'open' status (successfully extracted)
       if (opp.status !== 'open') tabMatch = false;
     }
@@ -164,11 +154,6 @@ export default function Home() {
       const matchName = opp.name?.toLowerCase().includes(query) || false;
       const matchFunder = opp.funder?.toLowerCase().includes(query) || false;
       if (!matchName && !matchFunder) return false;
-    }
-
-    // 3. Top Matches filtering
-    if (showTopMatches && (opp.match_score || 0) < 80) {
-      return false;
     }
 
     return true;
@@ -304,7 +289,7 @@ export default function Home() {
 
       {/* Advanced Filters */}
       <div className="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-slate-200">
-        <div className="w-full md:w-1/2">
+        <div className="w-full">
           <input 
             type="text" 
             placeholder="Search opportunities by name or funder..." 
@@ -313,20 +298,11 @@ export default function Home() {
             className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm bg-white"
           />
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-slate-600">Top Matches Only (80+)</span>
-          <button 
-            onClick={() => setShowTopMatches(!showTopMatches)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${showTopMatches ? 'bg-emerald-500' : 'bg-slate-300'}`}
-          >
-            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${showTopMatches ? 'translate-x-6' : 'translate-x-1'}`} />
-          </button>
-        </div>
       </div>
 
       <div className="mb-8 flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="flex flex-wrap items-center gap-2">
-          {['Grants', 'Tenders', 'Awards', 'Fellowships / Other', 'Saved Portals', 'Manually Added', 'Queued for Extraction', 'Failed Extraction'].map(tab => (
+          {['All Open', 'Saved Portals', 'Queue Backlog'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -339,19 +315,6 @@ export default function Home() {
               {tab}
             </button>
           ))}
-        </div>
-        <div className="flex items-center gap-5 text-[13px] font-bold tracking-wide uppercase text-slate-500">
-          <span className="flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
-            High Match
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-400"></span>
-            Med Match
-          </span>
         </div>
       </div>
 

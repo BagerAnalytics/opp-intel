@@ -200,7 +200,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-2 mb-3">
             <div className="bg-slate-50/50 rounded-2xl p-3 border border-slate-100/50">
               <p className="text-slate-400 text-[10px] mb-1 font-bold tracking-widest uppercase">Value</p>
               <p className="text-slate-900 text-[15px] font-extrabold">{opp.value || '$---'}</p>
@@ -209,25 +209,24 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               <p className="text-slate-400 text-[10px] mb-1 font-bold tracking-widest uppercase">Deadline</p>
               <p className="text-slate-900 text-[15px] font-extrabold">{opp.closing_date || 'Open'}</p>
             </div>
-            <div className="col-span-2 flex items-center gap-2">
-              {warmConnections.length > 0 ? (
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100/50 px-4 py-3 rounded-2xl flex items-center gap-3 w-full shadow-[inset_0_2px_10px_rgba(255,255,255,1)]">
-                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                  <div>
-                    <p className="text-emerald-600 text-[10px] font-bold tracking-widest uppercase mb-0.5">Warm Connection</p>
-                    <p className="text-slate-900 text-[13px] font-extrabold">{warmConnections[0].name}</p>
-                  </div>
+          </div>
+            
+          {(opp.benefits || opp.eligibility_criteria) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {opp.benefits && (
+                <div className="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
+                  <p className="text-emerald-700 text-[11px] mb-1 font-bold tracking-widest uppercase flex items-center gap-1.5"><Gift size={12}/> Benefits</p>
+                  <p className={`text-slate-700 text-[13px] ${isExpanded ? '' : 'line-clamp-3'}`}>{opp.benefits}</p>
                 </div>
-              ) : (
-                <div className="bg-slate-50/50 border border-slate-100/50 px-4 py-3 rounded-2xl flex items-center gap-3 w-full">
-                  <div className="p-1.5 bg-white rounded-lg shadow-sm border border-slate-100">
-                    <Users size={14} className="text-slate-400" />
-                  </div>
-                  <p className="text-slate-500 text-xs font-semibold">No warm connections found</p>
+              )}
+              {opp.eligibility_criteria && (
+                <div className="bg-blue-50/30 rounded-xl p-3 border border-blue-100/50">
+                  <p className="text-blue-700 text-[11px] mb-1 font-bold tracking-widest uppercase flex items-center gap-1.5"><ListChecks size={12}/> Eligibility</p>
+                  <p className={`text-slate-700 text-[13px] ${isExpanded ? '' : 'line-clamp-3'}`}>{opp.eligibility_criteria}</p>
                 </div>
               )}
             </div>
-          </div>
+          )}
             
           <p className={`text-slate-600 text-[15px] leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
             {opp.description || "No description provided."}
@@ -338,30 +337,6 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
 
           {hasDeepData ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {opp.benefits && (
-                <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
-                  <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
-                    <div className="p-2 bg-emerald-100/50 rounded-xl">
-                      <Gift size={18} className="text-emerald-600" strokeWidth={2.5} />
-                    </div>
-                    Benefits
-                  </div>
-                  <div className="text-[15px] text-slate-600 leading-relaxed whitespace-pre-wrap pl-[52px]">{opp.benefits}</div>
-                </div>
-              )}
-              
-              {opp.eligibility_criteria && (
-               <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
-                  <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
-                    <div className="p-2 bg-blue-100/50 rounded-xl">
-                      <ListChecks size={18} className="text-blue-600" strokeWidth={2.5} />
-                    </div>
-                    Eligibility
-                  </div>
-                  <div className="text-[15px] text-slate-600 leading-relaxed whitespace-pre-wrap pl-[52px]">{opp.eligibility_criteria}</div>
-                </div>
-              )}
-
               {opp.selection_criteria && (
                 <div className="space-y-3 p-5 rounded-2xl hover:bg-white/40 transition-colors">
                   <div className="flex items-center gap-3 text-slate-900 font-extrabold text-[15px]">
