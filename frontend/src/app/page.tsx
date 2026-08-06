@@ -140,7 +140,9 @@ export default function Home() {
     
     // Status filtering based on Tab
     if (activeTab === 'Queue Backlog') {
-      if (opp.status !== 'queued' && opp.status !== 'Scanning...' && opp.status !== 'failed') tabMatch = false;
+      if (opp.status !== 'queued' && opp.status !== 'Scanning...') tabMatch = false;
+    } else if (activeTab === 'Failed Extraction') {
+      if (opp.status !== 'failed') tabMatch = false;
     } else if (activeTab === 'All Open') {
       // Standard tabs should ONLY show 'open' status (successfully extracted)
       if (opp.status !== 'open') tabMatch = false;
@@ -263,7 +265,10 @@ export default function Home() {
       {/* Queue & Error Stats */}
       {(queuedCount > 0 || failedCount > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          <div className="bg-slate-100 rounded-3xl p-7 border border-slate-200 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+          <div 
+            onClick={() => setActiveTab('Queue Backlog')}
+            className="bg-slate-100 rounded-3xl p-7 border border-slate-200 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all cursor-pointer"
+          >
             <div>
               <h3 className="font-bold text-slate-500 text-[13px] tracking-widest uppercase mb-1">Queue Backlog</h3>
               <p className="text-4xl font-extrabold text-slate-700">{queuedCount}</p>
@@ -274,7 +279,10 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="bg-red-50/50 rounded-3xl p-7 border border-red-100 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all">
+          <div 
+            onClick={() => setActiveTab('Failed Extraction')}
+            className="bg-red-50/50 rounded-3xl p-7 border border-red-100 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all cursor-pointer"
+          >
             <div>
               <h3 className="font-bold text-red-500 text-[13px] tracking-widest uppercase mb-1">Failed Extraction</h3>
               <p className="text-4xl font-extrabold text-red-600">{failedCount}</p>
