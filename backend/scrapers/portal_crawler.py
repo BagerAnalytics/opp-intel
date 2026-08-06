@@ -20,6 +20,14 @@ def is_opportunity_link(url: str, text: str) -> bool:
             return True
     return False
 
+SEED_PORTALS = [
+    {"name": "Startup Researcher", "url": "https://www.startupresearcher.com/opportunity-radar?page=1"},
+    {"name": "Start Hub Ops SA", "url": "https://starthubops.co.za/"},
+    {"name": "Standards Facility", "url": "https://www.standardsfacility.org/project/apply"},
+    {"name": "Unconnected ConnectFunding", "url": "https://unconnected.org/connectfunding"},
+    {"name": "Agriventures Funding Preview", "url": "https://agriventures.co/dashboard/funding-preview"}
+]
+
 def scrape_saved_portals():
     print("Starting Portal Crawler to check saved portals for new opportunities...")
     
@@ -29,7 +37,20 @@ def scrape_saved_portals():
     
     try:
         with SessionLocal() as db:
-            portals = db.query(models.Portal).filter(models.Portal.status == "Active").all()
+            db_portals = db.query(models.Portal).filter(models.Portal.status == "Active").all()
+            
+            # Combine hardcoded seed portals with database portals
+            portals = list(db_portals)
+            for seed in SEED_PORTALS:
+                # Mock a Portal object for the crawler to use
+                class MockPortal:
+                    def __init__(self, name, url):
+                        self.name = name
+                        self.url = url
+                        self.opportunities_found = 0
+                        self.last_scraped = None
+                portals.append(MockPortal(seed['name'], seed['url']))
+                
             if not portals:
                 print("No saved portals found in memory.")
                 return
