@@ -267,6 +267,28 @@ def get_scraper_progress(db: Session = Depends(get_db)):
         db.refresh(progress)
     return progress
 
+@app.post("/api/scrapers/cancel")
+def cancel_scrapers():
+    """Cancel any currently running scrapers."""
+    if not _scraper_status["is_active"]:
+        return {"message": "No scrapers are currently running."}
+    
+    # We set the flag to false. Scraper scripts will need to check this to exit cleanly.
+    _scraper_status["is_active"] = False
+    _scraper_status["current_task"] = "Cancelling..."
+    
+    # If there's an active subprocess, we can terminate it
+    if "process" in _scraper_status and _scraper_status["process"]:
+        try:
+            _scraper_status["process"].terminate()
+        except Exception as e:
+            print(f"Failed to terminate scraper process: {e}")
+            
+    _scraper_status["process"] = None
+    _scraper_status["current_task"] = "Idle"
+    _scraper_status["progress_percent"] = 0
+    return {"message": "Scrapers cancelled successfully."}
+
 @app.post("/api/scrapers/trigger-all")
 def trigger_all_scrapers(db: Session = Depends(get_db)):
     """Manually trigger all background scrapers immediately."""
