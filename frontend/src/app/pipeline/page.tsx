@@ -92,7 +92,7 @@ export default function PipelinePage() {
 
   const fetchData = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const response = await axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] }));
       setOpportunities(response.data.filter((opp: Opportunity) => opp.status !== 'open' && opp.status !== 'closed'));
     } catch (error) {
@@ -122,7 +122,7 @@ export default function PipelinePage() {
     ));
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.put(`${apiUrl}/api/opportunities/${draggedId}/status?status=${targetStatus}`);
     } catch (error) {
       console.error("Failed to update status", error);
@@ -313,7 +313,7 @@ export default function PipelinePage() {
                               e.stopPropagation();
                               if(confirm('Remove opportunity from pipeline?')) {
                                 try {
-                                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+                                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
                                   axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=open`);
                                   setOpportunities(prev => prev.filter(o => o.id !== opp.id));
                                 } catch (err) {}

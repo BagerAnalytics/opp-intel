@@ -39,7 +39,7 @@ export default function NetworkPage() {
 
   const fetchContacts = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const response = await axios.get(`${apiUrl}/api/contacts`).catch(() => ({ data: [] }));
       setContacts(response.data);
     } catch (error) {
@@ -52,7 +52,7 @@ export default function NetworkPage() {
   const handleDeleteContact = async (id: number) => {
     if (!confirm('Are you sure you want to delete this target?')) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.delete(`${apiUrl}/api/contacts/${id}`);
       fetchContacts();
     } catch (error) {
@@ -63,7 +63,7 @@ export default function NetworkPage() {
   const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.post(`${apiUrl}/api/contacts`, formData);
       setIsModalOpen(false);
       setFormData({

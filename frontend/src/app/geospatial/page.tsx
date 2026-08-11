@@ -46,7 +46,7 @@ export default function GeospatialPage() {
 
   const fetchOpps = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       const res = await axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] }));
       setOpportunities(res.data);
     } catch (error) {
@@ -59,7 +59,7 @@ export default function GeospatialPage() {
   const handleManualUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://oppintel.up.railway.app';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
       await axios.post(`${apiUrl}/api/opportunities`, {
         ...newAward,
         status: 'won', // Force status to won
