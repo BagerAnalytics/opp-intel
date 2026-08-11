@@ -930,6 +930,29 @@ def force_seed(db: Session = Depends(get_db)):
         err_msg = traceback.format_exc()
         return {"status": "error", "message": str(e), "traceback": err_msg}
 
+@app.get("/api/debug/clear_db")
+def clear_live_db(db: Session = Depends(get_db)):
+    try:
+        opp_count = db.query(models.Opportunity).delete()
+        contact_count = db.query(models.Contact).delete()
+        doc_count = db.query(models.ComplianceDocument).delete()
+        
+        # Don't delete users or settings so they stay logged in
+        db.commit()
+        
+        return {
+            "status": "success", 
+            "message": "All mock data wiped permanently.",
+            "deleted": {
+                "opportunities": opp_count,
+                "contacts": contact_count,
+                "compliance_documents": doc_count
+            }
+        }
+    except Exception as e:
+        import traceback
+        return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
+
 if __name__ == '__main__':
     import uvicorn
     import os
