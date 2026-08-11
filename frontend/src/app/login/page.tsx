@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRight, Lock, Mail, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://opp-intel-production.up.railway.app');
 
 export default function LoginPage() {
   const router = useRouter();

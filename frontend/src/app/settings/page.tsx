@@ -5,7 +5,7 @@ import { User, Users, Database, CreditCard, Shield, Key, Bell, CheckCircle2, Che
 import axios from 'axios';
 
 type TabType = 'profile' | 'team' | 'engine' | 'billing';
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://opp-intel-production.up.railway.app');
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -15,6 +15,9 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<any>({ theme: 'light', ai_threshold: 80, email_notifications: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [profileData, setProfileData] = useState({ name: '', email: '' });
+  const [passwordData, setPasswordData] = useState({ newPassword: '', confirmPassword: '' });
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -23,6 +26,7 @@ export default function SettingsPage() {
         if (userStr) {
           const user = JSON.parse(userStr);
           setCurrentUser(user);
+          setProfileData({ name: user.name || '', email: user.email || '' });
           
           // Fetch settings
           const settingsRes = await axios.get(`${apiUrl}/api/settings/${user.id}`);
@@ -50,6 +54,48 @@ export default function SettingsPage() {
       await axios.post(`${apiUrl}/api/settings/${currentUser.id}`, { [key]: value });
     } catch (err) {
       console.error("Failed to update setting", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateProfile = async () => {
+    if (!currentUser) return;
+    setSaving(true);
+    try {
+      const res = await axios.put(`${apiUrl}/api/users/${currentUser.id}`, {
+        full_name: profileData.name,
+        email: profileData.email
+      });
+      const updatedUser = { ...currentUser, name: res.data.name, email: res.data.email };
+      setCurrentUser(updatedUser);
+      localStorage.setItem('oppintel_user', JSON.stringify(updatedUser));
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error("Failed to update profile", err);
+      alert("Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updatePassword = async () => {
+    if (!currentUser) return;
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+    setSaving(true);
+    try {
+      await axios.put(`${apiUrl}/api/users/${currentUser.id}`, {
+        password: passwordData.newPassword
+      });
+      setIsEditingPassword(false);
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+      alert("Password updated successfully!");
+    } catch (err) {
+      console.error("Failed to update password", err);
+      alert("Failed to update password.");
     } finally {
       setSaving(false);
     }
@@ -88,29 +134,83 @@ export default function SettingsPage() {
             <div className="grid grid-cols-2 gap-8 mb-10 pb-10 border-b border-slate-100">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
-                <input type="text" readOnly defaultValue={currentUser?.name || ''} className="w-full bg-white/20 backdrop-blur-md border border-slate-200 px-5 py-3 rounded-xl font-medium text-slate-500 cursor-not-allowed focus:outline-none transition-colors" />
+                <input 
+                  type="text" 
+                  value={profileData.name} 
+                  onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                  className="w-full bg-white/40 backdrop-blur-md border border-slate-200 px-5 py-3 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition-colors" 
+                />
               </div>
               <div>
                 <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
-                <input type="email" readOnly defaultValue={currentUser?.email || ''} className="w-full bg-white/20 backdrop-blur-md border border-slate-200 px-5 py-3 rounded-xl font-medium text-slate-500 cursor-not-allowed focus:outline-none transition-colors" />
+                <input 
+                  type="email" 
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                  className="w-full bg-white/40 backdrop-blur-md border border-slate-200 px-5 py-3 rounded-xl font-medium text-slate-800 focus:outline-none focus:border-slate-400 transition-colors" 
+                />
+              </div>
+              <div className="col-span-2 flex justify-end">
+                <button 
+                  onClick={updateProfile}
+                  disabled={saving}
+                  className="px-6 py-2.5 bg-slate-800 text-white text-sm font-medium rounded-xl hover:bg-slate-700 transition-colors disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Profile Changes'}
+                </button>
               </div>
             </div>
 
             <div>
               <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-6">Security</h3>
-              <div className="flex items-center justify-between p-6 bg-white/20 backdrop-blur-md rounded-2xl border border-slate-200 mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-500">
-                    <Key size={18} />
+              <div className="flex flex-col p-6 bg-white/20 backdrop-blur-md rounded-2xl border border-slate-200 mb-4">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-500">
+                      <Key size={18} />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-slate-800">Password</h4>
+                      <p className="text-xs font-medium text-slate-500 mt-0.5">Change your account password.</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-slate-800">Password</h4>
-                    <p className="text-xs font-medium text-slate-500 mt-0.5">Last changed recently</p>
-                  </div>
+                  <button onClick={() => setIsEditingPassword(!isEditingPassword)} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-100 transition-colors">
+                    {isEditingPassword ? "Cancel" : "Change Password"}
+                  </button>
                 </div>
-                <button className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-100 transition-colors">
-                  Change Password
-                </button>
+                {isEditingPassword && (
+                  <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 gap-6 animate-in slide-in-from-top-2 duration-300">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">New Password</label>
+                      <input 
+                        type="password" 
+                        placeholder="Enter new password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        className="w-full bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-slate-400" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Confirm Password</label>
+                      <input 
+                        type="password" 
+                        placeholder="Confirm new password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        className="w-full bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-slate-400" 
+                      />
+                    </div>
+                    <div className="col-span-2 flex justify-end">
+                      <button 
+                        onClick={updatePassword}
+                        disabled={saving || !passwordData.newPassword}
+                        className="px-5 py-2 bg-emerald-600 text-white text-sm font-medium rounded-xl shadow-md hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                      >
+                        {saving ? 'Saving...' : 'Save New Password'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between p-6 bg-white/20 backdrop-blur-md rounded-2xl border border-slate-200">
