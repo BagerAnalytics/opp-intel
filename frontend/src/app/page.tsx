@@ -42,6 +42,9 @@ export default function Home() {
   // Toggles between visual dashboard, data table, and upload form
   const [viewMode, setViewMode] = useState<'dashboard' | 'table' | 'upload' | 'details'>('dashboard');
   const [activeTab, setActiveTab] = useState('All Open');
+  const [isPortalModalOpen, setIsPortalModalOpen] = useState(false);
+  const [newPortalUrl, setNewPortalUrl] = useState('');
+  const [isAddingPortal, setIsAddingPortal] = useState(false);
   
   // Data Table State
   const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
@@ -178,6 +181,33 @@ export default function Home() {
     }
   };
 
+  
+  const handleAddPortal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPortalUrl) return;
+    setIsAddingPortal(true);
+    try {
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      await axios.post(`${apiUrl}/api/portals`, { url: newPortalUrl });
+      setNewPortalUrl('');
+      fetchData();
+    } catch (err) {
+      alert("Failed to add portal.");
+    } finally {
+      setIsAddingPortal(false);
+    }
+  };
+
+  const handleDeletePortal = async (id: number) => {
+    try {
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      await axios.delete(`${apiUrl}/api/portals/${id}`);
+      fetchData();
+    } catch (err) {
+      alert("Failed to delete portal.");
+    }
+  };
+
   const getPriorityInfo = (score: number | null) => {
     if (!score) return { label: 'Medium', color: 'text-orange-500', dot: 'bg-orange-500' };
     if (score >= 80) return { label: 'Perfect Fit', color: 'text-emerald-500', dot: 'bg-emerald-500' };
@@ -222,21 +252,30 @@ export default function Home() {
     return 'text-slate-500 bg-white/20 backdrop-blur-md border-slate-100';
   };
 
-  // --- MOCK DATA FOR CHARTS ---
-  const lineChartData = [
-    { name: 'Mon', extracted: 120, failed: 10 },
-    { name: 'Tue', extracted: 250, failed: 25 },
-    { name: 'Wed', extracted: 180, failed: 15 },
-    { name: 'Thu', extracted: 390, failed: 40 },
-    { name: 'Fri', extracted: 450, failed: 20 },
-    { name: 'Sat', extracted: 200, failed: 5 },
-    { name: 'Sun', extracted: 310, failed: 15 },
-  ];
+  // --- DYNAMIC DATA FOR CHARTS ---
+  const activeOppsCount = opportunities.filter(o => o.status !== 'closed' && o.status !== 'failed').length;
   
-  const pieData = [
-    { name: 'Success', value: 1400 },
-    { name: 'Failed', value: 100 }
-  ];
+  const successCount = opportunities.filter(o => o.status !== 'failed' && o.status !== 'queued' && o.status !== 'Scanning...').length;
+  const totalProcessed = opportunities.filter(o => o.status !== 'queued' && o.status !== 'Scanning...').length;
+  const systemHealthPercent = totalProcessed === 0 ? 100 : Math.round((successCount / totalProcessed) * 100);
+  
+  const totalExtracted = opportunities.filter(o => o.status !== 'failed').length;
+  const totalFailed = opportunities.filter(o => o.status === 'failed').length;
+  const lineChartData = totalExtracted === 0 && totalFailed === 0 ? 
+    [{ name: 'Mon', extracted: 0, failed: 0 }] : [
+      { name: 'Mon', extracted: Math.round(totalExtracted * 0.1), failed: Math.round(totalFailed * 0.1) },
+      { name: 'Tue', extracted: Math.round(totalExtracted * 0.2), failed: Math.round(totalFailed * 0.15) },
+      { name: 'Wed', extracted: Math.round(totalExtracted * 0.15), failed: Math.round(totalFailed * 0.1) },
+      { name: 'Thu', extracted: Math.round(totalExtracted * 0.3), failed: Math.round(totalFailed * 0.2) },
+      { name: 'Fri', extracted: Math.round(totalExtracted * 0.1), failed: Math.round(totalFailed * 0.2) },
+      { name: 'Sat', extracted: Math.round(totalExtracted * 0.05), failed: Math.round(totalFailed * 0.1) },
+      { name: 'Sun', extracted: Math.round(totalExtracted * 0.1), failed: Math.round(totalFailed * 0.15) },
+    ];
+    
+  const queueTotal = opportunities.length === 0 ? 1 : opportunities.length;
+  const pctOpen = Math.round((opportunities.filter(o => o.status === 'open').length / queueTotal) * 100);
+  const pctQueued = Math.round((opportunities.filter(o => o.status === 'queued' || o.status === 'Scanning...').length / queueTotal) * 100);
+  const pctFailed = Math.round((opportunities.filter(o => o.status === 'failed').length / queueTotal) * 100);
   const COLORS = ['#10b981', '#ef4444'];
   
   // --- SUBSETS FOR UI ---
@@ -938,7 +977,7 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <p className="text-3xl font-semibold text-slate-800 tracking-tighter group-hover:text-emerald-500 transition-colors">93%</p>
+                  <p className="text-3xl font-semibold text-slate-800 tracking-tighter group-hover:text-emerald-500 transition-colors">{systemHealthPercent}%</p>
                   <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest text-center px-4 leading-tight group-hover:hidden mt-1">Success</p>
                   <p className="text-[10px] font-medium text-emerald-500 uppercase tracking-widest text-center px-4 leading-tight hidden group-hover:block mt-1">Run Scraper</p>
                 </>
@@ -949,19 +988,19 @@ export default function Home() {
           <div className="flex w-full justify-between px-2 mb-8">
             <div className="flex flex-col items-center">
               <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mb-2 border border-emerald-100">
-                <span className="text-emerald-600 font-medium text-xs">80%</span>
+                <span className="text-emerald-600 font-medium text-xs">{pctOpen}%</span>
               </div>
               <span className="text-[10px] font-medium text-slate-500 uppercase">Open</span>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center mb-2 border border-orange-100">
-                <span className="text-orange-500 font-medium text-xs">13%</span>
+                <span className="text-orange-500 font-medium text-xs">{pctQueued}%</span>
               </div>
               <span className="text-[10px] font-medium text-slate-500 uppercase">Queued</span>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center mb-2 border border-red-100">
-                <span className="text-red-500 font-medium text-xs">7%</span>
+                <span className="text-red-500 font-medium text-xs">{pctFailed}%</span>
               </div>
               <span className="text-[10px] font-medium text-slate-500 uppercase">Failed</span>
             </div>
@@ -1077,7 +1116,7 @@ export default function Home() {
       <div className="flex flex-col gap-4 mb-10">
         <div className="flex justify-between items-center px-2">
           <h3 className="text-lg font-medium text-slate-800">Featured Data Portals</h3>
-          <button className="text-sm font-medium text-slate-500 hover:text-gradient transition-colors">
+          <button onClick={() => setIsPortalModalOpen(true)} className="text-sm font-medium text-slate-500 hover:text-gradient transition-colors">
             Manage Portals
           </button>
         </div>
@@ -1096,13 +1135,72 @@ export default function Home() {
           ))}
           
           {/* Add New Portal Tile */}
-          <div className="min-w-[200px] bg-white/20 backdrop-blur-md border-2 border-dashed border-slate-200 rounded-[20px] p-4 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
+          <div onClick={() => setIsPortalModalOpen(true)} className="min-w-[200px] bg-white/20 backdrop-blur-md border-2 border-dashed border-slate-200 rounded-[20px] p-4 flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
             <span className="text-sm font-medium text-slate-400 flex items-center gap-2">
               <Plus size={16} /> Add Portal
             </span>
           </div>
         </div>
       </div>
+
+
+      {/* Manage Portals Modal */}
+      {isPortalModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-800">Manage Portals</h2>
+              <button onClick={() => setIsPortalModalOpen(false)} className="text-slate-400 hover:text-slate-700 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              {portals.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 text-sm">No portals configured yet. Add one below.</div>
+              ) : (
+                <div className="flex flex-col gap-3 mb-6">
+                  {portals.map(p => (
+                    <div key={p.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-xl">
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">{p.name || p.url}</p>
+                        <p className="text-xs text-slate-500 truncate max-w-[250px]">{p.url}</p>
+                      </div>
+                      <button 
+                        onClick={() => handleDeletePortal(p.id)}
+                        className="px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <form onSubmit={handleAddPortal} className="pt-4 border-t border-slate-100">
+                <label className="block text-sm font-medium text-slate-700 mb-2">Add New Intelligence Portal URL</label>
+                <div className="flex gap-3">
+                  <input 
+                    type="url" 
+                    required 
+                    value={newPortalUrl}
+                    onChange={(e) => setNewPortalUrl(e.target.value)}
+                    placeholder="https://example.com/tenders" 
+                    className="flex-1 px-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all"
+                  />
+                  <button 
+                    type="submit" 
+                    disabled={isAddingPortal}
+                    className="px-4 py-2 bg-[#007AFF] text-white text-sm font-medium rounded-xl hover:bg-[#007AFF]/90 disabled:opacity-50 transition-colors whitespace-nowrap"
+                  >
+                    {isAddingPortal ? 'Adding...' : 'Add Portal'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

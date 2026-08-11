@@ -399,6 +399,35 @@ def get_portals(db: Session = Depends(get_db)):
     portals = db.query(models.Portal).order_by(models.Portal.opportunities_found.desc()).all()
     return portals
 
+class PortalCreate(BaseModel):
+    url: str
+    name: Optional[str] = None
+
+@app.post("/api/portals")
+def create_portal(portal: PortalCreate, db: Session = Depends(get_db)):
+    """Add a new intelligence portal."""
+    import urllib.parse
+    
+    # Simple name extraction if not provided
+    name = portal.name
+    if not name:
+        try:
+            domain = urllib.parse.urlparse(portal.url).netloc
+            name = domain.replace('www.', '').split('.')[0].title()
+        except:
+            name = "New Portal"
+            
+    new_portal = models.Portal(
+        url=portal.url,
+        name=name,
+        status="Active",
+        opportunities_found=0
+    )
+    db.add(new_portal)
+    db.commit()
+    db.refresh(new_portal)
+    return new_portal
+
 @app.delete("/api/portals/{portal_id}")
 def delete_portal(portal_id: int, db: Session = Depends(get_db)):
     """Delete a portal."""

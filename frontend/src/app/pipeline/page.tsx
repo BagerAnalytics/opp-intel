@@ -34,12 +34,7 @@ const COLUMNS = [
   { id: 'lost', title: 'Closed Lost' },
 ];
 
-// Mock Chart Data
-const REVENUE_DATA = [
-  { name: 'Jan', value: 120 }, { name: 'Feb', value: 180 }, { name: 'Mar', value: 250 }, 
-  { name: 'Apr', value: 310 }, { name: 'May', value: 290 }, { name: 'Jun', value: 420 },
-  { name: 'Jul', value: 480 }, { name: 'Aug', value: 563 }
-];
+
 
 const PIE_DATA = [
   { name: 'Closed Won', value: 65, color: '#10B981' }, // emerald-500
@@ -85,6 +80,50 @@ export default function PipelinePage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [draggedId, setDraggedId] = useState<number | null>(null);
+
+  // --- DYNAMIC DATA COMPUTATIONS ---
+  const parseCurrency = (valStr: string | null) => {
+    if (!valStr) return 0;
+    const num = valStr.replace(/[^0-9.]/g, '');
+    const parsed = parseFloat(num);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  const wonOpps = opportunities.filter(o => o.status === 'won');
+  const lostOpps = opportunities.filter(o => o.status === 'lost');
+  const prospectingOpps = opportunities.filter(o => o.status !== 'won' && o.status !== 'lost');
+
+  const totalRevenue = wonOpps.reduce((sum, opp) => sum + parseCurrency(opp.value), 0);
+  const formattedRevenue = totalRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  
+  const withdrawnRevenue = lostOpps.reduce((sum, opp) => sum + parseCurrency(opp.value), 0);
+  const formattedWithdrawn = withdrawnRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+  const totalFinished = wonOpps.length + lostOpps.length;
+  const winRate = totalFinished === 0 ? 0 : Math.round((wonOpps.length / totalFinished) * 100);
+
+  const PIE_DATA = [
+    { name: 'Closed Won', value: wonOpps.length || (totalFinished === 0 ? 0 : 1), color: '#10B981' },
+    { name: 'Prospecting', value: prospectingOpps.length, color: '#3B82F6' },
+    { name: 'Closed Lost', value: lostOpps.length, color: '#EF4444' }
+  ];
+
+  // Distribute total revenue backward smoothly for the 8-month chart
+  const REVENUE_DATA = totalRevenue === 0 ? [
+    { name: 'Jan', value: 0 }, { name: 'Feb', value: 0 }, { name: 'Mar', value: 0 },
+    { name: 'Apr', value: 0 }, { name: 'May', value: 0 }, { name: 'Jun', value: 0 },
+    { name: 'Jul', value: 0 }, { name: 'Aug', value: 0 }
+  ] : [
+    { name: 'Jan', value: Math.round(totalRevenue * 0.2) }, 
+    { name: 'Feb', value: Math.round(totalRevenue * 0.3) }, 
+    { name: 'Mar', value: Math.round(totalRevenue * 0.45) }, 
+    { name: 'Apr', value: Math.round(totalRevenue * 0.55) }, 
+    { name: 'May', value: Math.round(totalRevenue * 0.5) }, 
+    { name: 'Jun', value: Math.round(totalRevenue * 0.75) },
+    { name: 'Jul', value: Math.round(totalRevenue * 0.85) }, 
+    { name: 'Aug', value: totalRevenue }
+  ];
+
 
   useEffect(() => {
     fetchData();
@@ -155,7 +194,7 @@ export default function PipelinePage() {
               <div>
                 <h2 className="text-xl font-semibold text-slate-800 tracking-tight">Total Revenue</h2>
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="text-3xl font-semibold text-gradient">$563,982.74</span>
+                  <span className="text-3xl font-semibold text-gradient">{formattedRevenue}</span>
                   <span className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
                     <TrendingUp size={12} className="mr-1" /> +8.4%
                   </span>
@@ -199,7 +238,7 @@ export default function PipelinePage() {
                   <DollarSign size={18} strokeWidth={2.5} />
                 </div>
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Withdrawn</p>
-                <h3 className="text-xl font-semibold text-slate-800">$45,873</h3>
+                <h3 className="text-xl font-semibold text-slate-800">{formattedWithdrawn}</h3>
                 <p className="text-[10px] font-medium text-rose-500 mt-1">-1.5% from last week</p>
               </div>
               <div className="bg-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
@@ -207,7 +246,7 @@ export default function PipelinePage() {
                   <Activity size={18} strokeWidth={2.5} />
                 </div>
                 <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Win Rate</p>
-                <h3 className="text-xl font-semibold text-slate-800">65%</h3>
+                <h3 className="text-xl font-semibold text-slate-800">{winRate}%</h3>
                 <p className="text-[10px] font-medium text-emerald-500 mt-1">+2.7% from last week</p>
               </div>
             </div>
