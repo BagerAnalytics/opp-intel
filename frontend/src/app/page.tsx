@@ -69,7 +69,7 @@ export default function Home() {
     // Poll scraper progress
     const fetchProgress = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+        const apiUrl = 'https://opp-intel-production.up.railway.app';
         const res = await axios.get(`${apiUrl}/api/scrapers/progress`);
         setProgress(prev => {
           if (prev.is_active && !res.data.is_active) {
@@ -88,7 +88,7 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
       const [oppResponse, contactsResponse, complianceResponse, portalsResponse] = await Promise.all([
         axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/contacts`).catch(() => ({ data: [] })),
@@ -107,7 +107,7 @@ export default function Home() {
   };
 
   const handleRunScrapers = async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+    const apiUrl = 'https://opp-intel-production.up.railway.app';
     
     if (progress.is_active) {
       try {
@@ -132,7 +132,7 @@ export default function Home() {
     if (!extractUrl) return alert("Please enter a URL first.");
     setIsExtracting(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
       const res = await axios.post(`${apiUrl}/api/opportunities/extract-link`, { url: extractUrl });
       
       // Merge extracted data into form
@@ -160,7 +160,7 @@ export default function Home() {
   const handleSaveOpportunity = async () => {
     setIsSaving(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
       await axios.post(`${apiUrl}/api/opportunities`, formData);
       alert("Opportunity saved successfully!");
       fetchData(); // Refresh table

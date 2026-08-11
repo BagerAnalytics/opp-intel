@@ -31,7 +31,7 @@ export default function CompliancePage() {
 
   const fetchDocs = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
       const response = await axios.get(`${apiUrl}/api/compliance`).catch(() => ({ data: [] }));
       setDocs(response.data);
     } catch (error) {
@@ -44,7 +44,7 @@ export default function CompliancePage() {
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
       await axios.post(`${apiUrl}/api/compliance`, formData);
       setIsModalOpen(false);
       setFormData({
@@ -59,7 +59,7 @@ export default function CompliancePage() {
   const handleDeleteDoc = async (id: number) => {
     if (!confirm('Are you sure you want to remove this document tracker?')) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
       await axios.delete(`${apiUrl}/api/compliance/${id}`);
       fetchDocs();
     } catch (error) {
@@ -74,7 +74,7 @@ export default function CompliancePage() {
     }
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = 'https://opp-intel-production.up.railway.app';
       const uploadData = new FormData();
       uploadData.append('file', file);
       

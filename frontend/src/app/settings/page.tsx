@@ -5,7 +5,7 @@ import { User, Users, Database, CreditCard, Shield, Key, Bell, CheckCircle2, Che
 import axios from 'axios';
 
 type TabType = 'profile' | 'team' | 'engine' | 'billing';
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+const apiUrl = 'https://opp-intel-production.up.railway.app';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
