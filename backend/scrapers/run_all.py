@@ -60,6 +60,7 @@ from scrapers.meta_discovery import scrape_meta_portals
 from scrapers.portal_crawler import scrape_saved_portals
 from database import SessionLocal
 import models
+from notifications import notify_new_opportunities, notify_scraper_error
 
 def update_progress(db, percent, task_name):
     progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
@@ -83,6 +84,7 @@ def run_all_scrapers():
     print("Running scheduled scrapers from isolated process...")
     db = SessionLocal()
     try:
+        initial_opp_count = db.query(models.Opportunity).count()
         # TEMP BYPASS: Skip discovery to process queue instantly!
         # Discovery phases restored
         update_progress(db, 5, "Hunting for new Opportunity Portals...")
@@ -115,10 +117,20 @@ def run_all_scrapers():
 
         
         finish_progress(db)
+        final_opp_count = db.query(models.Opportunity).count()
+        new_opps = final_opp_count - initial_opp_count
+        
+        if new_opps > 0:
+            print(f"Scraper finished. Found {new_opps} new opportunities. Sending email alert...")
+            notify_new_opportunities(new_opps)
+        else:
+            print("Scraper finished, but no new opportunities were found.")
+            
         print("Scrapers completed successfully.")
         
     except Exception as e:
         print(f"Scraper execution error: {e}")
+        notify_scraper_error(str(e))
         if str(e) == "API_QUOTA_EXCEEDED":
             update_progress(db, 0, "ERROR: Gemini AI Quota Exhausted! Please update your API Key.")
             # Set is_active to False manually instead of calling finish_progress to keep the error visible

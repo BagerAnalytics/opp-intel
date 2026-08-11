@@ -8,6 +8,10 @@ export default function Header() {
   const router = useRouter();
   const [user, setUser] = useState<{name: string, role: string, email: string} | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const logsRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -21,6 +25,12 @@ export default function Header() {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+      if (logsRef.current && !logsRef.current.contains(event.target as Node)) {
+        setShowLogs(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -84,21 +94,57 @@ export default function Header() {
 
       {/* Right Actions */}
       <div className="flex items-center gap-6">
-        {/* Notification Bubbles */}
+                {/* Notification Bubbles */}
         <div className="flex items-center gap-4 border-r border-slate-200/50 pr-6">
-          <button 
-            onClick={handleNotificationClick}
-            className="relative text-slate-400 hover:text-slate-700 transition-colors group"
-            title="Intelligence Logs"
-          >
-            <MessageSquare size={20} className="text-slate-400 group-hover:text-slate-600 transition-all duration-400 ease-ios" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white/70 shadow-sm hidden"></span>
-          </button>
           
-          <button onClick={handleNotificationClick} className="relative text-slate-400 hover:text-slate-700 transition-colors group">
-            <Bell size={20} className="text-slate-400 group-hover:text-slate-600 transition-all duration-400 ease-ios" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#007AFF] rounded-full border-2 border-white/70 shadow-sm animate-pulse hidden"></span>
-          </button>
+          {/* Intelligence Logs */}
+          <div className="relative" ref={logsRef}>
+            <button 
+              onClick={() => setShowLogs(!showLogs)}
+              className="relative text-slate-400 hover:text-slate-700 transition-colors group"
+              title="Intelligence Logs"
+            >
+              <MessageSquare size={20} className="text-slate-400 group-hover:text-slate-600 transition-all duration-400 ease-ios" />
+            </button>
+            
+            {showLogs && (
+              <div className="absolute right-0 mt-3 w-80 bg-white/90 backdrop-blur-xl border border-slate-200/60 rounded-xl shadow-lg shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-800">Intelligence Logs</h3>
+                </div>
+                <div className="p-6 text-center">
+                  <MessageSquare size={24} className="mx-auto text-slate-300 mb-3" />
+                  <p className="text-sm font-medium text-slate-600">No active logs</p>
+                  <p className="text-xs text-slate-400 mt-1">The AI engine is currently idle.</p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Notifications */}
+          <div className="relative" ref={notifRef}>
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)} 
+              className="relative text-slate-400 hover:text-slate-700 transition-colors group"
+            >
+              <Bell size={20} className="text-slate-400 group-hover:text-slate-600 transition-all duration-400 ease-ios" />
+            </button>
+
+            {showNotifications && (
+              <div className="absolute right-0 mt-3 w-80 bg-white/90 backdrop-blur-xl border border-slate-200/60 rounded-xl shadow-lg shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
+                  <span className="text-xs font-medium text-[#007AFF] bg-[#007AFF]/10 px-2 py-0.5 rounded-full">0 New</span>
+                </div>
+                <div className="p-6 text-center">
+                  <Bell size={24} className="mx-auto text-slate-300 mb-3" />
+                  <p className="text-sm font-medium text-slate-600">You're all caught up!</p>
+                  <p className="text-xs text-slate-400 mt-1">New opportunities will be emailed to you.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* Profile */}
