@@ -278,6 +278,11 @@ export default function Home() {
   const pctFailed = Math.round((opportunities.filter(o => o.status === 'failed').length / queueTotal) * 100);
   const COLORS = ['#10b981', '#ef4444'];
   
+  const pieData = [
+    { name: 'Success', value: successCount === 0 && totalProcessed === 0 ? 1 : successCount },
+    { name: 'Failed', value: totalProcessed - successCount }
+  ];
+  
   // --- SUBSETS FOR UI ---
   const openOpps = opportunities.filter(o => o.status === 'open');
   const submittedOpps = opportunities.filter(o => o.status === 'Submitted' || o.status === 'won');
