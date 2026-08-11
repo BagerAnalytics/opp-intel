@@ -128,11 +128,11 @@ def start_scheduler():
         with SessionLocal() as db:
             # SEED ADMIN AND USER ACCOUNTS
             import auth
-            admin_user = db.query(models.User).filter(models.User.email == "admin@oppintel.com").first()
+            admin_user = db.query(models.User).filter(models.User.email == "support@premieragric.co.za").first()
             if not admin_user:
                 admin_user = models.User(
-                    email="admin@oppintel.com", 
-                    password_hash=auth.get_password_hash("admin123"), 
+                    email="support@premieragric.co.za", 
+                    password_hash=auth.get_password_hash("PremierAgric@01"), 
                     role="Admin", 
                     full_name="System Admin"
                 )
