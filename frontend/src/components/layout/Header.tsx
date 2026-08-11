@@ -1,11 +1,41 @@
 "use client";
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { Bell, Search, MessageSquare, Menu } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { Bell, Search, MessageSquare, Menu, LogOut, User as UserIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<{name: string, role: string, email: string} | null>(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('oppintel_user');
+      if (stored) {
+        setUser(JSON.parse(stored));
+      }
+    } catch (e) {}
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('oppintel_token');
+    localStorage.removeItem('oppintel_user');
+    router.push('/login');
+  };
+
+  const handleNotificationClick = () => {
+    alert("You have no new notifications at this time.");
+  };
   
   const getTitle = () => {
     if (pathname === '/') return 'Dashboard';
@@ -20,6 +50,11 @@ export default function Header() {
   const currentDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
   });
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+  };
 
   return (
     <header className="h-[88px] glass-panel border-b border-slate-200/50 flex items-center justify-between px-10 sticky top-0 z-40 transition-all duration-400 ease-ios">
@@ -52,28 +87,62 @@ export default function Header() {
         {/* Notification Bubbles */}
         <div className="flex items-center gap-4 border-r border-slate-200/50 pr-6">
           <button 
+            onClick={handleNotificationClick}
             className="relative text-slate-400 hover:text-slate-700 transition-colors group"
             title="Intelligence Logs"
           >
             <MessageSquare size={20} className="text-slate-400 group-hover:text-slate-600 transition-all duration-400 ease-ios" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white/70 shadow-sm"></span>
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white/70 shadow-sm hidden"></span>
           </button>
           
-          <button className="relative text-slate-400 hover:text-slate-700 transition-colors group">
+          <button onClick={handleNotificationClick} className="relative text-slate-400 hover:text-slate-700 transition-colors group">
             <Bell size={20} className="text-slate-400 group-hover:text-slate-600 transition-all duration-400 ease-ios" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#007AFF] rounded-full border-2 border-white/70 shadow-sm animate-pulse"></span>
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#007AFF] rounded-full border-2 border-white/70 shadow-sm animate-pulse hidden"></span>
           </button>
         </div>
 
         {/* Profile */}
-        <div className="flex items-center gap-4 cursor-pointer group">
-          <div className="text-right hidden md:block">
-            <p className="text-sm font-medium text-slate-900 group-hover:text-gradient transition-colors duration-400 ease-ios">Sarah M.</p>
-            <p className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Super Admin</p>
+        <div className="relative" ref={menuRef}>
+          <div 
+            className="flex items-center gap-4 cursor-pointer group"
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            <div className="text-right hidden md:block">
+              <p className="text-sm font-medium text-slate-900 group-hover:text-gradient transition-colors duration-400 ease-ios">
+                {user?.name || "User"}
+              </p>
+              <p className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">
+                {user?.role || "Member"}
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium shadow-md shadow-slate-900/10 group-hover:scale-105 transition-transform duration-400 ease-ios">
+              {getInitials(user?.name || "")}
+            </div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-medium shadow-md shadow-slate-900/10 group-hover:scale-105 transition-transform duration-400 ease-ios">
-            SM
-          </div>
+
+          {/* Dropdown Menu */}
+          {showProfileMenu && (
+            <div className="absolute right-0 mt-3 w-48 bg-white/90 backdrop-blur-xl border border-slate-200/60 rounded-xl shadow-lg shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="px-4 py-2 border-b border-slate-100 mb-1">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Account</p>
+                <p className="text-sm text-slate-800 font-medium truncate mt-0.5">{user?.email || "No email"}</p>
+              </div>
+              <button 
+                onClick={() => router.push('/settings')}
+                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#007AFF] transition-colors flex items-center gap-2"
+              >
+                <UserIcon size={16} />
+                Profile Settings
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-2"
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
