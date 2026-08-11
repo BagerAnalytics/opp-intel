@@ -71,6 +71,9 @@ def start_scheduler():
             try: conn.execute(text("ALTER TABLE opportunities ADD COLUMN raw_text TEXT;"))
             except Exception: pass
             
+            try: conn.execute(text("ALTER TABLE users ADD COLUMN full_name TEXT;"))
+            except Exception: pass
+            
             conn.execute(text('''
                 CREATE TABLE IF NOT EXISTS scraper_progress (
                     id INTEGER PRIMARY KEY,
