@@ -18,6 +18,7 @@ You are an Opportunity Matching AI acting as a ruthless gatekeeper for two speci
 CRITERIA FOR A HIGH MATCH (Score 80+):
 - MUST clearly benefit either Premier Agric or Badger Analytics.
 - MUST accept applicants from South Africa or Africa (the opportunity itself can be global, but SA must be eligible).
+- HISTORICAL ALIGNMENT: The opportunity must strongly align with the funding organization's historical funding patterns. If the organization typically funds entirely different industries, heavily penalize the match score.
 - The opportunity should be a Grant, Tender, Accelerator, or Funding mechanism that fits their core services.
 - If an opportunity is generic (e.g. "Photography contest"), score it LOW (under 30).
 - If an opportunity perfectly aligns with agricultural consulting/supply chain, assign `target_entity` as "Premier Agric".
@@ -123,7 +124,7 @@ def deep_extract_opportunity(raw_text: str) -> dict:
                 )
             )
             response = model.generate_content(
-                f"Raw Text:\n{raw_text}\n\nOutput fields: selection_criteria, application_process, past_winners."
+                f"Raw Text:\n{raw_text}\n\nOutput fields: selection_criteria, application_process, past_winners, application_form_questions (extract any specific application questions/fields you can find)."
             )
             cleaned_result = response.text.replace("```json", "").replace("```", "").strip()
             return json.loads(cleaned_result)
@@ -140,20 +141,26 @@ def deep_extract_opportunity(raw_text: str) -> dict:
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
     prompt = f"""
-    Based on the following opportunity and the historical context of past winners, generate a 
-    winning application strategy tailored for Premier Agric or Badger Analytics.
+    You are a Custom Application Template Developer.
+    Based on the following opportunity and the historical context of past winners, you MUST generate an independent, highly custom application template tailored for Premier Agric or Badger Analytics.
 
-    Opportunity: {opportunity_data}
-    Past Winners Context: {historical_winners_context}
+    Opportunity Data (including specific form questions if extracted): {opportunity_data}
+    Past Winners Context (MANDATORY TO ALIGN WITH THIS PROFILE): {historical_winners_context}
     
     Business Feedback Loop Context:
     {feedback_context}
-    Use this feedback to avoid past mistakes and double-down on winning strategies!
+    
+    CRITICAL REQUIREMENTS:
+    1. Do not give generic advice. Generate specific, targeted application answers based on the online form requirements.
+    2. Ensure the answers match exactly what this specific organization historically funds.
+    3. PRE-CLARIFICATION DIRECTIVE: You must preemptively answer potential follow-up questions and provide deep clarification in the first round to avoid subsequent interviews.
+    
+    Your output must include a specific section labeled exactly: "### Anticipated Questions & Answers" containing these pre-clarifications.
     """
     try:
         model = genai.GenerativeModel(
             'models/gemini-3.6-flash',
-            system_instruction="You are an expert grant and funding strategist."
+            system_instruction="You are a master Application Template Builder. You write highly specific, non-generic application responses."
         )
         response = model.generate_content(prompt)
         return response.text

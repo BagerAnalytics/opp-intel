@@ -21,10 +21,10 @@ export default function ProjectsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input type="text" placeholder="Search projects..." className="pl-10 pr-4 py-2 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm w-64 text-slate-900 placeholder:text-slate-400" />
           </div>
-          <button className="px-4 py-2 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl text-slate-600 hover:text-slate-900 shadow-sm flex items-center gap-2 text-sm font-bold transition-all">
+          <button className="px-4 py-2 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl text-slate-600 hover:text-slate-900 shadow-sm flex items-center gap-2 text-sm font-medium transition-all">
             <Filter size={16} /> Filter
           </button>
-          <button className="px-6 py-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(37,99,235,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex items-center gap-2">
+          <button className="px-6 py-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-medium text-white hover:shadow-[0_4px_14px_rgba(37,99,235,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex items-center gap-2">
             <Briefcase size={16} /> New Project
           </button>
         </div>
@@ -34,7 +34,7 @@ export default function ProjectsPage() {
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/60 shadow-[0_4px_24px_rgb(0,0,0,0.02)] overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-200/50 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <tr className="bg-white/20 backdrop-blur-md/50 border-b border-slate-200/50 text-xs font-medium text-slate-500 uppercase tracking-widest">
                 <th className="p-5 pl-8">Project Name</th>
                 <th className="p-5">Type</th>
                 <th className="p-5">Client / Funder</th>
@@ -51,7 +51,7 @@ export default function ProjectsPage() {
                     <p className="text-slate-500 text-xs font-semibold mt-1">Value: {project.value}</p>
                   </td>
                   <td className="p-5">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border shadow-sm
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-widest border shadow-sm
                       ${project.type === 'Training' ? 'bg-orange-50 text-orange-700 border-orange-100' : 
                         project.type === 'Consulting' ? 'bg-purple-50 text-purple-700 border-purple-100' : 
                         'bg-emerald-50 text-emerald-700 border-emerald-100'}
@@ -59,7 +59,7 @@ export default function ProjectsPage() {
                       {project.type}
                     </span>
                   </td>
-                  <td className="p-5 text-sm text-slate-700 font-bold">
+                  <td className="p-5 text-sm text-slate-700 font-medium">
                     {project.client}
                   </td>
                   <td className="p-5">
@@ -70,11 +70,11 @@ export default function ProjectsPage() {
                           style={{ width: `${project.progress}%` }}
                         ></div>
                       </div>
-                      <span className="text-xs font-bold text-slate-600">{project.progress}%</span>
+                      <span className="text-xs font-medium text-slate-600">{project.progress}%</span>
                     </div>
                   </td>
                   <td className="p-5">
-                    <span className="text-slate-700 text-xs font-bold flex items-center gap-1.5">
+                    <span className="text-slate-700 text-xs font-medium flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${project.status === 'Active' ? 'bg-emerald-500' : project.status === 'Completed' ? 'bg-slate-400' : 'bg-blue-500'}`}></span>
                       {project.status}
                     </span>

@@ -1,0 +1,114 @@
+[
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Disabled",
+        "value": "False"
+      },
+      {
+        "label": "Name",
+        "value": "Unnamed List"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Declined suggested members"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Members"
+      }
+    ],
+    "fbid": "10201752058760885"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Disabled",
+        "value": "False"
+      },
+      {
+        "label": "Name",
+        "value": "Restricted"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Declined suggested members"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Members"
+      }
+    ],
+    "fbid": "1692441648567"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Disabled",
+        "value": "False"
+      },
+      {
+        "label": "Name",
+        "value": "Acquaintances"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Declined suggested members"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Members"
+      }
+    ],
+    "fbid": "1652759336534"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Disabled",
+        "value": "False"
+      },
+      {
+        "label": "Name",
+        "value": "Close friends"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Declined suggested members"
+      },
+      {
+        "dict": [
+          
+        ],
+        "title": "Members"
+      }
+    ],
+    "fbid": "1536599792618"
+  }
+]

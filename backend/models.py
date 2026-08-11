@@ -79,3 +79,21 @@ class ComplianceDocument(Base):
     expiry_date = Column(String, nullable=True)
     file_url = Column(String, nullable=True)
     notes = Column(Text, nullable=True)
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    password_hash = Column(String)
+    role = Column(String, default="User")
+    full_name = Column(String, nullable=True)
+
+class Setting(Base):
+    __tablename__ = "settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    theme = Column(String, default="light")
+    ai_threshold = Column(Integer, default=80)
+    email_notifications = Column(Boolean, default=True)

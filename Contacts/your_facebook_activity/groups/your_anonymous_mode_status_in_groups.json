@@ -1,0 +1,47 @@
+{
+  "media": [
+    
+  ],
+  "label_values": [
+    {
+      "label": "Anonymous mode status"
+    },
+    {
+      "label": "Anonymous post enabled"
+    },
+    {
+      "label": "Have you ever engaged anonymously in this group",
+      "value": "False"
+    },
+    {
+      "label": "Have you ever set a nickname in this group",
+      "value": "False"
+    },
+    {
+      "label": "Have you explicitly selected 'Participate anonymously without a nickname' before",
+      "value": "False"
+    },
+    {
+      "label": "Number of times you have interacted using nickname in this group",
+      "value": "0"
+    },
+    {
+      "label": "Use a nickname when interacting with this Group"
+    },
+    {
+      "dict": [
+        {
+          "dict": [
+            {
+              "label": "Name",
+              "value": "Food Security and Community Resilience - South Africa"
+            }
+          ],
+          "title": ""
+        }
+      ],
+      "title": "Group"
+    }
+  ],
+  "fbid": "25744381138547020"
+}

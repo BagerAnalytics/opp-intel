@@ -44,7 +44,7 @@ const MatchScoreRing = ({ score }: { score: number | null }) => {
 
   return (
     <div className="relative flex items-center justify-center w-[64px] h-[64px]">
-      <div className="absolute inset-0 bg-white rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"></div>
+      <div className="absolute inset-0 glass-panel rounded-3xl"></div>
       <svg className="transform -rotate-90 w-full h-full relative z-10" viewBox="0 0 56 56">
         <circle cx="28" cy="28" r={radius} className="stroke-slate-100" strokeWidth="4" fill="none" />
         <circle 
@@ -172,9 +172,9 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <p className="text-[13px] text-emerald-600 uppercase tracking-widest font-bold">{opp.funder}</p>
+                <p className="text-[13px] text-emerald-600 uppercase tracking-widest font-medium">{opp.funder}</p>
                 {opp.opp_type && (
-                  <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded-md ${
+                  <span className={`px-2 py-0.5 text-[10px] uppercase font-medium rounded-md ${
                     opp.opp_type === 'Grant' ? 'bg-purple-100 text-purple-700' :
                     opp.opp_type === 'Tender' ? 'bg-amber-100 text-amber-700' :
                     'bg-rose-100 text-rose-700'
@@ -183,7 +183,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                   </span>
                 )}
                 {opp.target_entity && (
-                  <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded-md ${
+                  <span className={`px-2 py-0.5 text-[10px] uppercase font-medium rounded-md ${
                     opp.target_entity === 'Premier Agric' ? 'bg-emerald-100 text-emerald-700' :
                     opp.target_entity === 'Badger Analytics' ? 'bg-sky-100 text-sky-700' :
                     'bg-slate-200 text-slate-700'
@@ -195,18 +195,18 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             </div>
             
             <div className="flex flex-col items-center">
-              <p className="text-slate-400 text-[10px] mb-1.5 font-bold tracking-widest uppercase">AI Fit</p>
+              <p className="text-slate-400 text-[10px] mb-1.5 font-medium tracking-widest uppercase">AI Fit</p>
               <MatchScoreRing score={scoreData.score} />
             </div>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-2 mb-3">
-            <div className="bg-slate-50/50 rounded-2xl p-3 border border-slate-100/50">
-              <p className="text-slate-400 text-[10px] mb-1 font-bold tracking-widest uppercase">Value</p>
+            <div className="bg-white/20 backdrop-blur-md/50 rounded-2xl p-3 border border-slate-100/50">
+              <p className="text-slate-400 text-[10px] mb-1 font-medium tracking-widest uppercase">Value</p>
               <p className="text-slate-900 text-[15px] font-extrabold">{opp.value || '$---'}</p>
             </div>
-            <div className="bg-slate-50/50 rounded-2xl p-3 border border-slate-100/50">
-              <p className="text-slate-400 text-[10px] mb-1 font-bold tracking-widest uppercase">Deadline</p>
+            <div className="bg-white/20 backdrop-blur-md/50 rounded-2xl p-3 border border-slate-100/50">
+              <p className="text-slate-400 text-[10px] mb-1 font-medium tracking-widest uppercase">Deadline</p>
               <p className="text-slate-900 text-[15px] font-extrabold">{opp.closing_date || 'Open'}</p>
             </div>
           </div>
@@ -215,13 +215,13 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               {opp.benefits && (
                 <div className="bg-emerald-50/30 rounded-xl p-3 border border-emerald-100/50">
-                  <p className="text-emerald-700 text-[11px] mb-1 font-bold tracking-widest uppercase flex items-center gap-1.5"><Gift size={12}/> Benefits</p>
+                  <p className="text-emerald-700 text-[11px] mb-1 font-medium tracking-widest uppercase flex items-center gap-1.5"><Gift size={12}/> Benefits</p>
                   <p className={`text-slate-700 text-[13px] ${isExpanded ? '' : 'line-clamp-3'}`}>{opp.benefits}</p>
                 </div>
               )}
               {opp.eligibility_criteria && (
                 <div className="bg-blue-50/30 rounded-xl p-3 border border-blue-100/50">
-                  <p className="text-blue-700 text-[11px] mb-1 font-bold tracking-widest uppercase flex items-center gap-1.5"><ListChecks size={12}/> Eligibility</p>
+                  <p className="text-blue-700 text-[11px] mb-1 font-medium tracking-widest uppercase flex items-center gap-1.5"><ListChecks size={12}/> Eligibility</p>
                   <p className={`text-slate-700 text-[13px] ${isExpanded ? '' : 'line-clamp-3'}`}>{opp.eligibility_criteria}</p>
                 </div>
               )}
@@ -233,7 +233,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
           </p>
           
           {missingDocs.length > 0 && (
-            <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl text-[13px] font-bold border border-red-100/50 shadow-sm shadow-red-100/50">
+            <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl text-[13px] font-medium border border-red-100/50 shadow-sm shadow-red-100/50">
               <AlertCircle size={16} className="text-red-500" />
               Missing Docs: <span className="font-medium">{missingDocs.map(d => d.document_name).join(', ')}</span>
             </div>
@@ -251,7 +251,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                   window.location.reload();
                 } catch (err) {}
               }}
-              className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl text-[14px] font-bold transition-all shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.4)] hover:scale-[1.02] flex items-center justify-center gap-2"
+              className="w-full px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl text-[14px] font-medium transition-all shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.4)] hover:scale-[1.02] flex items-center justify-center gap-2"
             >
               <Plus size={18} /> Add to Pipeline
             </button>
@@ -279,7 +279,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                   }
                 }
               }}
-              className="w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border mt-2 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-sm hover:scale-[1.02]"
+              className="w-full px-6 py-3 rounded-2xl text-[14px] font-medium transition-all duration-300 flex items-center justify-center gap-2 border mt-2 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:shadow-sm hover:scale-[1.02]"
               title="Automatically extract details and score fit"
             >
               <Sparkles size={18} className="text-emerald-500" />
@@ -289,7 +289,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
             <button 
               onClick={handleScoreMatch}
               disabled={isScoring}
-              className={`w-full px-6 py-3 rounded-2xl text-[14px] font-bold transition-all duration-300 flex items-center justify-center gap-2 border bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm hover:scale-[1.02] mt-2`}
+              className={`w-full px-6 py-3 rounded-2xl text-[14px] font-medium transition-all duration-300 flex items-center justify-center gap-2 border bg-white text-slate-700 border-slate-200 hover:bg-white/20 backdrop-blur-md hover:border-slate-300 hover:shadow-sm hover:scale-[1.02] mt-2`}
             >
               {isScoring ? (
                 <><Loader2 size={18} className="animate-spin text-emerald-600" /> Analyzing...</>
@@ -300,7 +300,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
               )}
             </button>
           )}
-          <button className="p-3 text-slate-400 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors self-start md:self-center mt-3 relative z-10 group-hover:bg-slate-50">
+          <button className="p-3 text-slate-400 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors self-start md:self-center mt-3 relative z-10 group-hover:bg-white/20 backdrop-blur-md">
             {isExpanded ? <ChevronUp size={22} strokeWidth={2.5} /> : <ChevronDown size={22} strokeWidth={2.5} />}
           </button>
         </div>
@@ -308,7 +308,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
 
       {/* Expanded Deep Data Section */}
       <div className={`transition-all duration-500 ease-in-out origin-top ${isExpanded ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        <div className="border-t border-slate-100/60 p-7 bg-slate-50/50 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+        <div className="border-t border-slate-100/60 p-7 bg-white/20 backdrop-blur-md/50 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
           
           {hasScore && scoreData.reasoning && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -388,7 +388,7 @@ export default function OpportunityCard({ opp: initialOpp, contacts = [], compli
                 target="_blank" 
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-[0_4px_12px_rgba(15,23,42,0.15)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.2)] hover:-translate-y-0.5"
+                className="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium transition-all shadow-[0_4px_12px_rgba(15,23,42,0.15)] hover:shadow-[0_4px_16px_rgba(15,23,42,0.2)] hover:-translate-y-0.5"
               >
                 Apply Now <ExternalLink size={18} strokeWidth={2.5} />
               </a>

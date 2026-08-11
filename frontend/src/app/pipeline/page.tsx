@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Loader2, Plus, MoreVertical, BarChart2 } from 'lucide-react';
+import { Loader2, MoreVertical, TrendingUp, DollarSign, Activity, PieChart as PieChartIcon } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell } from 'recharts';
 
 interface Opportunity {
   id: number;
@@ -33,22 +34,35 @@ const COLUMNS = [
   { id: 'lost', title: 'Closed Lost' },
 ];
 
+// Mock Chart Data
+const REVENUE_DATA = [
+  { name: 'Jan', value: 120 }, { name: 'Feb', value: 180 }, { name: 'Mar', value: 250 }, 
+  { name: 'Apr', value: 310 }, { name: 'May', value: 290 }, { name: 'Jun', value: 420 },
+  { name: 'Jul', value: 480 }, { name: 'Aug', value: 563 }
+];
+
+const PIE_DATA = [
+  { name: 'Closed Won', value: 65, color: '#10B981' }, // emerald-500
+  { name: 'Prospecting', value: 25, color: '#3B82F6' }, // blue-500
+  { name: 'Closed Lost', value: 10, color: '#EF4444' }  // red-500
+];
+
 const MatchScoreRing = ({ score }: { score: number | null }) => {
   const actualScore = score || 0;
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (actualScore / 100) * circumference;
   
-  let colorClass = "text-emerald-500 drop-shadow-[0_0_6px_rgba(16,185,129,0.4)]";
-  if (actualScore < 70) colorClass = "text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.4)]";
-  if (actualScore < 50) colorClass = "text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.4)]";
+  let colorClass = "text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]";
+  if (actualScore < 70) colorClass = "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]";
+  if (actualScore < 50) colorClass = "text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]";
   if (!score) colorClass = "text-slate-200 drop-shadow-none";
 
   return (
     <div className="relative flex items-center justify-center w-[52px] h-[52px]">
-      <div className="absolute inset-0 bg-white/60 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"></div>
+      <div className="absolute inset-0 bg-white/20 backdrop-blur-md/50 backdrop-blur-md rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] border border-white/50"></div>
       <svg className="transform -rotate-90 w-full h-full relative z-10" viewBox="0 0 44 44">
-        <circle cx="22" cy="22" r={radius} className="stroke-slate-100" strokeWidth="3" fill="none" />
+        <circle cx="22" cy="22" r={radius} className="stroke-slate-100" strokeWidth="2.5" fill="none" />
         <circle 
           cx="22" cy="22" r={radius} 
           className={colorClass} 
@@ -61,7 +75,7 @@ const MatchScoreRing = ({ score }: { score: number | null }) => {
         />
       </svg>
       <div className="absolute flex flex-col items-center justify-center z-20">
-        <span className="text-[11px] font-extrabold text-slate-900 tracking-tight">{score ? `${score}%` : 'N/A'}</span>
+        <span className="text-[11px] font-semibold text-slate-800 tracking-tight">{score ? `${score}%` : 'N/A'}</span>
       </div>
     </div>
   );
@@ -78,8 +92,8 @@ export default function PipelinePage() {
 
   const fetchData = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
-      const response = await axios.get(`${apiUrl}/api/opportunities`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] }));
       setOpportunities(response.data.filter((opp: Opportunity) => opp.status !== 'open' && opp.status !== 'closed'));
     } catch (error) {
       console.error("Error fetching opportunities", error);
@@ -98,160 +112,268 @@ export default function PipelinePage() {
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = async (e: React.DragEvent, status: string) => {
+  const handleDrop = async (e: React.DragEvent, targetStatus: string) => {
     e.preventDefault();
-    if (draggedId === null) return;
-    
-    const opp = opportunities.find(o => o.id === draggedId);
-    if (!opp || opp.status === status) return;
+    if (!draggedId) return;
 
-    setOpportunities(prev => prev.map(o => o.id === draggedId ? { ...o, status } : o));
-    setDraggedId(null);
+    // Optimistic UI update
+    setOpportunities(prev => prev.map(opp => 
+      opp.id === draggedId ? { ...opp, status: targetStatus } : opp
+    ));
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
-      await axios.put(`${apiUrl}/api/opportunities/${draggedId}/status?status=${status}`);
+      await axios.put(`${apiUrl}/api/opportunities/${draggedId}/status?status=${targetStatus}`);
     } catch (error) {
       console.error("Failed to update status", error);
-      fetchData();
+      fetchData(); // Revert on failure
     }
+    setDraggedId(null);
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+      <div className="flex-1 flex items-center justify-center h-screen bg-[#f5f7fa]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 size={32} className="animate-spin text-gradient" />
+          <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">Loading Market Intelligence...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-88px)] overflow-hidden relative">
-      <div className="absolute top-20 right-20 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl -z-10 pointer-events-none" />
+    <div className="flex-1 flex flex-col h-[calc(100vh-88px)] bg-[#f5f7fa] overflow-y-auto overflow-x-hidden animate-in fade-in duration-300 scrollbar-hide">
       
-      {/* Top Header */}
-      <div className="flex items-center justify-between mb-8 mt-4 shrink-0 px-2 relative z-10">
-        <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 tracking-tight">Opportunities Pipeline</h2>
-        <div className="flex gap-4">
-          <button className="w-11 h-11 flex items-center justify-center rounded-2xl bg-white border border-white/60 text-slate-500 hover:text-slate-900 shadow-sm hover:shadow-md transition-all duration-300">
-            <Plus size={20} strokeWidth={2.5} />
-          </button>
-          <button className="px-6 py-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex items-center gap-2">
-            New Opportunity
-          </button>
-        </div>
-      </div>
-      
-      <main className="flex-1 overflow-x-auto pb-8 px-2 relative z-10">
-        <div className="flex gap-6 h-full items-start min-w-max">
-          {COLUMNS.map(column => {
-            const colOpps = opportunities.filter(o => o.status === column.id);
-            const mockVolume = colOpps.length * 15 + Math.floor(Math.random() * 20);
-
-            return (
-              <div 
-                key={column.id}
-                className="w-[340px] flex flex-col bg-slate-50/60 backdrop-blur-xl rounded-3xl border border-white/50 shadow-[0_4px_24px_rgb(0,0,0,0.02)] h-full max-h-full"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, column.id)}
-              >
-                <div className="p-5 flex items-center justify-between shrink-0 border-b border-slate-100/50">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-extrabold text-slate-900 text-[15px] tracking-tight">{column.title}</h3>
-                    <span className="text-emerald-700 bg-emerald-100/50 px-2 py-0.5 rounded-full text-xs font-bold">{colOpps.length}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-400 bg-white/60 px-2 py-1 rounded-lg border border-slate-100/50 shadow-sm">
-                    <BarChart2 size={14} strokeWidth={2.5} />
-                    <span className="text-xs font-bold">${mockVolume}k</span>
-                  </div>
-                </div>
-                
-                <div className="flex-1 px-4 py-4 overflow-y-auto space-y-4 scrollbar-hide">
-                  {colOpps.map(opp => (
-                    <div 
-                      key={opp.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, opp.id)}
-                      className="cursor-move group/card"
-                    >
-                      <div className="bg-white/90 backdrop-blur-md p-5 rounded-3xl border border-white/60 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] group-hover/card:-translate-y-1 group-hover/card:border-emerald-100/60 transition-all duration-300 relative">
-                        
-                        {/* Top Line: Title & Dots */}
-                        <div className="flex justify-between items-start gap-4 mb-4">
-                          <h4 className="font-extrabold text-slate-900 text-[15px] leading-tight line-clamp-2 group-hover/card:text-emerald-700 transition-colors">
-                            {opp.name}
-                          </h4>
-                          <button className="text-slate-400 hover:text-slate-900 shrink-0 mt-0.5 transition-colors p-1 rounded-md hover:bg-slate-100" onClick={(e) => {
-                            e.stopPropagation();
-                            if(confirm('Remove opportunity from pipeline?')) {
-                              try {
-                                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
-                                axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=open`);
-                                setOpportunities(prev => prev.filter(o => o.id !== opp.id));
-                              } catch (err) {}
-                            }
-                          }}>
-                            <MoreVertical size={16} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                        
-                        {/* Match Score & Status Pill */}
-                        <div className="flex justify-between items-center mb-6 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/50">
-                          <div>
-                            <p className="text-slate-400 text-[10px] font-bold tracking-widest uppercase mb-2">AI Match Score</p>
-                            <span className="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest rounded-full border border-emerald-100 shadow-[inset_0_2px_4px_rgba(255,255,255,1)]">
-                              {column.title === 'Prospecting' ? 'Prospecting' : column.title}
-                            </span>
-                          </div>
-                          <MatchScoreRing score={opp.match_score} />
-                        </div>
-                        
-                        {/* Lead Owner & Value Grid */}
-                        <div className="grid grid-cols-2 gap-4 mb-5">
-                          <div>
-                            <p className="text-slate-400 text-[10px] font-bold tracking-widest uppercase mb-1.5">Lead Owner</p>
-                            <div className="flex items-center gap-2">
-                              <img 
-                                src="https://ui-avatars.com/api/?name=SJ&background=0D8BD9&color=fff&rounded=true&bold=true" 
-                                alt="SJ" 
-                                className="w-5 h-5 rounded-full ring-2 ring-white shadow-sm"
-                              />
-                              <span className="text-slate-700 text-[13px] font-bold">SJ</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-slate-400 text-[10px] font-bold tracking-widest uppercase mb-1.5">Value</p>
-                            <p className="text-slate-900 text-[14px] font-extrabold">{opp.value || '$---'}</p>
-                          </div>
-                        </div>
-                        
-                        {/* Activities & Date */}
-                        <div className="grid grid-cols-2 gap-4 mb-5 border-t border-slate-100/60 pt-4">
-                          <p className="text-slate-500 text-xs font-semibold">5 Activities</p>
-                          <p className="text-slate-500 text-xs font-semibold">Q3 2024</p>
-                        </div>
-                        
-                        {/* Tags */}
-                        <div className="flex gap-2">
-                          <span className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-[11px] font-bold shadow-sm">Tasks</span>
-                          <span className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-[11px] font-bold shadow-sm">Tags3</span>
-                        </div>
-                        
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {colOpps.length === 0 && (
-                    <div className="h-32 rounded-3xl flex flex-col items-center justify-center border-2 border-dashed border-slate-200 bg-white/30 text-slate-400 text-sm font-bold tracking-wide">
-                      No deals here
-                    </div>
-                  )}
+      {/* TOP SECTION: ANALYTICS DASHBOARD */}
+      <div className="p-8 pb-4 shrink-0">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          
+          {/* Main Revenue Chart */}
+          <div className="xl:col-span-2 bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-800 tracking-tight">Total Revenue</h2>
+                <div className="flex items-center gap-3 mt-1">
+                  <span className="text-3xl font-semibold text-gradient">$563,982.74</span>
+                  <span className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                    <TrendingUp size={12} className="mr-1" /> +8.4%
+                  </span>
                 </div>
               </div>
-            );
-          })}
+              <div className="flex gap-2">
+                <button className="px-4 py-2 bg-white/20 backdrop-blur-md text-slate-500 rounded-xl text-xs font-medium hover:bg-slate-100">Monthly</button>
+                <button className="px-4 py-2 gradient-accent rounded-xl text-xs font-medium shadow-md shadow-sm">Weekly</button>
+              </div>
+            </div>
+            
+            <div className="flex-1 min-h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={REVENUE_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#007AFF" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#007AFF" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }} dx={-10} tickFormatter={(val) => `$${val}k`} />
+                  <RechartsTooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)', fontWeight: 'bold' }}
+                    itemStyle={{ color: '#007AFF' }}
+                  />
+                  <Area type="monotone" dataKey="value" stroke="#007AFF" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Secondary Stats & Pie Chart */}
+          <div className="flex flex-col gap-6">
+            
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center mb-4">
+                  <DollarSign size={18} strokeWidth={2.5} />
+                </div>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Withdrawn</p>
+                <h3 className="text-xl font-semibold text-slate-800">$45,873</h3>
+                <p className="text-[10px] font-medium text-rose-500 mt-1">-1.5% from last week</p>
+              </div>
+              <div className="bg-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-4">
+                  <Activity size={18} strokeWidth={2.5} />
+                </div>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-1">Win Rate</p>
+                <h3 className="text-xl font-semibold text-slate-800">65%</h3>
+                <p className="text-[10px] font-medium text-emerald-500 mt-1">+2.7% from last week</p>
+              </div>
+            </div>
+
+            {/* Pipeline Distribution Pie Chart */}
+            <div className="bg-white rounded-[24px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex-1 flex flex-col justify-center items-center relative">
+              <h3 className="text-sm font-semibold text-slate-800 absolute top-6 left-6">Pipeline Distribution</h3>
+              <div className="h-40 w-full mt-8">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={PIE_DATA}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={65}
+                      paddingAngle={5}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {PIE_DATA.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ fontWeight: 'bold' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              
+              {/* Pie Chart Legend */}
+              <div className="flex items-center justify-center gap-6 mt-2">
+                {PIE_DATA.map((entry, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                      <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">{entry.name}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-slate-800">{entry.value}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* BOTTOM SECTION: KANBAN BOARD */}
+      <div className="px-8 pb-10 flex-1 flex flex-col min-h-[600px]">
+        <div className="flex items-center justify-between mb-6 mt-4">
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Active Pipeline</h2>
+            <p className="text-sm font-medium text-slate-400 mt-1 uppercase tracking-widest">Drag and drop to manage stages</p>
+          </div>
+        </div>
+
+        {/* Board Container */}
+        <div className="flex-1 overflow-hidden pb-4">
+          <div className="flex gap-4 h-full w-full">
+            {COLUMNS.map(column => {
+              const colOpps = opportunities.filter(o => o.status === column.id);
+              
+              // Calculate dummy volume
+              const mockVolume = colOpps.length * 45;
+
+              return (
+                <div 
+                  key={column.id}
+                  className="flex-1 min-w-0 flex flex-col bg-white/40 backdrop-blur-2xl rounded-[32px] border border-white shadow-[0_8px_32px_rgba(0,0,0,0.03)] h-full max-h-full"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, column.id)}
+                >
+                  <div className="p-6 flex items-center justify-between shrink-0 border-b border-white/60">
+                    <div className="flex items-center gap-3">
+                      <h3 className="font-extrabold text-slate-900 text-[16px] tracking-tight">{column.title}</h3>
+                      <span className="text-white bg-[#007AFF] px-2.5 py-0.5 rounded-full text-xs font-medium shadow-md shadow-sm">{colOpps.length}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-gradient bg-white px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm">
+                      <DollarSign size={14} strokeWidth={3} />
+                      <span className="text-xs font-semibold">{mockVolume}k</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 px-5 py-5 overflow-y-auto space-y-4 scrollbar-hide">
+                    {colOpps.map(opp => (
+                      <div 
+                        key={opp.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, opp.id)}
+                        className="cursor-move group/card"
+                      >
+                        <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.08)] group-hover/card:-translate-y-1 group-hover/card:border-indigo-100 transition-all duration-300 relative">
+                          
+                          {/* Top Line: Title & Dots */}
+                          <div className="flex justify-between items-start gap-4 mb-5">
+                            <h4 className="font-semibold text-slate-800 text-[16px] leading-snug line-clamp-2 group-hover/card:text-gradient transition-colors">
+                              {opp.name}
+                            </h4>
+                            <button className="text-slate-300 hover:text-rose-500 shrink-0 mt-0.5 transition-colors p-1.5 rounded-xl hover:bg-rose-50" onClick={(e) => {
+                              e.stopPropagation();
+                              if(confirm('Remove opportunity from pipeline?')) {
+                                try {
+                                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+                                  axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=open`);
+                                  setOpportunities(prev => prev.filter(o => o.id !== opp.id));
+                                } catch (err) {}
+                              }
+                            }}>
+                              <MoreVertical size={16} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                          
+                          {/* Match Score & Funder */}
+                          <div className="flex justify-between items-center mb-6 bg-white/20 backdrop-blur-md p-3 rounded-2xl border border-slate-100/80">
+                            <div>
+                              <p className="text-slate-400 text-[10px] font-medium tracking-widest uppercase mb-1">Funder</p>
+                              <p className="text-slate-700 text-sm font-extrabold line-clamp-1">{opp.funder}</p>
+                            </div>
+                            <MatchScoreRing score={opp.match_score} />
+                          </div>
+                          
+                          {/* Lead Owner & Value Grid */}
+                          <div className="grid grid-cols-2 gap-4 mb-5">
+                            <div>
+                              <p className="text-slate-400 text-[10px] font-medium tracking-widest uppercase mb-2">Lead Owner</p>
+                              <div className="flex items-center gap-2">
+                                <img 
+                                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(opp.target_entity || 'User')}&background=f5f7fa&color=3f20b3&rounded=true&bold=true`}
+                                  alt="Owner" 
+                                  className="w-6 h-6 rounded-full shadow-sm"
+                                />
+                                <span className="text-slate-700 text-[13px] font-extrabold line-clamp-1">{opp.target_entity || 'Unassigned'}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-slate-400 text-[10px] font-medium tracking-widest uppercase mb-2">Value</p>
+                              <p className="text-gradient text-[15px] font-semibold">{opp.value || '$---'}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Tags */}
+                          <div className="flex gap-2 pt-5 border-t border-slate-100">
+                            <span className="px-3 py-1.5 rounded-xl bg-[#f5f7fa] text-slate-500 text-[10px] font-semibold uppercase tracking-widest border border-slate-100">
+                              {opp.opp_type || 'Opportunity'}
+                            </span>
+                          </div>
+                          
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {colOpps.length === 0 && (
+                      <div className="h-32 rounded-[24px] flex flex-col items-center justify-center border-2 border-dashed border-slate-200 bg-white/50 text-slate-400 text-sm font-medium tracking-wide">
+                        No deals here
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

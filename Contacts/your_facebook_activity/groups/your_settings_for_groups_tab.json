@@ -1,0 +1,22 @@
+{
+  "media": [
+    
+  ],
+  "label_values": [
+    {
+      "label": "Popular now disabled",
+      "value": "False"
+    },
+    {
+      "label": "Groups story disabled",
+      "value": "False"
+    },
+    {
+      "dict": [
+        
+      ],
+      "title": "Pinned groups"
+    }
+  ],
+  "fbid": "10204743552186351"
+}

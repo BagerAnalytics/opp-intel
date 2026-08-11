@@ -106,8 +106,8 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-white/20 backdrop-blur-md/50">
+          <h2 className="text-2xl font-medium text-slate-800 tracking-tight flex items-center gap-2">
             Add Opportunity
           </h2>
           <button 
@@ -121,21 +121,21 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
         <div className="flex border-b border-slate-200">
           <button 
             onClick={() => setActiveTab('auto')}
-            className={`flex-1 py-4 font-bold text-sm flex items-center justify-center gap-2 transition-colors ${activeTab === 'auto' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`flex-1 py-4 font-medium text-sm flex items-center justify-center gap-2 transition-colors ${activeTab === 'auto' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-500 hover:bg-white/20 backdrop-blur-md'}`}
           >
             <Sparkles size={18} />
             Smart Auto-Extract
           </button>
           <button 
             onClick={() => setActiveTab('bulk')}
-            className={`flex-1 py-4 font-bold text-sm flex items-center justify-center gap-2 transition-colors ${activeTab === 'bulk' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`flex-1 py-4 font-medium text-sm flex items-center justify-center gap-2 transition-colors ${activeTab === 'bulk' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-500 hover:bg-white/20 backdrop-blur-md'}`}
           >
             <Sparkles size={18} />
             Bulk Import
           </button>
           <button 
             onClick={() => setActiveTab('manual')}
-            className={`flex-1 py-4 font-bold text-sm flex items-center justify-center gap-2 transition-colors ${activeTab === 'manual' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-500 hover:bg-slate-50'}`}
+            className={`flex-1 py-4 font-medium text-sm flex items-center justify-center gap-2 transition-colors ${activeTab === 'manual' ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30' : 'text-slate-500 hover:bg-white/20 backdrop-blur-md'}`}
           >
             <FileText size={18} />
             Manual Entry
@@ -149,7 +149,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
                   <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="text-emerald-600 w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">Paste a link to any opportunity</h3>
+                  <h3 className="text-xl font-medium text-slate-800">Paste a link to any opportunity</h3>
                   <p className="text-slate-500 mt-2">Our AI will visit the page, read the contents, extract all necessary details, and generate a Match Score and Strategy automatically.</p>
                 </div>
                 
@@ -176,7 +176,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Sparkles className="text-blue-600 w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">Bulk Import Opportunities</h3>
+                  <h3 className="text-xl font-medium text-slate-800">Bulk Import Opportunities</h3>
                   <p className="text-slate-500 mt-2">Paste multiple links below (one per line). We will instantly queue them up and run the AI crawler on all of them securely in the background!</p>
                 </div>
                 
@@ -198,7 +198,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
             <form id="add-opp-form" onSubmit={handleManualSubmit} className="space-y-8">
               {/* Basic Info */}
               <div>
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-slate-800 mb-4 flex items-center gap-2">
                   <span className="bg-emerald-100 text-emerald-700 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
                   Basic Information
                 </h3>
@@ -230,7 +230,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
 
               {/* Categorization */}
               <div>
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-slate-800 mb-4 flex items-center gap-2">
                   <span className="bg-emerald-100 text-emerald-700 w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
                   Categorization
                 </h3>
@@ -259,7 +259,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
 
               {/* Deep Details */}
               <div>
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-medium text-slate-800 mb-4 flex items-center gap-2">
                   <span className="bg-emerald-100 text-emerald-700 w-6 h-6 rounded-full flex items-center justify-center text-xs">3</span>
                   Deep Details (AI Context)
                 </h3>
@@ -296,11 +296,11 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 bg-slate-50/50 mt-auto">
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-100 bg-white/20 backdrop-blur-md/50 mt-auto">
           <button 
             type="button" 
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-xl transition-colors"
+            className="px-6 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 bg-slate-100 rounded-xl transition-colors"
           >
             Cancel
           </button>
@@ -308,7 +308,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
             type="submit" 
             form={activeTab === 'auto' ? "auto-opp-form" : activeTab === 'bulk' ? "bulk-opp-form" : "add-opp-form"}
             disabled={isSubmitting}
-            className={`px-8 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg transition-all flex items-center gap-2 ${
+            className={`px-8 py-2.5 text-sm font-medium text-white rounded-xl shadow-lg transition-all flex items-center gap-2 ${
               isSubmitting ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-emerald-600/20 hover:-translate-y-0.5'
             }`}
           >

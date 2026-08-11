@@ -1,0 +1,1667 @@
+[
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1731661606
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/3671428736245314/permalink/8603926259662179/",
+                "href": "https://www.facebook.com/groups/3671428736245314/permalink/8603926259662179/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "KZN Group of Farmers"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "KZN Group of Farmers"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "586791890483892"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1731662760
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/712842152243664/permalink/2530891557105372/",
+                "href": "https://www.facebook.com/groups/712842152243664/permalink/2530891557105372/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "KZN Farmers (Abalimi)"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "KZN Farmers (Abalimi)"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "1079393616901725"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1731662995
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/livestockfarming/permalink/2025153951265882/",
+                "href": "https://www.facebook.com/groups/livestockfarming/permalink/2025153951265882/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Farming and Security Forum SA"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "Farming and Security Forum SA"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "442697145537158"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1731662118
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/3443036229334462/?sale_post_id=3443036229334462",
+                "href": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/3443036229334462/?sale_post_id=3443036229334462"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "488376800926258"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1731662118
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/1244732902267115/permalink/27596019460045100/?sale_post_id=27596019460045100",
+                "href": "https://www.facebook.com/groups/1244732902267115/permalink/27596019460045100/?sale_post_id=27596019460045100"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "GLOBAL TRADERS"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "GLOBAL TRADERS"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "850845340557732"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1561374448
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/2065061577131941/",
+                "href": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/2065061577131941/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "482880832461283"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1560019564
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/2054720668166032/",
+                "href": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/2054720668166032/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "617193135431913"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1560334903
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/2057092324595533/",
+                "href": "https://www.facebook.com/groups/tenderenterpreneurchatwithmindloz/permalink/2057092324595533/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "TENDERS & ENTREPRENEURS SECRET CHAT GROUP"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "393659831248022"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1560334936
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/2010872569174865/permalink/2296804200581699/",
+                "href": "https://www.facebook.com/groups/2010872569174865/permalink/2296804200581699/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Black Entrepreneurs South Africa"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "Black Entrepreneurs South Africa"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "400559397335472"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1561374509
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/2010872569174865/permalink/2305746163020836/",
+                "href": "https://www.facebook.com/groups/2010872569174865/permalink/2305746163020836/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Black Entrepreneurs South Africa"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "Black Entrepreneurs South Africa"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "495925751194087"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1560021527
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/2010872569174865/permalink/2294196754175777/",
+                "href": "https://www.facebook.com/groups/2010872569174865/permalink/2294196754175777/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Black Entrepreneurs South Africa"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "Black Entrepreneurs South Africa"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "2349370981789818"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1561117111
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/2010872569174865/permalink/2303467216582064/",
+                "href": "https://www.facebook.com/groups/2010872569174865/permalink/2303467216582064/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Black Entrepreneurs South Africa"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "Black Entrepreneurs South Africa"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "325601271722494"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1561374544
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/southafricanentrepreneursnetwork/permalink/363779530948904/",
+                "href": "https://www.facebook.com/groups/southafricanentrepreneursnetwork/permalink/363779530948904/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "South African Entrepreneurs Network"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "South African Entrepreneurs Network"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "618833461960961"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1560019649
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/southafricanpreneurs/permalink/2387493418154356/",
+                "href": "https://www.facebook.com/groups/southafricanpreneurs/permalink/2387493418154356/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "SABIZPRO"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "SABIZPRO"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "321425692083670"
+  },
+  {
+    "media": [
+      
+    ],
+    "label_values": [
+      {
+        "label": "Type"
+      },
+      {
+        "label": "Event time",
+        "timestamp_value": 1579527525
+      },
+      {
+        "label": "Action taken",
+        "dict": [
+          {
+            "label": "delete_posts",
+            "value": "False"
+          },
+          {
+            "label": "delete_comments",
+            "value": "False"
+          },
+          {
+            "label": "delete_stories",
+            "value": "False"
+          },
+          {
+            "label": "delete_invites",
+            "value": "False"
+          },
+          {
+            "label": "apply_to_other_groups",
+            "value": "False"
+          },
+          {
+            "label": "mute_duration",
+            "value": ""
+          },
+          {
+            "label": "rule_id",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "label": "Feedback"
+      },
+      {
+        "label": "Feedback tag"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "URL",
+                "value": "https://www.facebook.com/groups/southafricanentrepreneursnetwork/permalink/493105034683019/",
+                "href": "https://www.facebook.com/groups/southafricanentrepreneursnetwork/permalink/493105034683019/"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "South African Entrepreneurs Network"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Group"
+              },
+              {
+                "dict": [
+                  {
+                    "dict": [
+                      {
+                        "label": "Name",
+                        "value": "Khanya Thokozani Mhlengi Nyawo"
+                      }
+                    ],
+                    "title": ""
+                  }
+                ],
+                "title": "Author"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Content"
+      },
+      {
+        "dict": [
+          {
+            "dict": [
+              {
+                "label": "Name",
+                "value": "South African Entrepreneurs Network"
+              }
+            ],
+            "title": ""
+          }
+        ],
+        "title": "Group"
+      }
+    ],
+    "fbid": "478679123076446"
+  }
+]

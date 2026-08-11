@@ -20,7 +20,7 @@ export default function AwardsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input type="text" placeholder="Search awards..." className="pl-10 pr-4 py-2 bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm w-64 text-slate-900 placeholder:text-slate-400" />
           </div>
-          <button className="px-6 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-sm font-bold text-white hover:shadow-[0_4px_14px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex items-center gap-2">
+          <button className="px-6 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-sm font-medium text-white hover:shadow-[0_4px_14px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 transition-all duration-300 shadow-sm flex items-center gap-2">
             <Plus size={16} strokeWidth={3} /> Track Award
           </button>
         </div>
@@ -35,7 +35,7 @@ export default function AwardsPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
                 <Trophy size={48} className={`${award.icon} opacity-80 drop-shadow-sm`} strokeWidth={1.5} />
                 <div className="absolute top-4 right-4">
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/90 backdrop-blur-sm shadow-sm
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-medium uppercase tracking-widest bg-white/90 backdrop-blur-sm shadow-sm
                     ${award.status === 'Submitted' ? 'text-blue-600' : 
                       award.status === 'Shortlisted' ? 'text-emerald-600' : 
                       award.status === 'Drafting' ? 'text-amber-600' : 'text-slate-500'}`}>
@@ -53,11 +53,11 @@ export default function AwardsPage() {
                 </p>
                 
                 <div className="mt-auto pt-5 border-t border-slate-100/80 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-slate-600 text-xs font-bold">
+                  <div className="flex items-center gap-2 text-slate-600 text-xs font-medium">
                     <Calendar size={14} className="text-slate-400" />
                     Deadline: {award.deadline}
                   </div>
-                  <button className="text-slate-400 group-hover:text-amber-500 transition-colors p-1 bg-slate-50 rounded-lg group-hover:bg-amber-50">
+                  <button className="text-slate-400 group-hover:text-amber-500 transition-colors p-1 bg-white/20 backdrop-blur-md rounded-lg group-hover:bg-amber-50">
                     <ExternalLink size={16} />
                   </button>
                 </div>

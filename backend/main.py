@@ -55,10 +55,18 @@ def start_scheduler():
     from database import engine
     try:
         with engine.begin() as conn:
-            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS strategy TEXT;"))
-            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS opp_type TEXT;"))
-            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS target_entity TEXT;"))
-            conn.execute(text("ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS raw_text TEXT;"))
+            try: conn.execute(text("ALTER TABLE opportunities ADD COLUMN strategy TEXT;"))
+            except Exception: pass
+            
+            try: conn.execute(text("ALTER TABLE opportunities ADD COLUMN opp_type TEXT;"))
+            except Exception: pass
+            
+            try: conn.execute(text("ALTER TABLE opportunities ADD COLUMN target_entity TEXT;"))
+            except Exception: pass
+            
+            try: conn.execute(text("ALTER TABLE opportunities ADD COLUMN raw_text TEXT;"))
+            except Exception: pass
+            
             conn.execute(text('''
                 CREATE TABLE IF NOT EXISTS scraper_progress (
                     id INTEGER PRIMARY KEY,
@@ -78,7 +86,7 @@ def start_scheduler():
                     opportunities_found INTEGER DEFAULT 0
                 )
             '''))
-            print("Successfully added strategy, opp_type, target_entity, and scraper_progress to database.")
+            print("Successfully checked/added strategy, opp_type, target_entity, and scraper_progress to database.")
     except Exception as e:
         print(f"Migration notice (safe to ignore): {e}")
 
@@ -112,8 +120,38 @@ def start_scheduler():
             db.commit()
             if count > 0:
                 print(f"Startup cleanup: Deleted {count} stale 'Scanning...' ghost records.")
+            
     except Exception as e:
         print(f"Startup cleanup error (safe to ignore): {e}")
+
+    try:
+        with SessionLocal() as db:
+            # SEED ADMIN AND USER ACCOUNTS
+            import auth
+            admin_user = db.query(models.User).filter(models.User.email == "admin@oppintel.com").first()
+            if not admin_user:
+                admin_user = models.User(
+                    email="admin@oppintel.com", 
+                    password_hash=auth.get_password_hash("admin123"), 
+                    role="Admin", 
+                    full_name="System Admin"
+                )
+                db.add(admin_user)
+                
+            regular_user = db.query(models.User).filter(models.User.email == "user@oppintel.com").first()
+            if not regular_user:
+                regular_user = models.User(
+                    email="user@oppintel.com", 
+                    password_hash=auth.get_password_hash("user123"), 
+                    role="User", 
+                    full_name="Regular User"
+                )
+                db.add(regular_user)
+            db.commit()
+            print("Startup: Verified default users exist.")
+            
+    except Exception as e:
+        print(f"Startup cleanup/seed error (safe to ignore): {e}")
 
 import subprocess
 import sys
@@ -767,3 +805,56 @@ def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Smart Scan Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# ================= AUTHENTICATION & SETTINGS =================
+
+import auth
+from pydantic import BaseModel
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/api/auth/login")
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == req.email).first()
+    if not user or not auth.verify_password(req.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
+    
+    access_token = auth.create_access_token(data={"sub": user.email, "role": user.role, "id": user.id})
+    return {"access_token": access_token, "token_type": "bearer", "user": {"id": user.id, "email": user.email, "name": user.full_name, "role": user.role}}
+
+class SettingsUpdate(BaseModel):
+    theme: Optional[str] = None
+    ai_threshold: Optional[int] = None
+    email_notifications: Optional[bool] = None
+
+@app.get("/api/settings/{user_id}")
+def get_settings(user_id: int, db: Session = Depends(get_db)):
+    setting = db.query(models.Setting).filter(models.Setting.user_id == user_id).first()
+    if not setting:
+        setting = models.Setting(user_id=user_id)
+        db.add(setting)
+        db.commit()
+        db.refresh(setting)
+    return setting
+
+@app.post("/api/settings/{user_id}")
+def update_settings(user_id: int, req: SettingsUpdate, db: Session = Depends(get_db)):
+    setting = db.query(models.Setting).filter(models.Setting.user_id == user_id).first()
+    if not setting:
+        setting = models.Setting(user_id=user_id)
+        db.add(setting)
+    
+    if req.theme is not None: setting.theme = req.theme
+    if req.ai_threshold is not None: setting.ai_threshold = req.ai_threshold
+    if req.email_notifications is not None: setting.email_notifications = req.email_notifications
+    
+    db.commit()
+    db.refresh(setting)
+    return setting
+
+@app.get("/api/users")
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    return [{"id": u.id, "email": u.email, "name": u.full_name, "role": u.role, "status": "Active"} for u in users]
