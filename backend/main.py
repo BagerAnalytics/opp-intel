@@ -141,6 +141,8 @@ def start_scheduler():
                     full_name="System Admin"
                 )
                 db.add(admin_user)
+            else:
+                admin_user.password_hash = auth.get_password_hash("PremierAgric@01")
                 
             regular_user = db.query(models.User).filter(models.User.email == "premieragric1@gmail.com").first()
             if not regular_user:
@@ -148,9 +150,12 @@ def start_scheduler():
                     email="premieragric1@gmail.com", 
                     password_hash=auth.get_password_hash("PremierAgric@01"), 
                     role="User", 
-                    full_name="Regular User"
+                    full_name="Standard User"
                 )
                 db.add(regular_user)
+            else:
+                regular_user.password_hash = auth.get_password_hash("PremierAgric@01")
+                
             db.commit()
             print("Startup: Verified default users exist.")
             
