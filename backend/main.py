@@ -12,7 +12,11 @@ from scrapers.linkedin_opportunities import scrape_linkedin
 from scrapers.etenders_sa import scrape_etenders
 
 # Create tables in the database if they don't exist
-models.Base.metadata.create_all(bind=engine)
+try:
+    models.Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: Failed to run create_all on startup: {e}")
+
 
 app = FastAPI(title="OppIntel API")
 
