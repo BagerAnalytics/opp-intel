@@ -138,11 +138,11 @@ def start_scheduler():
                 )
                 db.add(admin_user)
                 
-            regular_user = db.query(models.User).filter(models.User.email == "user@oppintel.com").first()
+            regular_user = db.query(models.User).filter(models.User.email == "premieragric1@gmail.com").first()
             if not regular_user:
                 regular_user = models.User(
-                    email="user@oppintel.com", 
-                    password_hash=auth.get_password_hash("user123"), 
+                    email="premieragric1@gmail.com", 
+                    password_hash=auth.get_password_hash("PremierAgric@01"), 
                     role="User", 
                     full_name="Regular User"
                 )
