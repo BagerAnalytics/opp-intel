@@ -894,6 +894,42 @@ def update_user(user_id: int, req: UserUpdate, db: Session = Depends(get_db)):
     return {"id": user.id, "email": user.email, "name": user.full_name, "role": user.role}
 
 
+
+@app.get("/api/debug/seed")
+def force_seed(db: Session = Depends(get_db)):
+    import traceback
+    try:
+        import auth
+        admin_user = db.query(models.User).filter(models.User.email == "support@premieragric.co.za").first()
+        if not admin_user:
+            admin_user = models.User(
+                email="support@premieragric.co.za", 
+                password_hash=auth.get_password_hash("PremierAgric@01"), 
+                role="Admin", 
+                full_name="System Admin"
+            )
+            db.add(admin_user)
+        else:
+            admin_user.password_hash = auth.get_password_hash("PremierAgric@01")
+            
+        regular_user = db.query(models.User).filter(models.User.email == "premieragric1@gmail.com").first()
+        if not regular_user:
+            regular_user = models.User(
+                email="premieragric1@gmail.com", 
+                password_hash=auth.get_password_hash("PremierAgric@01"), 
+                role="User", 
+                full_name="Standard User"
+            )
+            db.add(regular_user)
+        else:
+            regular_user.password_hash = auth.get_password_hash("PremierAgric@01")
+            
+        db.commit()
+        return {"status": "success", "message": "Forced seed completed"}
+    except Exception as e:
+        err_msg = traceback.format_exc()
+        return {"status": "error", "message": str(e), "traceback": err_msg}
+
 if __name__ == '__main__':
     import uvicorn
     import os
