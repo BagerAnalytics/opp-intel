@@ -47,6 +47,19 @@ def validate_and_queue_link(db, url: str, source: str, api_key: str):
         return False
         
     print(f"Validating discovered link: {url}")
+    
+    # Provide live terminal feedback to the user UI
+    try:
+        from datetime import datetime
+        progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
+        if progress:
+            short_url = url.replace("https://", "").replace("http://", "").replace("www.", "")[:35]
+            progress.current_task = f"AI Extracting: {short_url}..."
+            progress.updated_at = datetime.utcnow().isoformat()
+            db.commit()
+    except Exception:
+        pass
+
     html_content = smart_fetch(url, api_key, render=False)
     if not html_content:
         return False
