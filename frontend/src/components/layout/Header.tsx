@@ -150,7 +150,7 @@ export default function Header() {
                         <div className="bg-emerald-500 h-full transition-all duration-500" style={{width: `${progress.progress_percent}%`}}></div>
                       </div>
                       <div className="bg-slate-900 rounded-lg p-3 font-mono text-xs text-emerald-400 mt-2 break-words">
-                        > {progress.current_task}
+                        {">"} {progress.current_task}
                         <span className="animate-pulse">_</span>
                       </div>
                     </div>
