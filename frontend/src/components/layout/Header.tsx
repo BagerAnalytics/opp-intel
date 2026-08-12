@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Bell, Search, MessageSquare, Menu, LogOut, User as UserIcon, Activity } from "lucide-react";
-import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Header() {
