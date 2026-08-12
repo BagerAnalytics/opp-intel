@@ -1,7 +1,7 @@
 import requests
 import time
 
-def smart_fetch(url: str, api_key: str, render: bool = False, max_retries: int = 2) -> str:
+def smart_fetch(url: str, api_key: str, render: bool = False, max_retries: int = 1) -> str:
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
@@ -55,6 +55,11 @@ def validate_and_queue_link(db, url: str, source: str, api_key: str):
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(html_content, "html.parser")
     raw_text = soup.get_text(separator="\n", strip=True)
+    
+    # Truncate to 25,000 characters to protect Groq's 8k token limit
+    if len(raw_text) > 25000:
+        print(f"Truncating massive webpage from {len(raw_text)} to 25,000 chars...")
+        raw_text = raw_text[:25000]
         
     # Phase 1: Lightweight Extraction
     basic_data = extract_opportunity_data(raw_text, url)
