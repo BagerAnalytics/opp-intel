@@ -1018,12 +1018,12 @@ export default function Home() {
             <h4 className="text-xs font-medium text-slate-600 uppercase tracking-widest mb-3">API Credits Remaining</h4>
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="font-semibold text-slate-500">OpenAI</span>
-                <span className="font-medium text-emerald-500">$142.50</span>
+                <span className="font-semibold text-slate-500">Google Gemini</span>
+                <span className="font-medium text-emerald-500">{credits?.gemini || 'Active (Pro)'}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="font-semibold text-slate-500">ScraperAPI</span>
-                <span className="font-medium text-gradient">45,210</span>
+                <span className="font-medium text-gradient">{credits?.scraper || 'Active'}</span>
               </div>
             </div>
           </div>
