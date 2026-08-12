@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 import time
+import os
 from database import SessionLocal
 from scrapers.utils import validate_and_queue_link
 import models
@@ -74,7 +75,7 @@ def scrape_saved_portals():
                     except Exception as e:
                         if str(e) == 'API_QUOTA_EXCEEDED': raise e
                         print(f"Normal fetch failed ({e}). Falling back to ScraperAPI...")
-                        API_KEY = "560f9d320dd92822005946b1eb2060ee"
+                        API_KEY = os.environ.get("SCRAPERAPI_KEY", "")
                         scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={portal.url}&render=true"
                         
                         res = requests.get(scraper_url, timeout=45)
@@ -105,7 +106,7 @@ def scrape_saved_portals():
                                 if is_opportunity_link(full_url, text):
                                     # Check if already in DB
                                     print(f"Discovered new potential opportunity via {portal.url}: {full_url}")
-                                    is_valid = validate_and_queue_link(db, full_url, f"Portal Crawler: {portal.name}", "560f9d320dd92822005946b1eb2060ee")
+                                    is_valid = validate_and_queue_link(db, full_url, f"Portal Crawler: {portal.name}", os.environ.get("SCRAPERAPI_KEY", ""))
                                     if is_valid:
                                         found_links += 1
                                         portal.opportunities_found += 1

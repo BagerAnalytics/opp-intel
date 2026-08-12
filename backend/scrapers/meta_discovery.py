@@ -115,7 +115,7 @@ def scrape_meta_portals():
         try:
             with SessionLocal() as db:
                 for url in new_urls:
-                    validate_and_queue_link(db, url, "Meta-Discovery", "560f9d320dd92822005946b1eb2060ee")
+                    validate_and_queue_link(db, url, "Meta-Discovery", os.environ.get("SCRAPERAPI_KEY", ""))
             
             print(f"Successfully queued {len(new_urls)} URLs for deep extraction.")
         except Exception as e:

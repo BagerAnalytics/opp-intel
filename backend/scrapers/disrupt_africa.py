@@ -20,7 +20,7 @@ def scrape_disrupt_africa():
         import requests
         from bs4 import BeautifulSoup
         
-        API_KEY = "560f9d320dd92822005946b1eb2060ee"
+        API_KEY = os.environ.get("SCRAPERAPI_KEY", "")
         scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={base_url}&render=true"
         
         res = requests.get(scraper_url, timeout=60)

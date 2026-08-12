@@ -34,7 +34,7 @@ def extract_from_url(url: str, opp_id: int = None):
             print(f"Normal fetch failed ({e}). Falling back to ScraperAPI...")
             
             # 2. Fall back to ScraperAPI (costs 5 credits)
-            API_KEY = "560f9d320dd92822005946b1eb2060ee"
+            API_KEY = os.environ.get("SCRAPERAPI_KEY", "")
             scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={url}&render=true"
             
             res = requests.get(scraper_url, timeout=60)

@@ -134,7 +134,7 @@ def scrape_discovery_engine():
         try:
             with SessionLocal() as db:
                 for url in new_urls:
-                    validate_and_queue_link(db, url, "Discovery Engine", "560f9d320dd92822005946b1eb2060ee")
+                    validate_and_queue_link(db, url, "Discovery Engine", os.environ.get("SCRAPERAPI_KEY", ""))
             
             print(f"Successfully queued {len(new_urls)} discovered links for extraction.")
         except Exception as e:
