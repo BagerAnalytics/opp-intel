@@ -37,6 +37,7 @@ export default function Home() {
   const [contacts, setContacts] = useState<any[]>([]);
   const [complianceDocs, setComplianceDocs] = useState<any[]>([]);
   const [portals, setPortals] = useState<any[]>([]);
+  const [credits, setCredits] = useState({ gemini: 'Checking...', scraper: 'Checking...' });
   const [isLoading, setIsLoading] = useState(true);
   
   // Toggles between visual dashboard, data table, and upload form
@@ -92,16 +93,18 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const apiUrl = 'https://opp-intel-production.up.railway.app';
-      const [oppResponse, contactsResponse, complianceResponse, portalsResponse] = await Promise.all([
+      const [oppResponse, contactsResponse, complianceResponse, portalsResponse, creditsResponse] = await Promise.all([
         axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/contacts`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/compliance`).catch(() => ({ data: [] })),
-        axios.get(`${apiUrl}/api/portals`).catch(() => ({ data: [] }))
+        axios.get(`${apiUrl}/api/portals`).catch(() => ({ data: [] })),
+        axios.get(`${apiUrl}/api/system/credits`).catch(() => ({ data: { gemini: 'Error', scraper: 'Error' } }))
       ]);
       setOpportunities(oppResponse.data || []);
       setContacts(contactsResponse.data || []);
       setComplianceDocs(complianceResponse.data || []);
       setPortals(portalsResponse.data || []);
+      setCredits(creditsResponse.data || { gemini: 'Active (Pro)', scraper: 'Active' });
     } catch (error) {
       console.warn("API is unreachable, using empty state fallback.");
     } finally {
