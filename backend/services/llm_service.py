@@ -1,13 +1,14 @@
 import os
 import json
+import time
 from dotenv import load_dotenv
-import google.generativeai as genai
-from google.api_core import exceptions
+from groq import Groq
 
 load_dotenv()
 
-# Initialize Gemini Client
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Initialize Groq Client
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+MODEL_NAME = "llama3-70b-8192"
 
 PROFILE_PROMPT = """
 You are an Opportunity Matching AI acting as a ruthless gatekeeper for two specific businesses:
@@ -27,6 +28,7 @@ CRITERIA FOR A HIGH MATCH (Score 80+):
 - IF THE OPPORTUNITY DEADLINE HAS PASSED OR IT IS EXPLICITLY STATED AS CLOSED, SCORE IT 0.
 
 Be harsh but fair. We only want highly lucrative, actionable opportunities.
+You MUST output strictly in JSON format.
 """
 
 def generate_match_score(opportunity_description: str, feedback_context: str = "") -> dict:
@@ -34,38 +36,29 @@ def generate_match_score(opportunity_description: str, feedback_context: str = "
     if feedback_context:
         system_prompt += f"\n\n{feedback_context}\nUse this feedback to adjust your scoring. If an opportunity is similar to one we've lost, lower the score. If similar to one we've won, raise the score."
         
-    import time
     for attempt in range(4):
         try:
-            model = genai.GenerativeModel(
-                'models/gemini-3.6-flash',
-                system_instruction=system_prompt,
-                generation_config=genai.types.GenerationConfig(
-                    response_mime_type="application/json",
-                    response_schema={
-                        "type": "object",
-                        "properties": {
-                            "match_score": {"type": "integer"},
-                            "reasoning": {"type": "string"},
-                            "opp_type": {"type": "string", "enum": ["Grant", "Tender", "Award", "Accelerator", "Other"]},
-                            "target_entity": {"type": "string", "enum": ["Premier Agric", "Badger Analytics", "Both"]}
-                        },
-                        "required": ["match_score", "reasoning", "opp_type", "target_entity"]
-                    }
-                )
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": system_prompt + "\nEnsure response strictly matches schema: {match_score: int, reasoning: str, opp_type: str, target_entity: str}"},
+                    {"role": "user", "content": f"Analyze this opportunity:\n\n{opportunity_description}"}
+                ],
+                response_format={"type": "json_object"}
             )
-            response = model.generate_content(f"Analyze this opportunity:\n\n{opportunity_description}")
-            return response.text
-        except exceptions.ResourceExhausted as e:
-            if attempt < 3:
-                print(f"Gemini 429 Rate Limit hit in Match Score. Backing off for {5 * (attempt + 1)} seconds...")
-                time.sleep(5 * (attempt + 1))
-            else:
-                print(f"Gemini API Quota Error fully exhausted: {e}")
-                raise Exception("API_QUOTA_EXCEEDED")
+            return response.choices[0].message.content
         except Exception as e:
-            print(f"Gemini Matcher Error: {e}")
-            return json.dumps({"match_score": 0, "reasoning": f"LLM failed: {e}", "opp_type": "Other", "target_entity": "Unknown"})
+            err_str = str(e).lower()
+            if "rate limit" in err_str or "429" in err_str:
+                if attempt < 3:
+                    print(f"Groq 429 Rate Limit hit in Match Score. Backing off for {5 * (attempt + 1)} seconds...")
+                    time.sleep(5 * (attempt + 1))
+                else:
+                    print(f"Groq API Quota Error fully exhausted: {e}")
+                    raise Exception("API_QUOTA_EXCEEDED")
+            else:
+                print(f"Groq Matcher Error: {e}")
+                return json.dumps({"match_score": 0, "reasoning": f"LLM failed: {e}", "opp_type": "Other", "target_entity": "Unknown"})
 
 def extract_opportunity_data(raw_text: str, url: str) -> dict:
     system_prompt = """
@@ -77,67 +70,63 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
     If the opportunity deadline has passed, or it is explicitly stated as EXPIRED or CLOSED, you MUST reject it.
     If you are rejecting it, you MUST return an EXACTLY empty JSON object: {}
     ONLY extract data if the webpage is a specific, individual, concrete grant/tender/award that is STILL OPEN.
+    You MUST output strictly in JSON format.
     """
     
-    # We use string manipulation to handle the empty JSON object {} fallback because response_schema strictly enforces fields.
-    # So we don't enforce a schema, just standard JSON parsing.
-    
-    import time
     for attempt in range(4):
         try:
-            model = genai.GenerativeModel(
-                'models/gemini-3.6-flash',
-                system_instruction=system_prompt,
-                generation_config=genai.types.GenerationConfig(
-                    response_mime_type="application/json"
-                )
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput fields: name, funder, value, closing_date, description (short 2-sentence summary), benefits (short bullet points), eligibility_criteria (short bullet points). DO NOT output selection_criteria or application_process. If rejecting, output {{}}."}
+                ],
+                response_format={"type": "json_object"}
             )
-            response = model.generate_content(
-                f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput fields: name, funder, value, closing_date, description (short 2-sentence summary), benefits (short bullet points), eligibility_criteria (short bullet points). DO NOT output selection_criteria or application_process. If rejecting, output {{}}."
-            )
-            cleaned_result = response.text.replace("```json", "").replace("```", "").strip()
+            cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
             return json.loads(cleaned_result)
-        except exceptions.ResourceExhausted as e:
-            if attempt < 3:
-                print(f"Gemini 429 Rate Limit hit. Backing off for {5 * (attempt + 1)} seconds...")
-                time.sleep(5 * (attempt + 1))
-            else:
-                print(f"Gemini API Quota Error fully exhausted: {e}")
-                raise Exception("API_QUOTA_EXCEEDED")
         except Exception as e:
-            print(f"Gemini Extraction Error: {e}")
-            return {}
+            err_str = str(e).lower()
+            if "rate limit" in err_str or "429" in err_str:
+                if attempt < 3:
+                    print(f"Groq 429 Rate Limit hit. Backing off for {5 * (attempt + 1)} seconds...")
+                    time.sleep(5 * (attempt + 1))
+                else:
+                    print(f"Groq API Quota Error fully exhausted: {e}")
+                    raise Exception("API_QUOTA_EXCEEDED")
+            else:
+                print(f"Groq Extraction Error: {e}")
+                return {}
 
 def deep_extract_opportunity(raw_text: str) -> dict:
     system_prompt = """
     You are an AI data extractor. Extract the deep, complex fields from this opportunity webpage text.
     Output ONLY valid JSON format.
     """
-    import time
     for attempt in range(4):
         try:
-            model = genai.GenerativeModel(
-                'models/gemini-3.6-flash',
-                system_instruction=system_prompt,
-                generation_config=genai.types.GenerationConfig(
-                    response_mime_type="application/json"
-                )
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Raw Text:\n{raw_text}\n\nOutput fields: selection_criteria, application_process, past_winners, application_form_questions (extract any specific application questions/fields you can find)."}
+                ],
+                response_format={"type": "json_object"}
             )
-            response = model.generate_content(
-                f"Raw Text:\n{raw_text}\n\nOutput fields: selection_criteria, application_process, past_winners, application_form_questions (extract any specific application questions/fields you can find)."
-            )
-            cleaned_result = response.text.replace("```json", "").replace("```", "").strip()
+            cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
             return json.loads(cleaned_result)
-        except exceptions.ResourceExhausted as e:
-            if attempt < 3:
-                print(f"Gemini 429 Rate Limit hit in Deep Extract. Backing off for {5 * (attempt + 1)} seconds...")
-                time.sleep(5 * (attempt + 1))
-            else:
-                print(f"Gemini API Quota Error fully exhausted: {e}")
-                return {}
         except Exception as e:
-            print(f"Gemini Deep Extraction Error: {e}")
-            return {}
+            err_str = str(e).lower()
+            if "rate limit" in err_str or "429" in err_str:
+                if attempt < 3:
+                    print(f"Groq 429 Rate Limit hit in Deep Extract. Backing off for {5 * (attempt + 1)} seconds...")
+                    time.sleep(5 * (attempt + 1))
+                else:
+                    print(f"Groq API Quota Error fully exhausted: {e}")
+                    return {}
+            else:
+                print(f"Groq Deep Extraction Error: {e}")
+                return {}
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
     prompt = f"""
@@ -158,15 +147,19 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
     Your output must include a specific section labeled exactly: "### Anticipated Questions & Answers" containing these pre-clarifications.
     """
     try:
-        model = genai.GenerativeModel(
-            'models/gemini-3.6-flash',
-            system_instruction="You are a master Application Template Builder. You write highly specific, non-generic application responses."
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "system", "content": "You are a master Application Template Builder. You write highly specific, non-generic application responses."},
+                {"role": "user", "content": prompt}
+            ]
         )
-        response = model.generate_content(prompt)
-        return response.text
-    except exceptions.ResourceExhausted as e:
-        print(f"Gemini API Quota Error: {e}")
-        raise Exception("API_QUOTA_EXCEEDED")
+        return response.choices[0].message.content
     except Exception as e:
-        print(f"Gemini Strategy Error: {e}")
-        return "Failed to generate strategy on LLM."
+        err_str = str(e).lower()
+        if "rate limit" in err_str or "429" in err_str or "quota" in err_str:
+            print(f"Groq API Quota Error: {e}")
+            raise Exception("API_QUOTA_EXCEEDED")
+        else:
+            print(f"Groq Strategy Error: {e}")
+            return "Failed to generate strategy on LLM."

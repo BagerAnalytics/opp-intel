@@ -55,7 +55,7 @@ uvicorn==0.51.0
 webdavclient3==3.14.7
 playwright-stealth==2.0.3
 duckduckgo-search==8.1.1
-google-generativeai
+groq
 
 passlib
 bcrypt

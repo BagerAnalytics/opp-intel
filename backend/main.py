@@ -987,6 +987,8 @@ def clear_live_db(db: Session = Depends(get_db)):
 def get_system_credits():
     import requests
     import os
+    from datetime import datetime, timedelta
+    from notifications import notify_groq_expiry
     
     scraper_key = os.environ.get("SCRAPERAPI_KEY")
     scraper_remaining = "Checking..."
@@ -1006,8 +1008,43 @@ def get_system_credits():
     else:
         scraper_remaining = "Key Missing"
         
+    # Groq Expiry Calculation
+    added_date_str = os.environ.get("GROQ_KEY_ADDED_DATE")
+    days_left = 90
+    
+    if added_date_str:
+        try:
+            added_date = datetime.strptime(added_date_str, "%Y-%m-%d")
+            expiry_date = added_date + timedelta(days=90)
+            days_left = (expiry_date - datetime.now()).days
+            
+            # Send notification if <= 7 days and haven't sent today
+            # (In a real system, we'd use a DB flag to prevent spam, but for now we just rely on standard triggers)
+            # Actually, to prevent spamming on every frontend load, we only email if it's EXACTLY 7, 3, or 1 days left 
+            # and only once per day. To keep it simple, we'll just check if it matches exactly.
+            # But the user might not open the dashboard on exactly day 7.
+            # We'll just rely on the UI to warn them heavily, and maybe log it.
+            # Wait, the user specifically asked: "also send notification when I need to renew".
+            # To avoid spamming every dashboard load, we'll check if a file exists marking the notification sent.
+            
+            if days_left <= 7 and days_left >= 0:
+                flag_file = f"/tmp/groq_warning_sent_{days_left}.flag"
+                if not os.path.exists(flag_file):
+                    notify_groq_expiry(days_left)
+                    # For windows dev compatibility, we'll just use a local .flag file
+                    with open(flag_file if os.name != 'nt' else f"groq_warning_{days_left}.flag", 'w') as flag:
+                        flag.write('sent')
+                        
+        except Exception as e:
+            print(f"Expiry calculation error: {e}")
+            days_left = "Error"
+            
+    # Ensure days_left doesn't go negative on UI
+    if isinstance(days_left, int) and days_left < 0:
+        days_left = 0
+        
     return {
-        "gemini": "Active (Pro)",
+        "gemini": f"{days_left} Days Left" if isinstance(days_left, int) else days_left,
         "scraper": scraper_remaining
     }
 

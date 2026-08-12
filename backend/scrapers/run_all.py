@@ -132,7 +132,7 @@ def run_all_scrapers():
         print(f"Scraper execution error: {e}")
         notify_scraper_error(str(e))
         if str(e) == "API_QUOTA_EXCEEDED":
-            update_progress(db, 0, "ERROR: Gemini AI Quota Exhausted! Please update your API Key.")
+            update_progress(db, 0, "ERROR: Groq API Quota Exhausted! Please update your API Key.")
             # Set is_active to False manually instead of calling finish_progress to keep the error visible
             progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
             if progress:

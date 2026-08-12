@@ -77,3 +77,18 @@ def notify_scraper_error(error_message: str):
     </html>
     """
     return send_email_notification(subject, html)
+
+def notify_groq_expiry(days_left: int):
+    subject = f"⚠️ OppIntel: Groq API Key Expires in {days_left} Days"
+    html = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-w: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; border-top: 5px solid #F59E0B;">
+          <h2 style="color: #F59E0B;">Action Required: API Key Expiry</h2>
+          <p>The free Groq Llama 3 API key powering your extraction engine will expire in <strong>{days_left} days</strong>.</p>
+          <p>To ensure uninterrupted service, please log into <a href="https://console.groq.com">console.groq.com</a>, generate a new free key, and update the <code>GROQ_API_KEY</code> and <code>GROQ_KEY_ADDED_DATE</code> variables in your Railway dashboard.</p>
+        </div>
+      </body>
+    </html>
+    """
+    return send_email_notification(subject, html)
