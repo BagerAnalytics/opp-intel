@@ -982,6 +982,35 @@ def clear_live_db(db: Session = Depends(get_db)):
         import traceback
         return {"status": "error", "message": str(e), "trace": traceback.format_exc()}
 
+
+@app.get("/api/system/credits")
+def get_system_credits():
+    import requests
+    import os
+    
+    scraper_key = os.environ.get("SCRAPERAPI_KEY")
+    scraper_remaining = "Checking..."
+    
+    if scraper_key:
+        try:
+            res = requests.get(f"https://api.scraperapi.com/account?api_key={scraper_key}", timeout=5)
+            if res.status_code == 200:
+                data = res.json()
+                limit = data.get("requestLimit", 0)
+                used = data.get("requestCount", 0)
+                scraper_remaining = f"{limit - used:,}"
+            else:
+                scraper_remaining = "API Error"
+        except Exception:
+            scraper_remaining = "Connection Failed"
+    else:
+        scraper_remaining = "Key Missing"
+        
+    return {
+        "gemini": "Active (Pro)",
+        "scraper": scraper_remaining
+    }
+
 if __name__ == '__main__':
     import uvicorn
     import os
