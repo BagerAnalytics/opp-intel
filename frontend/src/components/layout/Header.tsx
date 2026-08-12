@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Bell, Search, MessageSquare, Menu, LogOut, User as UserIcon } from "lucide-react";
+import { Bell, Search, MessageSquare, Menu, LogOut, User as UserIcon, Activity } from "lucide-react";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Header() {
@@ -10,6 +11,32 @@ export default function Header() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
+  const [progress, setProgress] = useState({ is_active: false, progress_percent: 0, current_task: 'Idle' });
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    const fetchProgress = async () => {
+      try {
+        const res = await fetch('https://opp-intel-production.up.railway.app/api/scrapers/progress');
+        const data = await res.json();
+        setProgress(data);
+      } catch (e) {
+        console.error('Failed to fetch progress');
+      }
+    };
+    
+    // Only poll aggressively if the logs dropdown is actually open, otherwise poll slowly or just once
+    if (showLogs) {
+      fetchProgress();
+      interval = setInterval(fetchProgress, 2000);
+    } else {
+      fetchProgress();
+      interval = setInterval(fetchProgress, 10000);
+    }
+    
+    return () => clearInterval(interval);
+  }, [showLogs]);
+
   const notifRef = useRef<HTMLDivElement>(null);
   const logsRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -112,10 +139,33 @@ export default function Header() {
                 <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-slate-800">Intelligence Logs</h3>
                 </div>
-                <div className="p-6 text-center">
-                  <MessageSquare size={24} className="mx-auto text-slate-300 mb-3" />
-                  <p className="text-sm font-medium text-slate-600">No active logs</p>
-                  <p className="text-xs text-slate-400 mt-1">The AI engine is currently idle.</p>
+                <div className="p-4">
+                  {progress.is_active ? (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <Activity size={16} className="text-emerald-500 animate-pulse" />
+                        <span className="text-sm font-medium text-emerald-600">Engine Active</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div className="bg-emerald-500 h-full transition-all duration-500" style={{width: `${progress.progress_percent}%`}}></div>
+                      </div>
+                      <div className="bg-slate-900 rounded-lg p-3 font-mono text-xs text-emerald-400 mt-2 break-words">
+                        > {progress.current_task}
+                        <span className="animate-pulse">_</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <MessageSquare size={24} className="mx-auto text-slate-300 mb-3" />
+                      <p className="text-sm font-medium text-slate-600">No active logs</p>
+                      <p className="text-xs text-slate-400 mt-1">The AI engine is currently idle.</p>
+                      {progress.current_task && progress.current_task !== 'Idle' && (
+                        <div className="mt-4 p-2 bg-slate-50 border border-slate-100 rounded text-xs text-slate-500 font-mono text-left break-words">
+                          Last log: {progress.current_task}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
