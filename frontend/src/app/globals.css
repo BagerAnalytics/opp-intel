@@ -67,3 +67,9 @@ h1, h2, h3, h4, h5, h6 {
 .text-gradient {
   color: #1c1c21;
 }
+
+
+/* Remove default browser focus outlines */
+*:focus {
+  outline: none !important;
+}
