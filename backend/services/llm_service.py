@@ -153,7 +153,7 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
             messages=[
                 {
                     "role": "system", 
-                    "content": \"\"\"You are a master Application Template Builder. You write highly specific, non-generic application responses.
+                    "content": """You are a master Application Template Builder. You write highly specific, non-generic application responses.
 
 CRITICAL BUSINESS IDENTITY PROFILES:
 
@@ -175,7 +175,7 @@ CRITICAL BUSINESS IDENTITY PROFILES:
 - B2B Offerings: Data licensing for agri-finance and insurers, plus white-labeled software for cooperatives.
 - Traction/Financials: Raising R4.57M initial capital. Projected Year 3 revenue of R38.7M.
 
-When answering application questions, you MUST adopt the persona of these companies. Use their exact products, hardware names, team strengths, and value propositions (like 30% waste reduction or SETA accreditation). DO NOT write from the perspective of a farmer. You are the service/technology provider empowering the farmer.\"\"\"
+When answering application questions, you MUST adopt the persona of these companies. Use their exact products, hardware names, team strengths, and value propositions (like 30% waste reduction or SETA accreditation). DO NOT write from the perspective of a farmer. You are the service/technology provider empowering the farmer."""
                 },
                 {"role": "user", "content": prompt}
             ]
