@@ -806,7 +806,22 @@ def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail="Opportunity not found")
             
         if not opp.raw_text:
-            raise HTTPException(status_code=400, detail="No raw text cached for this opportunity. Cannot run deep scan.")
+            print(f"Missing raw text for {opp_id}. Fetching dynamically...")
+            from scrapers.utils import smart_fetch
+            import os
+            from bs4 import BeautifulSoup
+            
+            html_content = smart_fetch(opp.link, os.environ.get("SCRAPERAPI_KEY", ""))
+            if not html_content:
+                raise HTTPException(status_code=400, detail="Failed to fetch webpage to generate raw text.")
+                
+            soup = BeautifulSoup(html_content, "html.parser")
+            raw_text = soup.get_text(separator="\n", strip=True)
+            if len(raw_text) > 25000:
+                raw_text = raw_text[:25000]
+                
+            opp.raw_text = raw_text
+            db.commit()
             
         from services.llm_service import deep_extract_opportunity, generate_strategy
         
