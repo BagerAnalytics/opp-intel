@@ -832,9 +832,23 @@ def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
             err_msg = deep_data.get("error", "Unknown LLM extraction failure") if isinstance(deep_data, dict) else "Unknown LLM extraction failure"
             raise HTTPException(status_code=500, detail=f"LLM Error: {err_msg}")
             
-        import json
         def _safe_str(v):
-            return json.dumps(v, indent=2) if isinstance(v, (dict, list)) else (str(v) if v is not None else None)
+            if v is None: return None
+            if isinstance(v, str): return v
+            if isinstance(v, list):
+                return "\n".join([f"- {item}" for item in v])
+            if isinstance(v, dict):
+                md = ""
+                for k, val in v.items():
+                    clean_k = str(k).replace("_", " ").title()
+                    if isinstance(val, list):
+                        md += f"**{clean_k}**\n" + "\n".join([f"- {i}" for i in val]) + "\n\n"
+                    elif isinstance(val, dict):
+                        md += f"**{clean_k}**\n" + "\n".join([f"- **{sub_k.replace('_', ' ').title()}**: {sub_v}" for sub_k, sub_v in val.items()]) + "\n\n"
+                    else:
+                        md += f"- **{clean_k}**: {val}\n"
+                return md.strip()
+            return str(v)
             
         opp.selection_criteria = _safe_str(deep_data.get("selection_criteria", opp.selection_criteria))
         opp.application_process = _safe_str(deep_data.get("application_process", opp.application_process))
