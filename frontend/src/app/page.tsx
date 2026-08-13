@@ -112,6 +112,17 @@ export default function Home() {
     }
   };
 
+  const handleSmartScan = async (oppId: number) => {
+    try {
+      await axios.post(`https://opp-intel-production.up.railway.app/api/scrapers/smart-scan/${oppId}`);
+      alert("Smart Scan initiated! Refreshing data in a few seconds...");
+      setTimeout(() => window.location.reload(), 3000);
+    } catch (error) {
+      console.error("Failed to start Smart Scan:", error);
+      alert("Failed to start Smart Scan. Check console.");
+    }
+  };
+
   const handleRunScrapers = async () => {
     const apiUrl = 'https://opp-intel-production.up.railway.app';
     
