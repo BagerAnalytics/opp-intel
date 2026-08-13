@@ -658,21 +658,58 @@ export default function Home() {
 
             {/* GALLERY / SMART SCAN ZONE */}
             <div id="smart-scan-section" className="glass-panel rounded-3xl p-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 gradient-accent rounded-2xl flex items-center justify-center font-semibold text-xl shadow-lg shadow-sm">
-                  <Brain size={24} />
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 gradient-accent rounded-2xl flex items-center justify-center font-semibold text-xl shadow-lg shadow-sm">
+                    <Brain size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-800 tracking-tight">AI Smart Scan Analysis</h3>
+                    <p className="text-xs font-medium text-gradient uppercase tracking-widest mt-1">Deep Intelligence</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-800 tracking-tight">AI Smart Scan Analysis</h3>
-                  <p className="text-xs font-medium text-gradient uppercase tracking-widest mt-1">Deep Intelligence</p>
-                </div>
+                {(opp.match_reasoning || opp.strategy) && (
+                  <button 
+                    onClick={(e) => {
+                      const btn = e.currentTarget;
+                      const originalText = btn.innerHTML;
+                      btn.innerHTML = '<span class="flex items-center gap-2"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
+                      btn.disabled = true;
+                      axios.post(`https://opp-intel-production.up.railway.app/api/scrapers/smart-scan/${opp.id}`)
+                        .then(() => fetchData())
+                        .catch(() => alert('Scan failed'))
+                        .finally(() => {
+                          btn.innerHTML = originalText;
+                          btn.disabled = false;
+                        });
+                    }}
+                    className="text-xs bg-white border border-slate-200 text-slate-600 hover:text-indigo-600 px-4 py-2 rounded-xl font-medium shadow-sm transition-all flex items-center gap-2"
+                  >
+                    <Brain size={14} /> Re-run Scan
+                  </button>
+                )}
               </div>
 
               {!opp.match_reasoning && !opp.strategy ? (
                 <div className="w-full h-48 bg-white/20 backdrop-blur-md border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center">
                   <Brain size={32} className="text-slate-300 mb-4" />
                   <p className="text-slate-500 font-medium mb-2">AI Analysis hasn't run on this opportunity yet.</p>
-                  <button onClick={() => handleSmartScan(opp.id)} className="text-sm font-medium text-gradient hover:underline">Force Smart Scan Now</button>
+                  <button 
+                    onClick={(e) => {
+                      const btn = e.currentTarget;
+                      const originalText = btn.innerHTML;
+                      btn.innerHTML = 'Scanning...';
+                      btn.disabled = true;
+                      axios.post(`https://opp-intel-production.up.railway.app/api/scrapers/smart-scan/${opp.id}`)
+                        .then(() => fetchData())
+                        .catch(() => alert('Scan failed'))
+                        .finally(() => {
+                          btn.innerHTML = originalText;
+                          btn.disabled = false;
+                        });
+                    }}
+                    className="text-sm font-medium text-gradient hover:underline disabled:opacity-50"
+                  >Force Smart Scan Now</button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
