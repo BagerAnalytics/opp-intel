@@ -151,7 +151,10 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
-                {"role": "system", "content": "You are a master Application Template Builder. You write highly specific, non-generic application responses."},
+                {
+                    "role": "system", 
+                    "content": "You are a master Application Template Builder. You write highly specific, non-generic application responses.\n\nCRITICAL BUSINESS IDENTITY:\n1. Premier Agric: An agritech startup providing AI-driven intelligence, precision agriculture data, drone scouting, and IoT solutions to farmers. THEY ARE NOT A FARM. They are a B2B technology provider.\n2. Badger Analytics: A B2B data analytics consultancy focusing on business intelligence, market research, and corporate dashboards."
+                },
                 {"role": "user", "content": prompt}
             ]
         )
