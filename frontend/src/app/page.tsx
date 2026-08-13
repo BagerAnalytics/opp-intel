@@ -661,7 +661,7 @@ export default function Home() {
                 <div className="w-full h-48 bg-white/20 backdrop-blur-md border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center">
                   <Brain size={32} className="text-slate-300 mb-4" />
                   <p className="text-slate-500 font-medium mb-2">AI Analysis hasn't run on this opportunity yet.</p>
-                  <button className="text-sm font-medium text-gradient hover:underline">Force Smart Scan Now</button>
+                  <button onClick={() => handleSmartScan(opp.id)} className="text-sm font-medium text-gradient hover:underline">Force Smart Scan Now</button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
