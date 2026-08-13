@@ -829,7 +829,8 @@ def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
         deep_data = deep_extract_opportunity(opp.raw_text)
         
         if "error" in deep_data or not deep_data:
-            raise HTTPException(status_code=500, detail="Failed to extract deep data from LLM")
+            err_msg = deep_data.get("error", "Unknown LLM extraction failure") if isinstance(deep_data, dict) else "Unknown LLM extraction failure"
+            raise HTTPException(status_code=500, detail=f"LLM Error: {err_msg}")
             
         opp.selection_criteria = deep_data.get("selection_criteria", opp.selection_criteria)
         opp.application_process = deep_data.get("application_process", opp.application_process)

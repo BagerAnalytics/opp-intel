@@ -123,10 +123,10 @@ def deep_extract_opportunity(raw_text: str) -> dict:
                     time.sleep(5 * (attempt + 1))
                 else:
                     print(f"Groq API Quota Error fully exhausted: {e}")
-                    return {}
+                    return {"error": str(e)}
             else:
                 print(f"Groq Deep Extraction Error: {e}")
-                return {}
+                return {"error": str(e)}
 
 def generate_strategy(opportunity_data: dict, historical_winners_context: str, feedback_context: str = "") -> str:
     prompt = f"""
