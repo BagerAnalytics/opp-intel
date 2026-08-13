@@ -832,9 +832,13 @@ def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
             err_msg = deep_data.get("error", "Unknown LLM extraction failure") if isinstance(deep_data, dict) else "Unknown LLM extraction failure"
             raise HTTPException(status_code=500, detail=f"LLM Error: {err_msg}")
             
-        opp.selection_criteria = deep_data.get("selection_criteria", opp.selection_criteria)
-        opp.application_process = deep_data.get("application_process", opp.application_process)
-        opp.past_winners = deep_data.get("past_winners", opp.past_winners)
+        import json
+        def _safe_str(v):
+            return json.dumps(v, indent=2) if isinstance(v, (dict, list)) else (str(v) if v is not None else None)
+            
+        opp.selection_criteria = _safe_str(deep_data.get("selection_criteria", opp.selection_criteria))
+        opp.application_process = _safe_str(deep_data.get("application_process", opp.application_process))
+        opp.past_winners = _safe_str(deep_data.get("past_winners", opp.past_winners))
         
         # Grab historical context for strategy
         historical_context = ""
