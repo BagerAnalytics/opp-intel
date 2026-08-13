@@ -579,8 +579,8 @@ def re_extract_opportunity(opp_id: int, db: Session = Depends(get_db)):
     for h in past:
         historical_context += f"Name: {h.name}, Status: {h.status}, Strategy Used: {h.strategy}\n"
         
-    feedback_objs = db.query(models.BusinessFeedback).order_by(models.BusinessFeedback.created_at.desc()).limit(5).all()
-    feedback_context = " ".join([f.feedback for f in feedback_objs]) if feedback_objs else ""
+    # feedback_objs = db.query(models.BusinessFeedback).order_by(models.BusinessFeedback.created_at.desc()).limit(5).all()
+    feedback_context = "" # " ".join([f.feedback for f in feedback_objs]) if feedback_objs else ""
         
     opp.strategy = generate_strategy(
         {"name": opp.name, "description": opp.description, "benefits": opp.benefits},
@@ -845,8 +845,8 @@ def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
             historical_context += f"Name: {h.name}, Status: {h.status}, Strategy Used: {h.strategy}\n"
             
         # Get business feedback
-        feedback_objs = db.query(models.BusinessFeedback).order_by(models.BusinessFeedback.created_at.desc()).limit(5).all()
-        feedback_context = " ".join([f.feedback for f in feedback_objs]) if feedback_objs else ""
+        # feedback_objs = db.query(models.BusinessFeedback).order_by(models.BusinessFeedback.created_at.desc()).limit(5).all()
+        feedback_context = "" # " ".join([f.feedback for f in feedback_objs]) if feedback_objs else ""
             
         print(f"Generating strategy for Opportunity ID {opp_id}...")
         opp.strategy = generate_strategy(
