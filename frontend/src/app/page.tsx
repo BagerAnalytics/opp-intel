@@ -109,7 +109,7 @@ export default function Home() {
     try {
       const apiUrl = 'https://opp-intel-production.up.railway.app';
       const [oppResponse, contactsResponse, complianceResponse, portalsResponse, creditsResponse, statsResponse] = await Promise.all([
-        axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] })),
+        axios.get(`${apiUrl}/api/opportunities?t=${Date.now()}`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/contacts`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/compliance`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/portals`).catch(() => ({ data: [] })),
@@ -585,7 +585,14 @@ export default function Home() {
                     btn.innerHTML = '<svg class="animate-spin w-5 h-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...';
                     btn.disabled = true;
                     axios.post(`https://opp-intel-production.up.railway.app/api/scrapers/smart-scan/${opp.id}`)
-                      .then(() => fetchData())
+                      .then(async () => {
+                        // Force a cache-busted fetch for just this opportunity to guarantee update
+                        const res = await axios.get(`https://opp-intel-production.up.railway.app/api/opportunities?t=${Date.now()}`);
+                        const freshData = res.data;
+                        setOpportunities(freshData);
+                        const specific = freshData.find((o: any) => o.id === opp.id);
+                        if (specific) setSelectedOppForScan(specific);
+                      })
                       .catch(() => alert('Scan failed'))
                       .finally(() => {
                         btn.innerHTML = originalText;
