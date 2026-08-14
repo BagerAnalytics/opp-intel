@@ -80,7 +80,7 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
                 model=MODEL_NAME,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput fields: name, funder, value, closing_date, description (short 2-sentence summary), benefits (short bullet points), eligibility_criteria (short bullet points). DO NOT output selection_criteria or application_process. If rejecting, output {{}}."}
+                    {"role": "user", "content": f"URL: {url}\n\nRaw Text:\n{raw_text}\n\nOutput fields: name, funder, value, closing_date, description (short 2-sentence summary), benefits (short bullet points), eligibility_criteria (short bullet points). DO NOT output selection_criteria or application_process. If rejecting, output {{}}. CRITICAL: For fields like benefits and eligibility_criteria, return a SINGLE FORMATTED STRING containing bullet points, DO NOT RETURN A JSON ARRAY (e.g. `\"benefits\": \"• Point 1\\n• Point 2\"` NOT `\"benefits\": [\"Point 1\", \"Point 2\"]`)."}
                 ],
                 response_format={"type": "json_object"}
             )

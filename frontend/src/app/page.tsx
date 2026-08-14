@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { 
-  Users, Target, FileText, Send, MoreVertical, Activity, ArrowRight, Database, Briefcase, Plus, Brain, X, ChevronLeft, Star, Heart, CheckCircle2
+  Users, Target, FileText, Send, MoreVertical, Activity, ArrowRight, Database, Briefcase, Plus, Brain, X, ChevronLeft, Star, Heart, CheckCircle2, Trash2, CheckCircle
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
@@ -565,11 +565,26 @@ export default function Home() {
                   <a href={opp.link || '#'} target="_blank" rel="noopener noreferrer" className="gradient-accent px-8 py-3 rounded-2xl font-medium shadow-lg shadow-sm transition-all flex items-center gap-2">
                     Apply Now
                   </a>
-                  <button className="w-12 h-12 bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-2xl flex items-center justify-center transition-all shadow-sm">
-                    <Heart className="w-5 h-5 fill-current" />
+                  <button onClick={async () => {
+                      if(confirm('Are you sure you want to delete this opportunity?')) {
+                        try {
+                          await axios.delete(`https://opp-intel-production.up.railway.app/api/opportunities/${opp.id}`);
+                          fetchData();
+                          setViewMode('table');
+                        } catch(e) { alert('Failed to delete'); }
+                      }
+                    }} className="w-12 h-12 bg-white border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-2xl flex items-center justify-center transition-all shadow-sm" title="Delete">
+                    <Trash2 className="w-5 h-5" />
                   </button>
-                  <button className="w-12 h-12 bg-white border border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-200 hover:bg-indigo-50 rounded-2xl flex items-center justify-center transition-all shadow-sm">
-                    <Send size={16} />
+                  <button onClick={async () => {
+                      try {
+                        await axios.patch(`https://opp-intel-production.up.railway.app/api/opportunities/${opp.id}`, {status: 'open'});
+                        fetchData();
+                        alert('Sent to Pipeline!');
+                        setViewMode('table');
+                      } catch(e) { alert('Failed to approve'); }
+                    }} className="w-12 h-12 bg-white border border-slate-200 text-slate-400 hover:text-indigo-500 hover:border-indigo-200 hover:bg-indigo-50 rounded-2xl flex items-center justify-center transition-all shadow-sm" title="Approve to Pipeline">
+                    <CheckCircle className="w-5 h-5" />
                   </button>
                 </div>
               </div>

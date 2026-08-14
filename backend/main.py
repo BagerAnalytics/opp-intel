@@ -652,6 +652,21 @@ def delete_opportunity(opp_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Opportunity deleted successfully"}
 
+class OpportunityUpdate(BaseModel):
+    status: Optional[str] = None
+
+@app.patch("/api/opportunities/{opp_id}")
+def update_opportunity_status(opp_id: int, update_data: OpportunityUpdate, db: Session = Depends(get_db)):
+    opp = db.query(models.Opportunity).filter(models.Opportunity.id == opp_id).first()
+    if not opp:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    if update_data.status:
+        opp.status = update_data.status
+    
+    db.commit()
+    return {"message": "Opportunity updated successfully"}
+
 @app.delete("/api/opportunities/cleanup")
 def cleanup_stale_opportunities(db: Session = Depends(get_db)):
     """Delete all stale 'Scanning...' ghost records that failed to extract."""
