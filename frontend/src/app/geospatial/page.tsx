@@ -219,33 +219,9 @@ export default function GeospatialPage() {
               </div>
             </div>
 
-            <div className="flex-1 relative w-full overflow-hidden">
-              {sortedRegions.map(region => (
-                <div 
-                  key={region.location}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-out"
-                  style={{ top: region.coordinates.top, left: region.coordinates.left, zIndex: activeRegion === region.location ? 50 : 10 }}
-                  onMouseEnter={() => setActiveRegion(region.location)}
-                  onMouseLeave={() => setActiveRegion(null)}
-                >
-                  {/* Node Ring Animation */}
-                  <div className="relative flex items-center justify-center group cursor-pointer">
-                    <div className={`absolute w-14 h-14 rounded-full ${region.color} opacity-20 animate-ping`}></div>
-                    <div className={`absolute w-8 h-8 rounded-full ${region.color} opacity-30`}></div>
-                    <div className={`w-4 h-4 rounded-full ${region.color} shadow-lg border-2 border-white relative z-10 transition-transform ${activeRegion === region.location ? 'scale-150' : 'scale-100'}`}></div>
-                  </div>
-
-                  {/* Tooltip */}
-                  <div className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-4 w-48 glass-panel rounded-3xl border border-slate-100 p-4 transition-all duration-300 ${activeRegion === region.location ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
-                    <h4 className="font-semibold text-slate-800 mb-1">{region.location}</h4>
-                    <div className="flex justify-between items-center mt-3">
-                      <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">Active</span>
-                      <span className="text-sm font-semibold text-gradient">{region.count} Opps</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="flex-1 relative w-full overflow-hidden" style={{ minHeight: '400px' }}>
+                <Map opportunities={opportunities} />
+              </div>
           </div>
         </div>
       ) : (
