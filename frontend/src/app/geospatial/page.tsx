@@ -210,9 +210,8 @@ export default function GeospatialPage() {
 
           {/* RIGHT PANEL - MAP VIEW */}
           <div className="flex-1 glass-panel rounded-3xl border border-slate-100 relative overflow-hidden flex flex-col">
-            <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_3px,transparent_3px)] [background-size:24px_24px] opacity-50"></div>
             
-            <div className="p-8 relative z-10 flex justify-between items-start">
+            <div className="p-8 relative z-10 flex justify-between items-start bg-white/50 backdrop-blur-sm border-b border-slate-100/50">
               <div>
                 <h2 className="text-xl font-semibold text-slate-800">Intelligence Map</h2>
                 <p className="text-sm text-slate-500 mt-1 font-medium">Geospatial distribution of pipeline</p>
