@@ -95,6 +95,16 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (selectedOppForScan) {
+      const freshOpp = opportunities.find(o => o.id === selectedOppForScan.id);
+      if (freshOpp && JSON.stringify(freshOpp) !== JSON.stringify(selectedOppForScan)) {
+        setSelectedOppForScan(freshOpp);
+      }
+    }
+  }, [opportunities, selectedOppForScan]);
+
+
   const fetchData = async () => {
     try {
       const apiUrl = 'https://opp-intel-production.up.railway.app';
