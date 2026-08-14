@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+const Map = dynamic(() => import('../../components/Map'), { ssr: false });
+
 import axios from 'axios';
 import { Globe, Activity, Plus, Trophy, X, Map as MapIcon, Calendar, DollarSign, Building } from 'lucide-react';
 
