@@ -190,9 +190,10 @@ export default function Home() {
         location: '', description: '', benefits: '', eligibility_criteria: '', link: ''
       });
       setExtractUrl('');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Save error", error);
-      alert("Failed to save opportunity.");
+      const errorMsg = error.response?.data?.detail || "Failed to save opportunity.";
+      alert(`Error: ${errorMsg}`);
     } finally {
       setIsSaving(false);
     }
