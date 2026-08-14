@@ -565,10 +565,27 @@ export default function Home() {
               <p className="text-sm font-semibold text-slate-400 text-center mb-8">{opp.name}</p>
               
               <button 
-                onClick={() => document.getElementById('smart-scan-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full bg-indigo-50 hover:bg-[#007AFF] hover:text-white text-indigo-600 font-medium py-3.5 rounded-2xl transition-all shadow-sm flex justify-center items-center gap-2 mb-8 group"
+                onClick={(e) => {
+                  document.getElementById('smart-scan-section')?.scrollIntoView({ behavior: 'smooth' });
+                  
+                  // If it hasn't been scanned yet, trigger it automatically!
+                  if (!opp.match_reasoning && !opp.strategy) {
+                    const btn = e.currentTarget;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<svg class="animate-spin w-5 h-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...';
+                    btn.disabled = true;
+                    axios.post(`https://opp-intel-production.up.railway.app/api/scrapers/smart-scan/${opp.id}`)
+                      .then(() => fetchData())
+                      .catch(() => alert('Scan failed'))
+                      .finally(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                      });
+                  }
+                }}
+                className="w-full bg-indigo-50 hover:bg-[#007AFF] hover:text-white text-indigo-600 font-medium py-3.5 rounded-2xl transition-all shadow-sm flex justify-center items-center gap-2 mb-8 group disabled:opacity-50"
               >
-                <Brain size={18} className="group-hover:animate-pulse" /> Run Smart Scan
+                <Brain size={18} className="group-hover:animate-pulse" /> {(opp.match_reasoning || opp.strategy) ? 'View AI Scan' : 'Run Smart Scan'}
               </button>
 
               <div className="w-full flex justify-between px-2 border-t border-slate-100 pt-6">
@@ -750,24 +767,9 @@ export default function Home() {
 
               {!opp.match_reasoning && !opp.strategy ? (
                 <div className="w-full h-48 bg-white/20 backdrop-blur-md border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center">
-                  <Brain size={32} className="text-slate-300 mb-4" />
-                  <p className="text-slate-500 font-medium mb-2">AI Analysis hasn't run on this opportunity yet.</p>
-                  <button 
-                    onClick={(e) => {
-                      const btn = e.currentTarget;
-                      const originalText = btn.innerHTML;
-                      btn.innerHTML = 'Scanning...';
-                      btn.disabled = true;
-                      axios.post(`https://opp-intel-production.up.railway.app/api/scrapers/smart-scan/${opp.id}`)
-                        .then(() => fetchData())
-                        .catch(() => alert('Scan failed'))
-                        .finally(() => {
-                          btn.innerHTML = originalText;
-                          btn.disabled = false;
-                        });
-                    }}
-                    className="text-sm font-medium text-gradient hover:underline disabled:opacity-50"
-                  >Force Smart Scan Now</button>
+                  <Brain size={32} className="text-slate-300 mb-4 animate-pulse" />
+                  <p className="text-slate-500 font-medium mb-1">AI Analysis hasn't run on this opportunity yet.</p>
+                  <p className="text-xs text-slate-400">Click the "Run Smart Scan" button in the sidebar to generate strategy.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
