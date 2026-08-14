@@ -181,7 +181,7 @@ export default function Home() {
     setIsSaving(true);
     try {
       const apiUrl = 'https://opp-intel-production.up.railway.app';
-      await axios.post(`${apiUrl}/api/opportunities`, formData);
+      await axios.post(`${apiUrl}/api/opportunities/manual`, formData);
       alert("Opportunity saved successfully!");
       fetchData(); // Refresh table
       setViewMode('table');
