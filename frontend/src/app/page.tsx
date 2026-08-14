@@ -266,6 +266,50 @@ export default function Home() {
     });
   };
 
+  
+  const formatListText = (text: string | null | undefined) => {
+    if (!text) return [];
+    let clean = text.trim();
+    
+    // Check if it's a stringified python list/set of strings like {"A", "B"} or ["A", "B"]
+    if ((clean.startsWith('{') && clean.endsWith('}')) || (clean.startsWith('[') && clean.endsWith(']'))) {
+      // Remove outer brackets
+      clean = clean.slice(1, -1).trim();
+      // Split by comma-quotes
+      let items = clean.split(/["'],\s*["']/);
+      return items.map(i => i.replace(/^["']|["']$/g, '').trim()).filter(i => i);
+    }
+    return text.split('\n').filter(i => i.trim());
+  };
+
+  const renderSelectionCriteria = (text: string | null | undefined) => {
+    if (!text) return <p className="text-sm text-slate-600">No detailed criteria generated.</p>;
+    
+    // Detect raw python dictionaries
+    if (text.includes("{'title':") || text.includes('{"title":')) {
+      const regex = /['"]title['"]\s*:\s*['"](.*?)['"],\s*['"]criteria['"]\s*:\s*['"](.*?)['"]/g;
+      const matches = Array.from(text.matchAll(regex));
+      
+      if (matches.length > 0) {
+        return (
+          <ul className="space-y-4">
+            {matches.map((m, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 flex-shrink-0 text-emerald-500 w-4 h-4" />
+                <div>
+                  <span className="text-sm font-bold text-slate-800">{m[1]}: </span>
+                  <span className="text-sm font-medium text-slate-600 leading-relaxed">{m[2]}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+    }
+    
+    return <div className="whitespace-pre-wrap">{renderMarkdown(text)}</div>;
+  };
+
   const getStatusColor = (status: string) => {
     if (status === 'open') return 'text-emerald-500 bg-emerald-50 border-emerald-100';
     if (status === 'queued' || status === 'Scanning...') return 'text-orange-500 bg-orange-50 border-orange-100';
@@ -646,12 +690,12 @@ export default function Home() {
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Eligibility
                   </h4>
                   <ul className="space-y-4">
-                    {(opp.eligibility_criteria || 'No specific eligibility mapped.').split('\n').map((line, i) => line.trim() ? (
+                    {formatListText(opp.eligibility_criteria || 'No specific eligibility mapped.').map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <CheckCircle2 className="mt-0.5 flex-shrink-0 text-emerald-500 w-4 h-4" />
                         <span className="text-sm font-medium text-slate-600 leading-relaxed">{line.replace(/^-\s*/, '')}</span>
                       </li>
-                    ) : null)}
+                    ))}
                   </ul>
                 </div>
                 <div>
@@ -659,12 +703,12 @@ export default function Home() {
                     <span className="w-2 h-2 rounded-full bg-orange-500"></span> Benefits
                   </h4>
                   <ul className="space-y-4">
-                    {(opp.benefits || 'No specific benefits mapped.').split('\n').map((line, i) => line.trim() ? (
+                    {formatListText(opp.benefits || 'No specific benefits mapped.').map((line, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <CheckCircle2 className="mt-0.5 flex-shrink-0 text-emerald-500 w-4 h-4" />
+                        <CheckCircle2 className="mt-0.5 flex-shrink-0 text-orange-500 w-4 h-4" />
                         <span className="text-sm font-medium text-slate-600 leading-relaxed">{line.replace(/^-\s*/, '')}</span>
                       </li>
-                    ) : null)}
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -741,7 +785,7 @@ export default function Home() {
                       <FileText size={14} className="text-emerald-500" /> Selection Criteria
                     </h4>
                     <div className="whitespace-pre-wrap">
-                      {opp.selection_criteria ? renderMarkdown(opp.selection_criteria) : <p className="text-sm text-slate-600">No detailed criteria generated.</p>}
+                      {renderSelectionCriteria(opp.selection_criteria)}
                     </div>
                   </div>
                   

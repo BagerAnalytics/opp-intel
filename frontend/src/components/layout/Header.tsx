@@ -93,7 +93,7 @@ export default function Header() {
   };
 
   return (
-    <header className="h-[88px] glass-panel border-b border-slate-200/50 flex items-center justify-between px-10 sticky top-0 z-40 transition-all duration-400 ease-ios">
+    <header className="h-[88px] bg-[#f5f7fa] border-b border-slate-200/50 flex items-center justify-between px-10 sticky top-0 z-40 transition-all duration-400 ease-ios">
       
       {/* Left Title */}
       <div>
