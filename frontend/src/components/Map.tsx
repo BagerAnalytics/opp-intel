@@ -29,9 +29,9 @@ export default function Map({ opportunities }: { opportunities: Opportunity[] })
   return (
     <div style={{ height: '100%', width: '100%', zIndex: 0, position: 'absolute', inset: 0 }}>
       <MapContainer center={center} zoom={4} style={{ height: '100%', width: '100%', backgroundColor: '#f8fafc' }} zoomControl={false}>
-        {/* CartoDB Voyager Tiles - Premium, modern, clean */}
+        {/* CartoDB Positron Tiles - Minimalist, high-end light map */}
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
         
         {opportunities.map((opp) => {
