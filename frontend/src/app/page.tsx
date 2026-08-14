@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const Map = dynamic(() => import('../components/Map'), { ssr: false });
+
 import axios from 'axios';
 import { 
   Users, Target, FileText, Send, MoreVertical, Activity, ArrowRight, Database, Briefcase, Plus, Brain, X, ChevronLeft, Star, Heart, CheckCircle2, Trash2, CheckCircle
