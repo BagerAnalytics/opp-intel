@@ -61,6 +61,7 @@ export default function Home() {
     location: '', description: '', benefits: '', eligibility_criteria: '', link: ''
   });
 
+  const [dailyStats, setDailyStats] = useState<{name: string, extracted: number, failed: number}[]>([]);
   const [progress, setProgress] = useState<{is_active: boolean, current_task: string, progress_percent: number}>({
     is_active: false,
     current_task: "Idle",
@@ -93,17 +94,19 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const apiUrl = 'https://opp-intel-production.up.railway.app';
-      const [oppResponse, contactsResponse, complianceResponse, portalsResponse, creditsResponse] = await Promise.all([
+      const [oppResponse, contactsResponse, complianceResponse, portalsResponse, creditsResponse, statsResponse] = await Promise.all([
         axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/contacts`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/compliance`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/portals`).catch(() => ({ data: [] })),
-        axios.get(`${apiUrl}/api/system/credits`).catch(() => ({ data: { gemini: 'Error', scraper: 'Error' } }))
+        axios.get(`${apiUrl}/api/system/credits`).catch(() => ({ data: { gemini: 'Error', scraper: 'Error' } })),
+        axios.get(`${apiUrl}/api/stats/daily`).catch(() => ({ data: [] }))
       ]);
       setOpportunities(oppResponse.data || []);
       setContacts(contactsResponse.data || []);
       setComplianceDocs(complianceResponse.data || []);
       setPortals(portalsResponse.data || []);
+      setDailyStats(statsResponse.data || []);
       setCredits(creditsResponse.data || { gemini: 'Active (Pro)', scraper: 'Active' });
     } catch (error) {
       console.warn("API is unreachable, using empty state fallback.");
@@ -275,16 +278,7 @@ export default function Home() {
   
   const totalExtracted = opportunities.filter(o => o.status !== 'failed').length;
   const totalFailed = opportunities.filter(o => o.status === 'failed').length;
-  const lineChartData = totalExtracted === 0 && totalFailed === 0 ? 
-    [{ name: 'Mon', extracted: 0, failed: 0 }] : [
-      { name: 'Mon', extracted: Math.round(totalExtracted * 0.1), failed: Math.round(totalFailed * 0.1) },
-      { name: 'Tue', extracted: Math.round(totalExtracted * 0.2), failed: Math.round(totalFailed * 0.15) },
-      { name: 'Wed', extracted: Math.round(totalExtracted * 0.15), failed: Math.round(totalFailed * 0.1) },
-      { name: 'Thu', extracted: Math.round(totalExtracted * 0.3), failed: Math.round(totalFailed * 0.2) },
-      { name: 'Fri', extracted: Math.round(totalExtracted * 0.1), failed: Math.round(totalFailed * 0.2) },
-      { name: 'Sat', extracted: Math.round(totalExtracted * 0.05), failed: Math.round(totalFailed * 0.1) },
-      { name: 'Sun', extracted: Math.round(totalExtracted * 0.1), failed: Math.round(totalFailed * 0.15) },
-    ];
+  const lineChartData = dailyStats.length > 0 ? dailyStats : [{ name: 'Mon', extracted: 0, failed: 0 }];
     
   const queueTotal = opportunities.length === 0 ? 1 : opportunities.length;
   const pctOpen = Math.round((opportunities.filter(o => o.status === 'open').length / queueTotal) * 100);

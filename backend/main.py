@@ -168,6 +168,40 @@ def start_scheduler():
 import subprocess
 import sys
 
+
+# Telemetry tracking for historical graph data
+def increment_daily_stat(db: Session, is_success: bool):
+    from datetime import datetime
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    stat = db.query(models.DailyStat).filter(models.DailyStat.date == today).first()
+    if not stat:
+        stat = models.DailyStat(date=today, extracted=0, failed=0)
+        db.add(stat)
+    
+    if is_success:
+        stat.extracted += 1
+    else:
+        stat.failed += 1
+    db.commit()
+
+@app.get("/api/stats/daily")
+def get_daily_stats(db: Session = Depends(get_db)):
+    from datetime import datetime, timedelta
+    
+    stats = []
+    # Get last 7 days including today
+    for i in range(6, -1, -1):
+        target_date = (datetime.utcnow() - timedelta(days=i)).strftime("%Y-%m-%d")
+        stat = db.query(models.DailyStat).filter(models.DailyStat.date == target_date).first()
+        day_name = (datetime.utcnow() - timedelta(days=i)).strftime("%a")
+        
+        if stat:
+            stats.append({"name": day_name, "extracted": stat.extracted, "failed": stat.failed})
+        else:
+            stats.append({"name": day_name, "extracted": 0, "failed": 0})
+            
+    return stats
+
 @app.get("/api/scrapers/run")
 @app.post("/api/scrapers/run")
 def trigger_scrapers():
@@ -830,6 +864,7 @@ def run_smart_scan(opp_id: int, db: Session = Depends(get_db)):
         
         if "error" in deep_data or not deep_data:
             err_msg = deep_data.get("error", "Unknown LLM extraction failure") if isinstance(deep_data, dict) else "Unknown LLM extraction failure"
+            increment_daily_stat(db, False)
             raise HTTPException(status_code=500, detail=f"LLM Error: {err_msg}")
             
         def _safe_str(v):

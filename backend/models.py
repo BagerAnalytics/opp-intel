@@ -58,6 +58,14 @@ class ScraperProgress(Base):
     progress_percent = Column(Integer, default=0)
     updated_at = Column(String, nullable=True)
 
+class DailyStat(Base):
+    __tablename__ = "daily_stats"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(String, unique=True, index=True) # "YYYY-MM-DD"
+    extracted = Column(Integer, default=0)
+    failed = Column(Integer, default=0)
+
 class Contact(Base):
     __tablename__ = "contacts"
 
