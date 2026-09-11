@@ -35,9 +35,10 @@ def extract_from_url(url: str, opp_id: int = None):
             
             # 2. Fall back to ScraperAPI (costs 5 credits)
             API_KEY = os.environ.get("SCRAPERAPI_KEY", "")
-            scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={url}&render=true"
+            # Removed render=true because it causes 60+ second timeouts on large pages like IDC
+            scraper_url = f"http://api.scraperapi.com?api_key={API_KEY}&url={url}"
             
-            res = requests.get(scraper_url, timeout=60)
+            res = requests.get(scraper_url, timeout=30)
             res.raise_for_status()
             html_content = res.text
             print("Successfully fetched via ScraperAPI.")
