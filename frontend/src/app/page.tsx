@@ -169,20 +169,13 @@ export default function Home() {
       const apiUrl = 'https://opp-intel-production.up.railway.app';
       const res = await axios.post(`${apiUrl}/api/opportunities/extract-link`, { url: extractUrl });
       
-      // Merge extracted data into form
-      setFormData(prev => ({
-        ...prev,
-        name: res.data.name || prev.name,
-        funder: res.data.funder || prev.funder,
-        description: res.data.description || prev.description,
-        benefits: res.data.benefits || prev.benefits,
-        eligibility_criteria: res.data.eligibility_criteria || prev.eligibility_criteria,
-        closing_date: res.data.closing_date || prev.closing_date,
-        value: res.data.value || prev.value,
-        opp_type: res.data.opp_type || prev.opp_type,
-        location: res.data.location || prev.location,
-        link: extractUrl
-      }));
+      // The backend automatically saves auto-extracted items to the DB
+      alert("Successfully extracted and automatically saved to your Pipeline! You can view it below.");
+      setExtractUrl("");
+      
+      // Refresh the table to show the newly saved opportunity
+      await fetchData();
+      
     } catch (error: any) {
       console.error("Extraction error", error);
       const errorMsg = error.response?.data?.detail || "The AI might have timed out or hit a block.";
