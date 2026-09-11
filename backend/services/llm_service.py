@@ -85,7 +85,10 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
                 response_format={"type": "json_object"}
             )
             cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
-            return json.loads(cleaned_result)
+            parsed = json.loads(cleaned_result)
+            if not parsed:
+                return {"error": "AI rejected this URL (Returned empty JSON). Reason: " + response.choices[0].message.content}
+            return parsed
         except Exception as e:
             err_str = str(e).lower()
             if "rate limit" in err_str or "429" in err_str:
@@ -96,8 +99,10 @@ def extract_opportunity_data(raw_text: str, url: str) -> dict:
                     print(f"Groq API Quota Error fully exhausted: {e}")
                     raise Exception("API_QUOTA_EXCEEDED")
             else:
+                import traceback
+                traceback.print_exc()
                 print(f"Groq Extraction Error: {e}")
-                return {}
+                return {"error": f"Groq Extraction Error: {e}"}
 
 def deep_extract_opportunity(raw_text: str) -> dict:
     system_prompt = """
@@ -115,7 +120,10 @@ def deep_extract_opportunity(raw_text: str) -> dict:
                 response_format={"type": "json_object"}
             )
             cleaned_result = response.choices[0].message.content.replace("```json", "").replace("```", "").strip()
-            return json.loads(cleaned_result)
+            parsed = json.loads(cleaned_result)
+            if not parsed:
+                return {"error": "AI rejected this URL (Returned empty JSON). Reason: " + response.choices[0].message.content}
+            return parsed
         except Exception as e:
             err_str = str(e).lower()
             if "rate limit" in err_str or "429" in err_str:
