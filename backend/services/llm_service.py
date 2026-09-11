@@ -149,11 +149,16 @@ def generate_strategy(opportunity_data: dict, historical_winners_context: str, f
     {feedback_context}
     
     CRITICAL REQUIREMENTS:
-    1. Do not give generic advice. Generate specific, targeted application answers based on the online form requirements.
-    2. Ensure the answers match exactly what this specific organization historically funds.
-    3. PRE-CLARIFICATION DIRECTIVE: You must preemptively answer potential follow-up questions and provide deep clarification in the first round to avoid subsequent interviews.
+    1. Do NOT hallucinate or invent fake projects, fake numbers (e.g. "45 apprenticeships"), or fake initiatives. You must ONLY use the exact capabilities, hardware, and financials provided in the business profiles.
+    2. Instead of writing a completely fake application, write a "Strategic Framing Guide". Explain EXACTLY how Premier Agric/Badger Analytics should position their existing services to win this specific grant.
+    3. PRE-CLARIFICATION DIRECTIVE: You must preemptively identify potential weaknesses in our profile for this specific grant, and provide a defense/clarification strategy.
     
-    Your output must include a specific section labeled exactly: "### Anticipated Questions & Answers" containing these pre-clarifications.
+    FORMATTING RULES:
+    - DO NOT use Markdown tables.
+    - DO NOT use `##` headers. ONLY use `###` or `####` headers.
+    - Keep formatting very simple (just bullet points and text).
+    
+    Your output must include a specific section labeled exactly: "### Anticipated Questions & Answers" containing the defense strategy.
     """
     try:
         response = client.chat.completions.create(
