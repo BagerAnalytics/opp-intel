@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
 import dynamic from 'next/dynamic';
 
 const Map = dynamic(() => import('../components/Map'), { ssr: false });
