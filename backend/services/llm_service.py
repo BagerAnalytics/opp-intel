@@ -8,8 +8,8 @@ load_dotenv()
 
 # Initialize Groq Client
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-# Use the latest 3.3 model since 3.1 was deprecated
-MODEL_NAME = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+# Fallback to the universally available 8192 token model
+MODEL_NAME = os.environ.get("GROQ_MODEL", "llama3-70b-8192")
 
 PROFILE_PROMPT = """
 You are an Opportunity Matching AI acting as a ruthless gatekeeper for two specific businesses:
