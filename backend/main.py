@@ -234,15 +234,27 @@ class BulkImportRequest(BaseModel):
     urls: List[str]
 
 @app.get("/api/test-models")
-def test_anthropic_models():
+def test_models():
+    import os
+    import requests
+    
+    result = {}
+    
+    # Test Groq
     try:
-        import os
-        import anthropic
-        client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        models = client.models.list()
-        return {"models": [m.id for m in models.data]}
+        groq_key = os.getenv("GROQ_API_KEY")
+        res = requests.get(
+            "https://api.groq.com/openai/v1/models",
+            headers={"Authorization": f"Bearer {groq_key}"}
+        )
+        if res.status_code == 200:
+            result["groq_models"] = [m["id"] for m in res.json().get("data", [])]
+        else:
+            result["groq_error"] = res.text
     except Exception as e:
-        return {"error": str(e)}
+        result["groq_error"] = str(e)
+        
+    return result
 
 @app.get("/api/debug/restore")
 def restore_failed_opportunities(db: Session = Depends(get_db)):
