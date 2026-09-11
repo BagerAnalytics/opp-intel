@@ -183,9 +183,10 @@ export default function Home() {
         location: res.data.location || prev.location,
         link: extractUrl
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Extraction error", error);
-      alert("Failed to auto-extract from URL. The AI might have timed out or hit a block.");
+      const errorMsg = error.response?.data?.detail || "The AI might have timed out or hit a block.";
+      alert(`Extraction Failed: ${errorMsg}`);
     } finally {
       setIsExtracting(false);
     }
