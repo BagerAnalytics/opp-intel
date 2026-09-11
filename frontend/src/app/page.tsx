@@ -789,7 +789,27 @@ export default function Home() {
                       <Target size={14} className="text-gradient" /> How to Win (Strategy)
                     </h4>
                     <div className="whitespace-pre-wrap">
-                      {opp.strategy ? renderMarkdown(opp.strategy) : <p className="text-sm text-slate-600">No strategy generated.</p>}
+                      {opp.strategy ? (
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            table: ({node, ...props}) => <div className="overflow-x-auto w-full"><table className="w-full text-sm text-left border-collapse border border-slate-200 mt-4 mb-4" {...props} /></div>,
+                            th: ({node, ...props}) => <th className="border border-slate-200 bg-slate-50 p-2 font-semibold text-slate-700" {...props} />,
+                            td: ({node, ...props}) => <td className="border border-slate-200 p-2 text-slate-600 align-top" {...props} />,
+                            h1: ({node, ...props}) => <h1 className="text-xl font-bold text-slate-800 mt-6 mb-2" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-lg font-bold text-slate-800 mt-5 mb-2" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-md font-semibold text-gradient mt-4 mb-2" {...props} />,
+                            h4: ({node, ...props}) => <h4 className="text-sm font-semibold text-slate-800 mt-3 mb-1" {...props} />,
+                            p: ({node, ...props}) => <p className="text-sm text-slate-600 leading-relaxed mb-3" {...props} />,
+                            ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3 text-sm text-slate-600" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3 text-sm text-slate-600" {...props} />,
+                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-semibold text-slate-800" {...props} />
+                          }}
+                        >
+                          {opp.strategy}
+                        </ReactMarkdown>
+                      ) : <p className="text-sm text-slate-600">No strategy generated.</p>}
                     </div>
                   </div>
                   
