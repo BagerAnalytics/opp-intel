@@ -49,6 +49,10 @@ def extract_from_url(url: str, opp_id: int = None):
             
     print(f"Extracted {len(raw_text)} characters. Sending to LLM for parsing...")
     
+    # TRUNCATE to avoid LLM token limits (Groq has an 8k-32k context limit)
+    if len(raw_text) > 20000:
+        raw_text = raw_text[:20000]
+    
     # 2. Use LLM to extract structured data
     extracted_data = extract_opportunity_data(raw_text, url)
     
