@@ -58,6 +58,8 @@ def extract_from_url(url: str, opp_id: int = None):
     
     if not extracted_data:
         return {"error": "Failed to extract data using LLM"}
+    if "error" in extracted_data:
+        return extracted_data
         
     print("Parsed data:", extracted_data.get("name"))
     
