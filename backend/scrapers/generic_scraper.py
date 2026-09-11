@@ -57,7 +57,7 @@ def extract_from_url(url: str, opp_id: int = None):
     extracted_data = extract_opportunity_data(raw_text, url)
     
     if not extracted_data:
-        return {"error": "Failed to extract data using LLM"}
+        return {"error": "AI rejected this URL: The opportunity deadline has likely passed, or the page does not contain a specific open grant."}
     if "error" in extracted_data:
         return extracted_data
         
