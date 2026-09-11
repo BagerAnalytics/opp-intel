@@ -113,20 +113,17 @@ def extract_from_url(url: str, opp_id: int = None):
             db.commit()
             db.refresh(new_opp)
             
-            # Automatically score and generate strategy
-            print("Running AI Matcher pipeline...")
-            score_opportunity(new_opp.id, db)
-            db.refresh(new_opp)
-            
-            print("Successfully extracted and scored!")
+            # Skip automatic scoring here to prevent HTTP 100-second timeouts on the frontend!
+            # The user can click 'Run Smart Scan' in the UI later to generate the strategy.
+            print("Successfully extracted basic data! Skipping deep AI scan to avoid timeouts.")
             
             # Return serialized dict
             return {
                 "id": new_opp.id,
                 "name": new_opp.name,
                 "funder": new_opp.funder,
-                "match_score": new_opp.match_score,
-                "strategy": new_opp.strategy
+                "match_score": 0,
+                "strategy": ""
             }
             
     except Exception as e:
