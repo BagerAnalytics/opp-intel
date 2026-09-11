@@ -8,8 +8,8 @@ load_dotenv()
 
 # Initialize Groq Client
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-# Use standard Llama 3.1
-MODEL_NAME = os.environ.get("GROQ_MODEL", "llama-3.1-70b-versatile")
+# Use an available model dynamically found on the user's Groq tier
+MODEL_NAME = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 
 PROFILE_PROMPT = """
 You are an Opportunity Matching AI acting as a ruthless gatekeeper for two specific businesses:
