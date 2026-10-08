@@ -108,8 +108,6 @@ def start_scheduler():
                 
             # PURGE DISCOVERY GARBAGE LINKS
             garbage_count = db.query(models.Opportunity).filter(
-                (models.Opportunity.description == None) | 
-                (models.Opportunity.description == '') | 
                 (models.Opportunity.description.like('Discovered via AI Engine%')) |
                 (models.Opportunity.name == 'Discovered Opportunity') |
                 (models.Opportunity.name.like('Extracting from %')) |

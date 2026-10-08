@@ -62,6 +62,33 @@ from database import SessionLocal
 import models
 from notifications import notify_new_opportunities, notify_scraper_error
 
+from dateutil.parser import parse
+from datetime import timezone
+
+def close_expired_opportunities(db):
+    try:
+        now = datetime.now(timezone.utc)
+        opps = db.query(models.Opportunity).filter(models.Opportunity.status == "open").all()
+        closed_count = 0
+        for opp in opps:
+            if opp.closing_date:
+                try:
+                    # Make dateutil parse fuzzy strings
+                    parsed_date = parse(opp.closing_date, fuzzy=True)
+                    # Make aware if naive
+                    if parsed_date.tzinfo is None:
+                        parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                    if parsed_date < now:
+                        opp.status = "closed"
+                        closed_count += 1
+                except Exception:
+                    pass
+        if closed_count > 0:
+            db.commit()
+            print(f"Automatically closed {closed_count} expired opportunities.")
+    except Exception as e:
+        print(f"Error closing expired opportunities: {e}")
+
 def update_progress(db, percent, task_name):
     progress = db.query(models.ScraperProgress).filter(models.ScraperProgress.id == 1).first()
     if progress:
@@ -114,7 +141,8 @@ def run_all_scrapers():
         # Centralized Extraction Queue Processor
         update_progress(db, 50, "Processing AI Extractor queue...")
         
-
+        update_progress(db, 95, "Closing expired opportunities...")
+        close_expired_opportunities(db)
         
         finish_progress(db)
         final_opp_count = db.query(models.Opportunity).count()
