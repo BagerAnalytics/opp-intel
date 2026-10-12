@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bell, Search, MessageSquare, Menu, LogOut, User as UserIcon, Activity } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { API_BASE_URL, logoutUser } from "@/lib/api";
 
 export default function Header() {
   const pathname = usePathname();
@@ -16,7 +17,7 @@ export default function Header() {
     let interval: NodeJS.Timeout;
     const fetchProgress = async () => {
       try {
-        const res = await fetch('https://opp-intel-production.up.railway.app/api/scrapers/progress');
+        const res = await fetch(`${API_BASE_URL}/api/scrapers/progress`);
         const data = await res.json();
         setProgress(data);
       } catch (e) {
@@ -64,9 +65,8 @@ export default function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('oppintel_token');
-    localStorage.removeItem('oppintel_user');
-    router.push('/login');
+    setShowProfileMenu(false);
+    logoutUser();
   };
 
   const handleNotificationClick = () => {

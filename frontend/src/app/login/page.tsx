@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Lock, Mail, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
-
-const apiUrl = 'https://opp-intel-production.up.railway.app';
+import { API_BASE_URL } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,19 +19,19 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${apiUrl}/api/auth/login`, {
-        email,
-        password
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+        email: email.trim(),
+        password: password
       });
 
       if (response.data.access_token) {
         localStorage.setItem('oppintel_token', response.data.access_token);
         localStorage.setItem('oppintel_user', JSON.stringify(response.data.user));
         
-        // Trigger a fake delay for the premium feel
+        // Redirect cleanly to reload dashboard state
         setTimeout(() => {
-          router.push('/');
-        }, 800);
+          window.location.href = '/';
+        }, 500);
       }
     } catch (err: any) {
       if (err.response?.status === 401) {

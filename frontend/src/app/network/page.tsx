@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 import { Search, MapPin, Filter, MoreHorizontal, Building, Mail, Link as LinkIcon, UserPlus, X, Trash2, CheckCircle2, Target } from 'lucide-react';
 
 interface Contact {
@@ -39,7 +40,7 @@ export default function NetworkPage() {
 
   const fetchContacts = async () => {
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       const response = await axios.get(`${apiUrl}/api/contacts`).catch(() => ({ data: [] }));
       setContacts(response.data);
     } catch (error) {
@@ -52,7 +53,7 @@ export default function NetworkPage() {
   const handleDeleteContact = async (id: number) => {
     if (!confirm('Are you sure you want to delete this target?')) return;
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.delete(`${apiUrl}/api/contacts/${id}`);
       fetchContacts();
     } catch (error) {
@@ -63,7 +64,7 @@ export default function NetworkPage() {
   const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/contacts`, formData);
       setIsModalOpen(false);
       setFormData({

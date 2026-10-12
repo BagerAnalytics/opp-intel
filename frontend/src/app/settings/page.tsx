@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { User, Users, Database, CreditCard, Shield, Key, Bell, CheckCircle2, ChevronRight, Activity, Plus, Search, MoreVertical, Zap, Loader2 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 
 type TabType = 'profile' | 'team' | 'engine' | 'billing';
-const apiUrl = 'https://opp-intel-production.up.railway.app';
+const apiUrl = API_BASE_URL;
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('profile');

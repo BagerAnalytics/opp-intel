@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 import { Loader2, MoreVertical, TrendingUp, DollarSign, Activity, PieChart as PieChartIcon } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Area, AreaChart, PieChart, Pie, Cell } from 'recharts';
 
@@ -131,7 +132,7 @@ export default function PipelinePage() {
 
   const fetchData = async () => {
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       const response = await axios.get(`${apiUrl}/api/opportunities`).catch(() => ({ data: [] }));
       setOpportunities(response.data.filter((opp: Opportunity) => opp.status !== 'open' && opp.status !== 'closed'));
     } catch (error) {
@@ -161,7 +162,7 @@ export default function PipelinePage() {
     ));
 
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.put(`${apiUrl}/api/opportunities/${draggedId}/status?status=${targetStatus}`);
     } catch (error) {
       console.error("Failed to update status", error);
@@ -352,7 +353,7 @@ export default function PipelinePage() {
                               e.stopPropagation();
                               if(confirm('Remove opportunity from pipeline?')) {
                                 try {
-                                  const apiUrl = 'https://opp-intel-production.up.railway.app';
+                                  const apiUrl = API_BASE_URL;
                                   axios.put(`${apiUrl}/api/opportunities/${opp.id}/status?status=open`);
                                   setOpportunities(prev => prev.filter(o => o.id !== opp.id));
                                 } catch (err) {}

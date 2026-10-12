@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 const Map = dynamic(() => import('../components/Map'), { ssr: false });
 
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 import { 
   Users, Target, FileText, Send, MoreVertical, Activity, ArrowRight, Database, Briefcase, Plus, Brain, X, ChevronLeft, Star, Heart, CheckCircle2, Trash2, CheckCircle
 } from 'lucide-react';
@@ -81,7 +82,7 @@ export default function Home() {
     // Poll scraper progress
     const fetchProgress = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+        const apiUrl = API_BASE_URL;
         const res = await axios.get(`${apiUrl}/api/scrapers/progress`);
         setProgress(prev => {
           if (prev.is_active && !res.data.is_active) {
@@ -110,7 +111,7 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       const [oppResponse, contactsResponse, complianceResponse, portalsResponse, creditsResponse, statsResponse] = await Promise.all([
         axios.get(`${apiUrl}/api/opportunities?t=${Date.now()}`).catch(() => ({ data: [] })),
         axios.get(`${apiUrl}/api/contacts`).catch(() => ({ data: [] })),
@@ -134,7 +135,7 @@ export default function Home() {
 
   const handleSmartScan = async (oppId: number) => {
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app'}/api/scrapers/smart-scan/${oppId}`);
+      await axios.post(`${API_BASE_URL}/api/scrapers/smart-scan/${oppId}`);
       alert("Smart Scan initiated! Refreshing data in a few seconds...");
       setTimeout(() => window.location.reload(), 3000);
     } catch (error) {
@@ -144,7 +145,7 @@ export default function Home() {
   };
 
   const handleRunScrapers = async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+    const apiUrl = API_BASE_URL;
     
     if (progress.is_active) {
       try {
@@ -169,7 +170,7 @@ export default function Home() {
     if (!extractUrl) return alert("Please enter a URL first.");
     setIsExtracting(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       const res = await axios.post(`${apiUrl}/api/opportunities/extract-link`, { url: extractUrl });
       
       // The backend automatically saves auto-extracted items to the DB
@@ -191,7 +192,7 @@ export default function Home() {
   const handleSaveOpportunity = async () => {
     setIsSaving(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/opportunities/manual`, formData);
       alert("Opportunity saved successfully!");
       fetchData(); // Refresh table
@@ -216,7 +217,7 @@ export default function Home() {
     if (!newPortalUrl) return;
     setIsAddingPortal(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/portals`, { url: newPortalUrl });
       setNewPortalUrl('');
       fetchData();
@@ -229,7 +230,7 @@ export default function Home() {
 
   const handleDeletePortal = async (id: number) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.delete(`${apiUrl}/api/portals/${id}`);
       fetchData();
     } catch (err) {
@@ -581,10 +582,10 @@ export default function Home() {
                     const originalText = btn.innerHTML;
                     btn.innerHTML = '<svg class="animate-spin w-5 h-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...';
                     btn.disabled = true;
-                    axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app'}/api/scrapers/smart-scan/${opp.id}`)
+                    axios.post(`${API_BASE_URL}/api/scrapers/smart-scan/${opp.id}`)
                       .then(async () => {
                         // Force a cache-busted fetch for just this opportunity to guarantee update
-                        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app'}/api/opportunities?t=${Date.now()}`);
+                        const res = await axios.get(`${API_BASE_URL}/api/opportunities?t=${Date.now()}`);
                         const freshData = res.data;
                         setOpportunities(freshData);
                         const specific = freshData.find((o: any) => o.id === opp.id);
@@ -647,7 +648,7 @@ export default function Home() {
                   <button onClick={async () => {
                       if(confirm('Are you sure you want to delete this opportunity?')) {
                         try {
-                          await axios.delete(`${process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app'}/api/opportunities/${opp.id}`);
+                          await axios.delete(`${API_BASE_URL}/api/opportunities/${opp.id}`);
                           fetchData();
                           setViewMode('table');
                         } catch(e) { alert('Failed to delete'); }
@@ -657,7 +658,7 @@ export default function Home() {
                   </button>
                   <button onClick={async () => {
                       try {
-                        await axios.patch(`${process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app'}/api/opportunities/${opp.id}`, {status: 'open'});
+                        await axios.patch(`${API_BASE_URL}/api/opportunities/${opp.id}`, {status: 'open'});
                         fetchData();
                         alert('Sent to Pipeline!');
                         setViewMode('table');
@@ -764,7 +765,7 @@ export default function Home() {
                       const originalText = btn.innerHTML;
                       btn.innerHTML = '<span class="flex items-center gap-2"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Scanning...</span>';
                       btn.disabled = true;
-                      axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'https://opp-intel-production.up.railway.app'}/api/scrapers/smart-scan/${opp.id}`)
+                      axios.post(`${API_BASE_URL}/api/scrapers/smart-scan/${opp.id}`)
                         .then(() => fetchData())
                         .catch(() => alert('Scan failed'))
                         .finally(() => {

@@ -12,8 +12,10 @@ import {
   Settings,
   HelpCircle,
   MessageSquare,
-  ShieldCheck
+  ShieldCheck,
+  LogOut
 } from "lucide-react";
+import { logoutUser } from "@/lib/api";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -70,9 +72,16 @@ export default function Sidebar() {
       </nav>
       
       {/* Bottom Profile / Branding */}
-      <div className="p-8 mt-auto flex flex-col gap-6">
+      <div className="p-6 mt-auto flex flex-col gap-4">
+        <button 
+          onClick={() => logoutUser()}
+          className="flex items-center gap-3 py-2.5 px-4 rounded-xl font-medium text-[14px] text-slate-500 hover:text-rose-600 hover:bg-rose-50/70 transition-all duration-300 w-full text-left group"
+        >
+          <LogOut size={18} className="text-slate-400 group-hover:text-rose-500 transition-colors" />
+          <span>Sign Out</span>
+        </button>
         <div className="w-full h-[1px] bg-slate-200/50"></div>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 px-1">
           <p className="text-xs font-medium text-slate-400 tracking-widest uppercase">OppIntel Admin</p>
           <p className="text-[10px] text-slate-400 tracking-wider">© 2026 All Rights Reserved</p>
         </div>

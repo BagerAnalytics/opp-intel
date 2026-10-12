@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 import { Loader2, Plus, ShieldCheck, FileText, AlertCircle, Clock, Trash2, X, UploadCloud, CheckCircle2 } from 'lucide-react';
 
 interface ComplianceDoc {
@@ -31,7 +32,7 @@ export default function CompliancePage() {
 
   const fetchDocs = async () => {
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       const response = await axios.get(`${apiUrl}/api/compliance`).catch(() => ({ data: [] }));
       setDocs(response.data);
     } catch (error) {
@@ -44,7 +45,7 @@ export default function CompliancePage() {
   const handleAddDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/compliance`, formData);
       setIsModalOpen(false);
       setFormData({
@@ -59,7 +60,7 @@ export default function CompliancePage() {
   const handleDeleteDoc = async (id: number) => {
     if (!confirm('Are you sure you want to remove this document tracker?')) return;
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       await axios.delete(`${apiUrl}/api/compliance/${id}`);
       fetchDocs();
     } catch (error) {
@@ -74,7 +75,7 @@ export default function CompliancePage() {
     }
     
     try {
-      const apiUrl = 'https://opp-intel-production.up.railway.app';
+      const apiUrl = API_BASE_URL;
       const uploadData = new FormData();
       uploadData.append('file', file);
       

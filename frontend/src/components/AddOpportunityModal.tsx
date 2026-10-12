@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '@/lib/api';
 import { X, Loader2, Link as LinkIcon, FileText, Sparkles } from 'lucide-react';
 
 interface AddOpportunityModalProps {
@@ -42,7 +43,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/opportunities/manual`, formData);
       onSuccess();
       onClose();
@@ -63,7 +64,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
     if (!urlInput) return;
     setIsSubmitting(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = API_BASE_URL;
       await axios.post(`${apiUrl}/api/opportunities/extract-link`, { url: urlInput });
       onSuccess();
       onClose();
@@ -90,7 +91,7 @@ export default function AddOpportunityModal({ isOpen, onClose, onSuccess }: AddO
     
     setIsSubmitting(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = API_BASE_URL;
       const response = await axios.post(`${apiUrl}/api/opportunities/bulk-import`, { urls });
       alert(response.data.message);
       onSuccess();
